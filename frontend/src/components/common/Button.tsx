@@ -1,7 +1,14 @@
-export default function Button(){
-    return (<div>
-        <button>
+import styles from "./Button.module.css"
 
-        </button>
-    </div>)
+interface Props{
+    text:string
+    type: "submit" | "reset" | "button" | undefined
+}
+export default function Button({text, type}: Props){
+    return (
+        <div >
+            <button className={styles.button} type={type}>
+                {text}
+            </button>
+        </div>)
 }

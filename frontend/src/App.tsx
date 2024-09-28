@@ -1,11 +1,11 @@
-import TextInput from "./components/common/TextInput.tsx";
 import './App.css'
+import LoginPage from "./pages/LoginPage.tsx";
 
 function App() {
 
   return (
     <>
-      <TextInput label={"aaa"} type={"text"} text={"aaa"} placeholder={"aaaa"}/>
+      <LoginPage></LoginPage>
     </>
   )
 }

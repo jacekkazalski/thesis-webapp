@@ -1,21 +1,19 @@
-import React from "react";
+import React from "react"
+import styles from "./TextInput.module.css"
 
 interface Props {
     label: string;
     type: string;
-    text: string;
     placeholder: string;
 }
 export default function TextInput({placeholder,type, label}: Props) {
-    const [text, setText] = React.useState(label);
     return(
-        <div>
+        <div className={styles.content}>
             <label>{label}</label>
             <input
+                className={styles.input}
                 type={type}
-                value={text}
                 placeholder={placeholder}
-                onChange={(e) => setText(e.target.value)}
             />
         </div>
 
