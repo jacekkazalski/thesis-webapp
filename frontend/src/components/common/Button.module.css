@@ -14,11 +14,22 @@
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-
+    cursor: pointer;
 
 }
-.button:hover {
+.primary {
+    background-color: var(--accent);
+}
+.primary:hover {
     background-color: var(--secondary-accent);
     color: var(--dark-text);
-    cursor: pointer;
+    border-color: var(--secondary-accent);
+}
+.ingredient {
+    background-color: var(--text-background);
+    color: var(--dark-text);
+}
+.ingredient:hover {
+    background-color: var(--secondary-accent);
+    border-color: var(--dark-text);
 }

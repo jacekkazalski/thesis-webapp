@@ -1,0 +1,9 @@
+.navbar{
+    display: flex;
+    width: 1440px;
+    padding: 10px 40px;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid var(--accent, #36869F);
+    background: var(--text-background, #FFF);
+}

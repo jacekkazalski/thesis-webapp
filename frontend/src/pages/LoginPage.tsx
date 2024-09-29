@@ -17,7 +17,7 @@ function LoginForm(){
             <h1>Logowanie</h1>
             <TextInput label={"E-mail"} type={"text"} placeholder={"E-mail"} />
             <TextInput label={"Hasło"} type={"text"} placeholder={"Hasło"} />
-            <Button text={"Zaloguj"} type={"submit"}/>
+            <Button variant={"primary"} text={"Zaloguj"} type={"submit"}/>
 
         </form>
     )
