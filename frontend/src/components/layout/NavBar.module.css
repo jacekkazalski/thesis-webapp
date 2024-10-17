@@ -1,9 +1,33 @@
 .navbar{
     display: flex;
-    width: 1440px;
+    width: 100%;
     padding: 10px 40px;
     align-items: center;
+    flex-flow: row wrap;
     gap: 20px;
     border-bottom: 2px solid var(--accent, #36869F);
     background: var(--text-background, #FFF);
+    height: max-content;
+}
+.buttons{
+    flex: 1;
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    width: max-content;
+}
+.searchbar {
+    flex: 3;
+    display: flex;
+}
+.searchbar div{
+    width: 100%;
+    display: inline-block;
+}
+.searchbar input{
+    display: inline-block;
+    width: 80%;
+}
+.logo {
+    flex: 1;
 }
