@@ -1,12 +1,11 @@
 import styles from "./LoginPage.module.css";
 import TextInput from "../components/common/TextInput.tsx";
 import Button from "../components/common/Button.tsx";
-import NavBar from "../components/layout/NavBar.tsx";
+
 
 export default function RegistrationPage() {
     return(
         <div>
-            <NavBar/>
             <RegistrationForm/>
         </div>
     )

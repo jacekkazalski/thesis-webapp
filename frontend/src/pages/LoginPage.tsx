@@ -1,12 +1,10 @@
 import TextInput from "../components/common/TextInput.tsx";
 import Button from "../components/common/Button.tsx";
 import styles from "./LoginPage.module.css"
-import NavBar from "../components/layout/NavBar.tsx";
 
 export default function LoginPage() {
     return(
         <div>
-            <NavBar/>
             <LoginForm/>
         </div>
     )
