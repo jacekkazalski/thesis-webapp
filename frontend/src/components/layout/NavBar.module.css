@@ -31,3 +31,7 @@
 .logo {
     flex: 1;
 }
+.logo:hover {
+    color: var(--accent, #36869F);
+    cursor: pointer;
+}

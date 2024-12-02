@@ -1,18 +1,19 @@
 import './App.css'
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import LoginPage from "./pages/LoginPage.tsx";
 import RegistrationPage from "./pages/RegistrationPage.tsx";
-import NavBar from "./components/layout/NavBar.tsx";
-import Sidebar from "./components/layout/Sidebar.tsx";
+import MainPage from "./pages/MainPage.tsx";
 
 function App() {
 
   return (
-    <>
-        <NavBar></NavBar>
-        <Sidebar/>
-        <LoginPage></LoginPage>
-        <RegistrationPage></RegistrationPage>
-    </>
+    <Router>
+        <Routes>
+            <Route path="/" element={<MainPage/>}/>
+            <Route path="/login" element={<LoginPage/>}/>
+            <Route path="/register" element={<RegistrationPage/>}/>
+        </Routes>
+    </Router>
   )
 }
 
