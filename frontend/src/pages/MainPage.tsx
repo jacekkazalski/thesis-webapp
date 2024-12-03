@@ -1,9 +1,22 @@
+import RecipeCard from "../components/common/RecipeCard.tsx";
 
 
 export default function MainPage(){
     return(
         <div>
-            Strona główna
+            <Gallery/>
+        </div>
+    )
+}
+function Gallery(){
+    return(
+        <div>
+            <RecipeCard/>
+            <RecipeCard/>
+            <RecipeCard/>
+            <RecipeCard/>
+            <RecipeCard/>
+            <RecipeCard/>
         </div>
     )
 }

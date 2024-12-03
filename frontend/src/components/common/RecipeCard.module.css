@@ -1,0 +1,17 @@
+.content{
+    border: 2px solid var(--accent);
+    border-radius: 2px;
+    display: flex;
+    width: 200px;
+    height: 175px;
+    align-items: flex-start;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    background-color: var(--text-background);
+}
+.content img{
+    height: 82px;
+    width: 200px;
+    object-fit: cover;
+
+}
