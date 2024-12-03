@@ -19,6 +19,7 @@
 }
 body {
   background-color: var(--site-background);
+  margin: 0;
 }
 
 h1 {

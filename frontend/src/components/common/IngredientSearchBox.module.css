@@ -1,3 +1,10 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+    width: 100%;
+}
 .searchresults{
     display: flex;
     height: 132px;
@@ -9,12 +16,26 @@
     flex-wrap: wrap;
     background-color: #D9D9D9;
 }
-.wrapper{
+.searchresultswrapper{
     display: flex;
-    padding: 15px 5px;
     flex-direction: column;
     align-items: center;
     gap: 5px;
     border: 2px solid var(--accent, #36869F);
     background: var(--text-background, #FFF);
+}
+.choseningredients{
+    display: flex;
+    height: 205px;
+    padding: 10px;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: flex-start;
+    gap: 5px;
+    flex-wrap: wrap;
+    border: 2px solid var(--accent, #36869F);
+}
+.title{
+    display: block;
+    width: 100%;
 }

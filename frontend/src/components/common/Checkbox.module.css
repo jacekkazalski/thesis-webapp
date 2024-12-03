@@ -1,0 +1,21 @@
+.checkbox{
+    align-items: center;
+    display: inline-flex;
+    gap: 10px;
+    justify-content: center
+}
+.rectangle{
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--dark-text);
+    cursor: pointer;
+}
+.text{
+
+}
+.unchecked{
+    background-color: var(--site-background);
+}
+.checked{
+    background-color: var(--accent);
+}
