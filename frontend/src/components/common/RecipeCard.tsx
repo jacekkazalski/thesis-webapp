@@ -1,5 +1,6 @@
 import examplePhoto from '../../assets/spaghetti.jpg'
 import styles from './RecipeCard.module.css'
+import Button from "./Button.tsx";
 
 export default function RecipeCard(){
     return(
@@ -8,16 +9,16 @@ export default function RecipeCard(){
                 src={examplePhoto}
                 alt="Recipe Card"
             />
-            <div>
-                Recipe Name
+            <div className={styles.name}>
+                <h3>Recipe Name</h3>
             </div>
-            <div>
-                Autor
+            <div className={styles.author}>
+                <Button text={"Autor"} type={"button"} variant={"hyperlink"}/>
             </div>
-            <div>
+            <div className={styles.rating}>
                 Ocena 5/5
             </div>
-            <div>
+            <div className={styles.ingredients}>
                 Składniki 5/5
             </div>
         </div>

@@ -3,15 +3,37 @@
     border-radius: 2px;
     display: flex;
     width: 200px;
-    height: 175px;
     align-items: flex-start;
     align-content: flex-start;
     flex-wrap: wrap;
     background-color: var(--text-background);
+    cursor: pointer;
+}
+.content:hover{
+    border-color: var(--secondary-accent);
 }
 .content img{
     height: 82px;
     width: 200px;
     object-fit: cover;
 
+}
+.name{
+    width: 100%;
+    text-align: center;
+}
+.name h3{
+    margin: 0;
+}
+.author{
+    width: 50%;
+    text-align: center;
+}
+.rating{
+    width: 50%;
+    text-align: center;
+}
+.ingredients{
+    width: 100%;
+    text-align: center;
 }

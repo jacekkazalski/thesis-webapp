@@ -1,0 +1,24 @@
+.content {
+    width: 100%;
+    background-color: var(--text-background);
+}
+.options{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 19px;
+    align-items: center;
+    border-bottom: 1px solid var(--dark-text);
+    padding: 5px 20px;
+}
+.gallery {
+    display: grid;
+    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px 12px;
+}
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}

@@ -6,6 +6,7 @@
     align-items: flex-start;
     gap: 17px;
     max-width: 330px;
+    border-right: 2px solid var(--accent, #36869F);
 }
 .navbutton:hover{
     color: var(--accent);
