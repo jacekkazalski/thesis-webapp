@@ -1,22 +1,31 @@
-import examplePhoto from '../../assets/spaghetti.jpg'
 import styles from './RecipeCard.module.css'
 import Button from "./Button.tsx";
-
-export default function RecipeCard(){
+import {Recipe} from "../../services/types.ts";
+import  {mockUsers, mockRatings} from '../../services/mockdata.ts'
+interface Props{
+    recipe: Recipe
+}
+export default function RecipeCard({recipe}: Props) {
+    const user = mockUsers.find((user) => user.id_user === recipe.added_by);
+    const ratings = mockRatings.filter((rating) => rating.id_recipe == recipe.id_recipe);
+    const avgRating =
+        ratings.length > 0
+            ? ratings.reduce((sum, rating) => sum + rating.value, 0) / ratings.length
+            : 0;
     return(
         <div className={styles.content}>
             <img
-                src={examplePhoto}
-                alt="Recipe Card"
+                src={recipe.image_path}
+                alt="recipe image"
             />
             <div className={styles.name}>
-                <h3>Recipe Name</h3>
+                <h3>{recipe.name}</h3>
             </div>
             <div className={styles.author}>
-                <Button text={"Autor"} type={"button"} variant={"hyperlink"}/>
+                <Button text={`${user.username}`} type={"button"} variant={"hyperlink"}/>
             </div>
             <div className={styles.rating}>
-                Ocena 5/5
+                {avgRating}/5
             </div>
             <div className={styles.ingredients}>
                 Składniki 5/5

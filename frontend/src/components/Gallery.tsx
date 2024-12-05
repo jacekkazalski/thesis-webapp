@@ -2,6 +2,7 @@ import styles from './Gallery.module.css'
 import Button from "./common/Button.tsx";
 import {useState} from "react";
 import RecipeCard from "./common/RecipeCard.tsx";
+import {mockRecipes} from "../services/mockdata.ts";
 
 export default function Gallery(){
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")
@@ -14,27 +15,7 @@ export default function Gallery(){
                 <Button text={"L"} type={"button"} variant={"primary"}/>
             </div>
             <div className={`${styles[viewType]}`}>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
-                <RecipeCard/>
+                {mockRecipes.map((recipe) => (<RecipeCard recipe={recipe}/>))}
 
             </div>
 
