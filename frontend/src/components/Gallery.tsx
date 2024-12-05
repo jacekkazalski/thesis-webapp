@@ -22,6 +22,20 @@ export default function Gallery(){
                 <RecipeCard/>
                 <RecipeCard/>
                 <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+                <RecipeCard/>
+
             </div>
 
         </div>

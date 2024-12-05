@@ -39,6 +39,7 @@
     color: var(--accent);
     background: none;
     border: none;
+
 }
 .hyperlink:hover {
     color: var(--secondary-accent);

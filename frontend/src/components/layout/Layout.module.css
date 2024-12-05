@@ -14,3 +14,7 @@
     display: flex;
     margin: 0;
 }
+.centered {
+    justify-content: center;
+    padding-top: 10px;
+}

@@ -1,0 +1,38 @@
+.content{
+    display: grid;
+    grid-template-columns: 70% 30%;
+    grid-template-rows: min-content min-content min-content;
+    width: 100%;
+    margin:0;
+    padding: 20px 40px;
+    background-color: var(--text-background);
+}
+.banner{
+    height: 300px;
+    object-fit: cover;
+    width: 100%;
+    grid-column: 1 /span 2 ;
+    border-radius: 5px;
+}
+.info{
+    width: 100%;
+    grid-column: 1 /span 2 ;
+    display: flex;
+    gap: 10px;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    height: min-content;
+    align-items: center;
+}
+.info h1{
+    width: 100%;
+    height: min-content;
+}
+.steps{
+    width: 100%;
+    border: 1px solid var(--accent);
+    white-space: pre-line;
+}
+.ingredients{
+
+}

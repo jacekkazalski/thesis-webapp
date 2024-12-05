@@ -5,6 +5,7 @@ import RegistrationPage from "./pages/RegistrationPage.tsx";
 import MainPage from "./pages/MainPage.tsx";
 import MainLayout from "./components/layout/MainLayout.tsx";
 import NavbarOnlyLayout from "./components/layout/NavbarOnlyLayout.tsx";
+import RecipePage from "./pages/RecipePage.tsx";
 
 function App() {
 
@@ -13,6 +14,7 @@ function App() {
         <Routes>
             <Route element={<MainLayout/>}>
                 <Route path="/" element={<MainPage/>}/>
+                <Route path="/recipe" element={<RecipePage/>}/>
             </Route>
             <Route element={<NavbarOnlyLayout/>}>
                 <Route path="/login" element={<LoginPage/>}/>

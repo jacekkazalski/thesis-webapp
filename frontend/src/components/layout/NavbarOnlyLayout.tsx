@@ -6,7 +6,7 @@ export default function NavbarOnlyLayout() {
     return(
         <div className={styles.layout}>
             <NavBar/>
-            <div className={styles.children}>
+            <div className={`${styles.children} ${styles.centered}`}>
                 <Outlet/>
             </div>
         </div>

@@ -8,12 +8,12 @@ export default function Sidebar(){
     const navigate = useNavigate();
     return(
         <div className={styles.sidebar}>
-            <a className={styles.navbutton} onClick={() => navigate("/")}>Strona główna</a>
-            <a className={styles.navbutton}>Dodaj przepis</a>
-            <a className={styles.navbutton}>Ostatnio dodane</a>
-            <a className={styles.navbutton}>Losuj przepis</a>
+            <a className={styles.navbutton} onClick={() => navigate("/")}>Strona główna /</a>
+            <a className={styles.navbutton}>Dodaj przepis /addrecipe</a>
+            <a className={styles.navbutton}>Ostatnio dodane /</a>
+            <a className={styles.navbutton} onClick={() => navigate("/recipe")}>Losuj przepis /recipe</a>
 
-            <p>Filtrowanie</p>
+            <div>Filtrowanie</div>
             <IngredientSearchBox/>
             <Checkbox text={"Tylko przepisy z wybranymi składnikami"}/>
             <Button text={"Szukaj"} type={"submit"} variant={"primary"}/>
