@@ -4,13 +4,7 @@ app.use(express.json());
 const { Pool } = require('pg');
 const port = process.env.PORT || 3000;
 
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'recipedb',
-    password: 'postgres',
-    port: 5432
-})
+
 
 // Connection testing
 pool.connect((err, client, release) => {
