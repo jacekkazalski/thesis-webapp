@@ -9,9 +9,18 @@ const port = process.env.PORT || 3000;
 app.use('/auth', authRouter)
 
 app.use('*', (req, res, next) => {
-    res.status(404).send('Not Found');
+    res.status(404).json({
+        status: 'error',
+        message: "Not found"
+    })
 })
 
+app.use((err, req, res, next) => {
+    res.status(err.statusCode || 500).json({
+        status: 'error',
+        message: err.statusMessage || 'Internal Server Error'
+    })
+})
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 })
