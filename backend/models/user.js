@@ -1,5 +1,5 @@
 const {Sequelize, DataTypes} = require('sequelize');
-const sequelize =  require('../../config/database')
+const sequelize =  require('../config/database')
 
 const User = sequelize.define(
     'User',
@@ -16,12 +16,6 @@ const User = sequelize.define(
       password: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          len: {
-            args: [8, 255],
-            msg: 'Password must be at least 8 characters long',
-          }
-        }
       },
       email: {
         type: DataTypes.STRING,

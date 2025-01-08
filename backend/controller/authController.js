@@ -1,4 +1,4 @@
-const user = require('../db/models/user')
+const user = require('../models/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const catchAsync = require('../utils/catchAsync')
@@ -18,6 +18,9 @@ const signup = catchAsync(async (req, res, next) => {
     }
     if (password !== confirmPassword) {
         return next(new CustomError('Passwords do not match', 400))
+    }
+    if(password.length < 8) {
+        return next(new CustomError('Password must be at least 8 characters long', 400))
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)

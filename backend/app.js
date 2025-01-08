@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const authRouter = require('./route/authRoute');
+const recipeRouter = require('./route/recipeRoute');
 const errorHandler = require('./utils/errorHandler');
 const CustomError = require('./utils/customError');
 
@@ -8,7 +9,9 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
+// Routes
 app.use('/api/auth', authRouter)
+app.use('/api/recipes', recipeRouter)
 
 app.use('*', (req, res, next) => {
     throw new CustomError(`Route ${req.originalUrl} not found`, 404)
