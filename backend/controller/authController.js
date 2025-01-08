@@ -1,6 +1,8 @@
 const user = require('../db/models/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const catchAsync = require('../utils/catchAsync')
+const CustomError = require('../utils/customError')
 
 const generateToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_SECRET, {
@@ -8,20 +10,14 @@ const generateToken = (payload) => {
     })
 }
 
-const signup = async (req, res, next) => {
+const signup = catchAsync(async (req, res, next) => {
     const {username, email, password, confirmPassword} = req.body;
 
     if (!username || !email || !password || !confirmPassword) {
-        return res.status(400).json({
-            status: 'error',
-            message: 'Missing required fields'
-        })
+        return next(new CustomError('Missing required fields', 400))
     }
     if (password !== confirmPassword) {
-        return res.status(400).json({
-            status: 'error',
-            message: 'Passwords do not match'
-        })
+        return next(new CustomError('Passwords do not match', 400))
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -34,10 +30,7 @@ const signup = async (req, res, next) => {
     })
 
     if(!newUser) {
-        return res.status(500).json({
-            status: 'error',
-            message: 'Failed to create the user'
-        })
+        return next(new CustomError('User could not be created', 500))
     }
 
     const token = generateToken({id: newUser.id_user, username: newUser.username})
@@ -53,26 +46,20 @@ const signup = async (req, res, next) => {
             token
         }
     })
-}
+})
 
-const login = async (req, res, next) => {
+const login = catchAsync( async (req, res, next) => {
     const {email, password} = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({
-            status: 'error',
-            message: 'Missing required fields'
-        })
+        return next(new CustomError('Missing required fields', 400))
     }
 
     const result = await user.findOne({
         where: {email: email},
     })
     if(!result || !await bcrypt.compare(password, result.password) ) {
-        return res.status(404).json({
-            status: 'error',
-            message: 'Invalid login data'
-        })
+        return next(new CustomError('Invalid email or password', 401))
     }
 
     const token = generateToken({
@@ -92,6 +79,6 @@ const login = async (req, res, next) => {
             token,
         },
     })
-}
+})
 
 module.exports = {signup, login}

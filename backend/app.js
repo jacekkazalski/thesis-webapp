@@ -1,26 +1,20 @@
 require('dotenv').config();
 const express = require('express');
-const authRouter = require('./route/authRoute')
+const authRouter = require('./route/authRoute');
+const errorHandler = require('./utils/errorHandler');
+const CustomError = require('./utils/customError');
 
 const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
-app.use('/auth', authRouter)
+app.use('/api/auth', authRouter)
 
 app.use('*', (req, res, next) => {
-    res.status(404).json({
-        status: 'error',
-        message: "Not found"
-    })
+    throw new CustomError(`Route ${req.originalUrl} not found`, 404)
 })
 
-app.use((err, req, res, next) => {
-    res.status(err.statusCode || 500).json({
-        status: 'error',
-        message: err.statusMessage || 'Internal Server Error'
-    })
-})
+app.use(errorHandler)
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 })
