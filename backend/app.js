@@ -5,8 +5,11 @@ const authRouter = require('./route/authRoute');
 const recipeRouter = require('./route/recipeRoute');
 const errorHandler = require('./utils/errorHandler');
 const CustomError = require('./utils/customError');
+const cookieParser = require('cookie-parser');
 
 const app = express();
+
+app.use(cookieParser());
 app.use(express.json());
 app.use(cors())
 const port = process.env.PORT || 3000;

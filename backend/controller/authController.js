@@ -36,7 +36,18 @@ const signup = catchAsync(async (req, res, next) => {
         return next(new CustomError('User could not be created', 500))
     }
 
-    const token = generateToken({id: newUser.id_user, username: newUser.username})
+    const token = generateToken({
+        id: newUser.id_user, 
+        username: newUser.username
+    })
+    
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        smeSite: 'Strict',
+        maxAge: 24 * 60 * 60 * 1000
+    })
+    
     return res.status(201).json({
         status: 'success',
         message: 'User created successfully',
@@ -45,8 +56,7 @@ const signup = catchAsync(async (req, res, next) => {
                 id: newUser.id_user,
                 username: newUser.username,
                 email: newUser.email,
-            },
-            token
+            }
         }
     })
 })
@@ -70,6 +80,13 @@ const login = catchAsync( async (req, res, next) => {
         username: result.username,
     })
 
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        smeSite: 'Strict',
+        maxAge: 24 * 60 * 60 * 1000
+    })
+
     return res.status(200).json({
         status: 'success',
         message: 'Login successful',
@@ -78,10 +95,23 @@ const login = catchAsync( async (req, res, next) => {
                 id: result.id_user,
                 username: result.username,
                 email: result.email,
-            },
-            token,
-        },
+            }
+        }
     })
 })
 
-module.exports = {signup, login}
+const authenticateToken = (req, res, next) => {
+    const token = req.cookies.token;
+    if (!token) {
+        return next(new CustomError('Unauthorized', 401))
+    }
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return next(new CustomError('Unauthorized', 401))
+        }
+        req.user = user
+        next()
+    })
+}
+
+module.exports = {signup, login, authenticateToken}
