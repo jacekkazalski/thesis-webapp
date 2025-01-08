@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const authRouter = require('./route/authRoute');
 const recipeRouter = require('./route/recipeRoute');
 const errorHandler = require('./utils/errorHandler');
@@ -7,6 +8,7 @@ const CustomError = require('./utils/customError');
 
 const app = express();
 app.use(express.json());
+app.use(cors())
 const port = process.env.PORT || 3000;
 
 // Routes
