@@ -12,6 +12,7 @@ module.exports = {
       username: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true
       },
       password: {
         type: Sequelize.STRING,
@@ -21,6 +22,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
+      },
+      refresh_token: {
+              type: Sequelize.STRING,
+              allowNull: true,
       },
       id_diet: {
         type: Sequelize.INTEGER

@@ -12,6 +12,9 @@ const User = sequelize.define(
       username: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+          msg: 'Username already exists',
+        }
       },
       password: {
         type: DataTypes.STRING,
@@ -28,6 +31,10 @@ const User = sequelize.define(
             msg: 'Invalid email',
           },
         },
+      },
+      refresh_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       id_diet: {
         type: DataTypes.INTEGER,
