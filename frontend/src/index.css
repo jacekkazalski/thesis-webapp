@@ -29,4 +29,7 @@ h1 {
   font-weight: 700;
   line-height: normal;
 }
+h2 {
+  text-wrap: nowrap;
+}
 

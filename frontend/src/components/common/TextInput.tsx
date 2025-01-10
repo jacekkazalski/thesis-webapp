@@ -1,14 +1,14 @@
-import React, {ChangeEvent} from "react"
+import React, {ChangeEvent, InputHTMLAttributes} from "react"
 import styles from "./TextInput.module.css"
 
-interface Props {
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
     label: string;
     type: string;
     placeholder: string;
     value: string;
     onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
-export default function TextInput({placeholder,type, label, value, onChange}: Props) {
+export default function TextInput({placeholder,type, label, value, onChange, ...rest}: Props) {
     return(
         <div className={styles.content}>
             <label>{label}</label>
@@ -18,6 +18,7 @@ export default function TextInput({placeholder,type, label, value, onChange}: Pr
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
+                {...rest}
             />
         </div>
 

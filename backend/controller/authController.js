@@ -80,7 +80,7 @@ const login = catchAsync(async (req, res, next) => {
         { username: result.username , id: result.id_user},
         process.env.ACCESS_TOKEN_SECRET,
         //TODO: change expiresIn to 15m
-        { expiresIn: '30s' }
+        { expiresIn: '15m' }
     )
     const refreshToken = jwt.sign(
         { username: result.username, id: result.id_user },
@@ -97,19 +97,19 @@ const login = catchAsync(async (req, res, next) => {
             sameSite: 'Strict'
         })
 
-    return res.json({ accessToken })
+    return res.json({ accessToken, username: result.username, email: result.email })
 })
 const refresh = catchAsync(async (req, res, next) => {
     const cookies = req.cookies
     if(!cookies?.jwt) {
-        return next(new CustomError('Unauthorized', 401))
+        return next(new CustomError('No cookie', 401))
     }
     const refreshToken = cookies.jwt
     const result = await user.findOne({
         where: { refresh_token: refreshToken },
     })
     if(!result) {
-        return next(new CustomError('Unauthorized', 401))
+        return next(new CustomError('No user', 401))
     }
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) {
@@ -118,7 +118,7 @@ const refresh = catchAsync(async (req, res, next) => {
         const accessToken = jwt.sign(
             { username: result.username , id: result.id_user},
             //TODO: change expiresIn to 15m
-            process.env.ACCESS_TOKEN_SECRET, {expiresIn: '30s'})
+            process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
 
         return res.json({accessToken})
     })
