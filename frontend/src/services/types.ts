@@ -29,3 +29,8 @@ export interface User {
     email: string,
     id_diet: 3,
 }
+export interface AuthState {
+    email?: string;
+    username?: string;
+    accessToken?: string;
+}

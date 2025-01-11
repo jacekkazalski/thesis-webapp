@@ -8,6 +8,7 @@ import NavbarOnlyLayout from "./components/layout/NavbarOnlyLayout.tsx";
 import RecipePage from "./pages/RecipePage.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import RequireAuth from "./components/auth/RequireAuth.tsx";
+import AddRecipePage from "./pages/AddRecipePage.tsx";
 
 function App() {
 
@@ -20,7 +21,7 @@ function App() {
                       <Route path="/recipe" element={<RecipePage/>}/>
 
                       <Route element={<RequireAuth/>}>
-                          <Route path={"/create"} element={<div>ADDRECIPE</div>}/>
+                          <Route path={"/create"} element={<AddRecipePage/>}/>
                       </Route>
                   </Route>
                   <Route element={<NavbarOnlyLayout/>}>

@@ -24,8 +24,8 @@ function RegistrationForm() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        setError(null);
-
+        setError("");
+        //TODO: Replace with axios
         try {
             const response = await fetch("http://localhost:3000/api/auth/signup", {
                 method: "POST",

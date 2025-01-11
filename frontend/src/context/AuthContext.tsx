@@ -1,14 +1,9 @@
 import { createContext, useState, ReactNode } from 'react';
-
-interface AuthState {
-    email?: string;
-    username?: string;
-    accessToken?: string;
-}
+import {AuthState} from "../services/types.ts";
 
 interface AuthContextType {
     auth: AuthState;
-    setAuth: (value: AuthState) => void;
+    setAuth: React.Dispatch<React.SetStateAction<AuthState>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

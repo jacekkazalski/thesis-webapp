@@ -102,17 +102,17 @@ const login = catchAsync(async (req, res, next) => {
 const refresh = catchAsync(async (req, res, next) => {
     const cookies = req.cookies
     if(!cookies?.jwt) {
-        return next(new CustomError('No cookie', 401))
+        return next(new CustomError('Unauthorized', 401))
     }
     const refreshToken = cookies.jwt
     const result = await user.findOne({
         where: { refresh_token: refreshToken },
     })
     if(!result) {
-        return next(new CustomError('No user', 401))
+        return next(new CustomError('Unauthorized', 401))
     }
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) {
+        if (err || user.username !== result.username) {
             return next(new CustomError('Forbidden', 403))
         }
         const accessToken = jwt.sign(
@@ -151,12 +151,15 @@ const logout = catchAsync(async (req, res, next) => {
 })
 
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization']
+    const authHeader = req.headers['Authorization'] || req.headers['authorization']
+    console.log(req.headers)
     if(!authHeader) {
         return next(new CustomError('Unauthorized', 401))
     }
     const token = authHeader.split(' ')[1]
+    console.log(token)
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        // Invalid/expired access token
         if (err) {
             return next(new CustomError('Forbidden', 403))
         }
