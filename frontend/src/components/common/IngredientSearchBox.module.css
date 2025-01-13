@@ -14,6 +14,7 @@
     align-content: flex-start;
     gap: 5px;
     flex-wrap: wrap;
+    overflow-y: scroll;
 }
 .searchresultswrapper{
     display: flex;

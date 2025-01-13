@@ -11,7 +11,7 @@ export default function NavBar(){
     return(
         <div className={styles.navbar}>
             <div className={styles.logo}>
-                <h2 onClick={() => navigate("/")}><FontAwesomeIcon icon={faCookieBite}/>Co w lodówce</h2>
+                <h2 onClick={() => navigate("/")}><FontAwesomeIcon icon={faCookieBite}/> Co w lodówce</h2>
             </div>
             <div className={styles.searchbar}>
                 <TextInput label={""} type={"text"} placeholder={"Szukaj..."}/>

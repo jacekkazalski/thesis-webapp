@@ -8,6 +8,7 @@ export default function RecipePage() {
     const [name, setName] = useState("");
     const [instructions, setInstructions] = useState("");
     const [ingredients, setIngredients] = useState([]);
+    const [author, setAuthor] = useState<{username: string, user_id: number}>()
     const {recipeId} = useParams<{ recipeId: string }>();
     useEffect(() => {
         const fetchRecipe = async () => {
@@ -20,6 +21,7 @@ export default function RecipePage() {
             setName(response.data.data.name);
             setInstructions(response.data.data.instructions);
             setIngredients(response.data.ingredients);
+            setAuthor(response.data.author)
         }
         fetchRecipe();
 
@@ -29,7 +31,7 @@ export default function RecipePage() {
             <img className={styles.banner} src={""} alt="example photo" />
             <div className={styles.info}>
                 <h1>{name}</h1>
-                <Button text={"Autor"} type={"button"} variant={"hyperlink"}/>
+                <Button text={author?.username} type={"button"} variant={"hyperlink"}/>
             </div>
             <div className={styles.steps}>
                 {instructions}

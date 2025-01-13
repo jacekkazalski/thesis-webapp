@@ -59,6 +59,9 @@
     gap: 2px;
  }
 .ingredientRow button{
-    width: 100px;
+    width: 220px;
     height: 100%;
+}
+.ingredientRow input{
+    width: 50px;
 }

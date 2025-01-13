@@ -8,7 +8,7 @@ export default function IngredientSearchBox({chosenIngredients, setChosenIngredi
     chosenIngredients: {id_ingredient: number, name: string}[],
     setChosenIngredients: React.Dispatch<React.SetStateAction<{id_ingredient: number, name: string}[]>>
 }) {
-    const [allIngredients, setAllIngredients] = useState([]);
+    const [allIngredients, setAllIngredients] = useState<{id_ingredient: number, name: string}[]>([]);
     const [search, setSearch] = useState("");
     useEffect(() => {
         const fetchIngredients = async () => {

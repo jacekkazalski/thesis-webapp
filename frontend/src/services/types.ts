@@ -5,6 +5,14 @@ export interface Recipe {
     image_path?: string;
     added_by: number;
 }
+export interface RecipeCardData{
+    id_recipe: number,
+    name: string,
+    User: {
+        username: string,
+        id_user: number
+    }
+}
 
 export interface Ingredient {
     id_ingredient: number;

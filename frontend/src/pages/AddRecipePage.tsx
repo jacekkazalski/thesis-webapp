@@ -108,9 +108,8 @@ export default function AddRecipePage() {
                         setChosenIngredients={setChosenIngredients}
                     />
                     {chosenIngredients.map((ingredient) =>
-                        <div className={styles.ingredientRow}>
+                        <div className={styles.ingredientRow} key={ingredient.id_ingredient}>
                             <Button
-                                key={ingredient.id_ingredient}
                                 text={ingredient.name}
                                 type={"button"}
                                 variant={"ingredient"}

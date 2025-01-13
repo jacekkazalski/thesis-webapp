@@ -1,17 +1,18 @@
 const recipe = require('../models/recipe');
 const ingredient_recipe = require('../models/ingredient_recipe');
 const ingredient = require('../models/ingredient');
+const user = require('../models/user');
 const catchAsync = require('../utils/catchAsync');
 const CustomError  = require('../utils/customError');
 
 const createRecipe = catchAsync(async (req, res, next) => {
     const body = req.body;
-    const user = req.user;
-    console.log(user);
+    const authUser = req.user;
+    console.log(authUser);
     const newRecipe = await recipe.create({
         name: body.name,
         instructions: body.instructions,
-        added_by: user.id
+        added_by: authUser.id
     });
     if(!newRecipe){
         return next(new CustomError('Recipe could not be created', 500));
@@ -40,10 +41,16 @@ const getRecipe = catchAsync(async (req, res, next) => {
     if(!id_recipe){
         return next(new CustomError('Missing required fields', 400));
     }
-    const foundRecipe = await recipe.findOne({ where: {id_recipe: id_recipe}});
+    const foundRecipe = await recipe.findOne({ 
+        where: {id_recipe: id_recipe},
+    });
     if(!foundRecipe){
         return next(new CustomError('Recipe not found', 404));
     }
+    const author = await user.findOne({ 
+        where: {id_user: foundRecipe.added_by}, 
+        attributes: ['id_user','username']
+    });
     const ingredients = await ingredient_recipe.findAll({ 
         where: {id_recipe: id_recipe},
         include: [ {
@@ -56,8 +63,20 @@ const getRecipe = catchAsync(async (req, res, next) => {
     return res.status(200).json({
         status: 'success',
         data: foundRecipe,
-        ingredients: ingredients
+        ingredients: ingredients,
+        author: author
+    });
+});
+const getAllRecipes = catchAsync(async (req, res, next) => {
+    const recipes = await recipe.findAll({
+        include: [{
+            model: user, 
+            attributes: ['username', 'id_user']}],
+        attributes: ['id_recipe', 'name']});
+    res.status(200).json({
+        status: 'success',
+        data: recipes
     });
 });
 
-module.exports = {createRecipe, getRecipe}
+module.exports = {createRecipe, getRecipe, getAllRecipes}
