@@ -2,6 +2,7 @@ import styles from './RecipePage.module.css'
 import Button from "../components/common/Button.tsx";
 import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
+import placeholderImg from "../assets/placeholder.png"
 import axios from '../api/axios.ts'
 
 export default function RecipePage() {
@@ -28,7 +29,7 @@ export default function RecipePage() {
     }, [recipeId]);
     return(
         <div className={styles.content}>
-            <img className={styles.banner} src={""} alt="example photo" />
+            <img className={styles.banner} src={placeholderImg} alt="example photo" />
             <div className={styles.info}>
                 <h1>{name}</h1>
                 <Button text={author?.username} type={"button"} variant={"hyperlink"}/>

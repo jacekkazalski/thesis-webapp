@@ -2,6 +2,7 @@ import styles from './RecipeCard.module.css'
 import Button from "./Button.tsx";
 import {RecipeCardData} from "../../services/types.ts";
 import {useNavigate} from "react-router-dom";
+import placeholderImg from "../../assets/placeholder.png"
 interface Props{
     recipe: RecipeCardData
 }
@@ -11,7 +12,7 @@ export default function RecipeCard({recipe}: Props) {
     return(
         <div className={styles.content} onClick={() => navigate(`/recipe/${recipe.id_recipe}`) }>
             <img
-                src={""}
+                src={placeholderImg}
                 alt="recipe image"
             />
             <div className={styles.name}>
