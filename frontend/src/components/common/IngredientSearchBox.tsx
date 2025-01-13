@@ -1,71 +1,65 @@
 import TextInput from "./TextInput.tsx";
 import styles from "./IngredientSearchBox.module.css"
 import Button from "./Button.tsx";
-import {mockIngredients} from "../../services/mockdata.ts";
-import {useState} from "react";
+import React, {useEffect, useState} from "react";
+import axios from "../../api/axios.ts";
 
-export default function IngredientSearchBox() {
-    const [chosenIngredients, setChosenIngredients] = useState<number[]>([]);
+export default function IngredientSearchBox({chosenIngredients, setChosenIngredients} : {
+    chosenIngredients: {id_ingredient: number, name: string}[],
+    setChosenIngredients: React.Dispatch<React.SetStateAction<{id_ingredient: number, name: string}[]>>
+}) {
+    const [allIngredients, setAllIngredients] = useState([]);
+    const [search, setSearch] = useState("");
+    useEffect(() => {
+        const fetchIngredients = async () => {
+            const response = await axios.get("/ingredients")
+            setAllIngredients(response.data.data);
+        }
+        fetchIngredients();
+    }, []);
+
     const handleAddIngredient = (ingredientId: number) => {
-        if (!chosenIngredients.includes(ingredientId)) {
-            setChosenIngredients([...chosenIngredients, ingredientId]);
+        const ingToAdd = allIngredients.find((ingredient) => ingredient.id_ingredient === ingredientId);
+        if (!chosenIngredients.some(ing => ing.id_ingredient == ingredientId) && ingToAdd) {
+            setChosenIngredients([...chosenIngredients, ingToAdd]);
         }
     };
-    const handleRemoveIngredient = (ingredientId: number) => {
-        setChosenIngredients(chosenIngredients.filter((id) => id !== ingredientId));
-    };
+    const filteredIngredients = allIngredients.filter(ingredient =>
+        ingredient.name.toLowerCase().includes(search.toLowerCase()))
     return(
         <div className={styles.wrapper}>
             <div className={styles.searchresultswrapper}>
                 <TextInput
-                    label={"Wyszukaj skłądnik"}
+                    label={""}
                     type={"text"}
                     placeholder={"Wyszukaj składnik"}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                 />
-                <IngredientSearchResults handleAddIngredient={handleAddIngredient}/>
+                <IngredientSearchResults
+                    handleAddIngredient={handleAddIngredient}
+                    searchIngredients={filteredIngredients}/>
             </div>
-            <ChosenIngredients handleRemoveIngredient={handleRemoveIngredient} chosenIngredients={chosenIngredients}/>
         </div>
 
     )
 }
 
-function IngredientSearchResults({handleAddIngredient}: {handleAddIngredient: (ingredientId: number) => void}) {
+function IngredientSearchResults({handleAddIngredient, searchIngredients}: {
+    handleAddIngredient: (ingredientId: number) => void,
+    searchIngredients?: { id_ingredient: number, name: string }[]
+}) {
     return (
         <div className={styles.searchresults}>
-            {mockIngredients.
+            {searchIngredients?.
             map((ingredient) =>
                 <Button
+                    key={ingredient.id_ingredient}
                     text={ingredient.name}
                     type={"button"}
                     variant={"ingredient"}
                     onClick={() => handleAddIngredient(ingredient.id_ingredient)}
                 />)}
-        </div>
-    )
-}
-function ChosenIngredients(
-    {
-        chosenIngredients, handleRemoveIngredient
-    }: {
-        chosenIngredients: number[];
-        handleRemoveIngredient: (id: number) => void;
-    }){
-    return(
-        <div className={styles.choseningredients}>
-            <div className={styles.title}>Wybrane składniki</div>
-            {chosenIngredients.map((ingredientId: number) => {
-                const ingredient = mockIngredients.find((ingredient) => ingredientId == ingredient.id_ingredient)
-                return(
-                    <Button
-                        text={ingredient.name}
-                        type={"button"}
-                        variant={"ingredient"}
-                        onClick={() => handleRemoveIngredient(ingredient.id_ingredient)}
-                    />
-                )
-            })}
-
         </div>
     )
 }

@@ -1,0 +1,64 @@
+.wrapper{
+    background-color: var(--text-background);
+    width: 100%;
+    padding: 5% 10%;
+}
+.form{
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 5px;
+}
+.title{
+    grid-column: 1;
+}
+.title input{
+    width: 90%;
+}
+.instructions{
+    grid-column: 1;
+    background-color: var(--text-background);
+    border: 1px solid;
+    border-color: var(--accent);
+    padding: 8px 14px;
+    border-radius: 2px;
+    color: var(--dark-text);
+    font-family: Inter, serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 90%;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+}
+.instructionsLabel{
+    grid-column: 1;
+}
+.addPhoto{
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.addPhoto button{
+}
+.addIngredients{
+    display: flex;
+    flex-direction: column;
+    grid-column: 2;
+    gap: 10px;
+}
+.submit{
+    width: 90%;
+}
+.ingredientRow{
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+ }
+.ingredientRow button{
+    width: 100px;
+    height: 100%;
+}

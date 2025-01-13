@@ -7,10 +7,11 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
     placeholder: string;
     value?: string;
     onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+    className?: string
 }
-export default function TextInput({placeholder,type, label, value, onChange, ...rest}: Props) {
+export default function TextInput({placeholder,type, label, value, onChange, className, ...rest}: Props) {
     return(
-        <div className={styles.content}>
+        <div className={`${styles.content} ${className}`}>
             <label>{label}</label>
             <input
                 className={styles.input}

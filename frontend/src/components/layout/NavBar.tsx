@@ -14,7 +14,7 @@ export default function NavBar(){
                 <h2 onClick={() => navigate("/")}><FontAwesomeIcon icon={faCookieBite}/>Co w lodówce</h2>
             </div>
             <div className={styles.searchbar}>
-                <TextInput label={"Szukaj"} type={"text"} placeholder={"Szukaj..."}/>
+                <TextInput label={""} type={"text"} placeholder={"Szukaj..."}/>
             </div>
             {isAuthenticated ? (
                 <div className={styles.buttons}>

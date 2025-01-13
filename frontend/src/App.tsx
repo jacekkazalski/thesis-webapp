@@ -20,11 +20,12 @@ function App() {
                       <Route path="/" element={<MainPage/>}/>
                       <Route path="/recipe" element={<RecipePage/>}/>
 
+
+                  </Route>
+                  <Route element={<NavbarOnlyLayout/>}>
                       <Route element={<RequireAuth/>}>
                           <Route path={"/create"} element={<AddRecipePage/>}/>
                       </Route>
-                  </Route>
-                  <Route element={<NavbarOnlyLayout/>}>
                       <Route path="/login" element={<LoginPage/>}/>
                       <Route path="/register" element={<RegistrationPage/>}/>
                   </Route>
