@@ -32,11 +32,11 @@ const createRecipe = catchAsync(async (req, res, next) => {
 
     return res.status(201).json({
         status: 'success',
-        data: newRecipe});
+        data: {id_recipe: newRecipe.id_recipe}});
 });
 
 const getRecipe = catchAsync(async (req, res, next) => {
-    const {id_recipe} = req.body;
+    const {id_recipe} = req.query;
     if(!id_recipe){
         return next(new CustomError('Missing required fields', 400));
     }

@@ -5,6 +5,7 @@ import React, {useState} from "react";
 import useAuth from "../hooks/useAuth.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import axios from "../api/axios.ts"
+import {AxiosError} from "axios";
 
 export default function LoginPage() {
     return(
@@ -41,9 +42,12 @@ function LoginForm(){
             setPassword('')
             navigate(from, {replace: true})
         } catch (err) {
-            if(err instanceof Error) {
-                if (err.message === "Invalid email or password") {
+            if(err instanceof AxiosError) {
+                if (err.response?.data.message === "Invalid email or password") {
                     setError("Błędny login lub hasło")
+                }
+                else {
+                    setError("Błąd logowania")
                 }
             } else {
                 setError("Błąd logowania")

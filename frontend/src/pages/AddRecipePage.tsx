@@ -27,8 +27,12 @@ export default function AddRecipePage() {
         })))
         console.log(ingredients)
     }, [chosenIngredients]);
-    //TODO: Update quantity on input
-
+    // Update array with quantity on input change
+    const handleQuantityChange = (ingredientId: number, quantity: string) => {
+        setIngredients(prev => prev.map(ing =>
+        ing.id_ingredient === ingredientId
+        ? {...ing, quantity: quantity} : ing))
+    }
     // Remove ingredient from chosen ingredients
     const handleRemoveIngredient = (ingredientId: number) => {
         const ingToRemove = chosenIngredients.find(ing => ing.id_ingredient == ingredientId);
@@ -48,7 +52,13 @@ export default function AddRecipePage() {
                     instructions,
                     ingredients
                 }))
-            console.log(response)
+            setName("")
+            setInstructions("")
+            setChosenIngredients([])
+            setPhotoPath("Nie wybrano pliku")
+
+            const recipeId = response.data.data.id_recipe
+            navigate(`/recipe/${recipeId}`)
         } catch(error){
             // If refresh token expired navigate to login and replace from location to get back
             console.log('ref exp')
@@ -109,7 +119,9 @@ export default function AddRecipePage() {
                             <TextInput
                                 label={""}
                                 type={"text"}
-                                placeholder={"ilość"}/>
+                                placeholder={"Ilość"}
+                                onChange={(e) => handleQuantityChange(ingredient.id_ingredient, e.target.value)}
+                            />
                         </div>)}
                 </div>
 
