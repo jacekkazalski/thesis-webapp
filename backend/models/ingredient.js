@@ -1,5 +1,6 @@
 const sequelize = require('../config/database');
 const { DataTypes } = require('sequelize');
+const Ingredient_recipe = require('./ingredient_recipe');
 
 const Ingredient = sequelize.define(
   'Ingredient',
@@ -23,5 +24,8 @@ const Ingredient = sequelize.define(
     timestamps: false,
   }
 );
+
+Ingredient.hasMany(Ingredient_recipe, {foreignKey: 'id_ingredient'});
+Ingredient_recipe.belongsTo(Ingredient, {foreignKey: 'id_ingredient'});
 
 module.exports = Ingredient;

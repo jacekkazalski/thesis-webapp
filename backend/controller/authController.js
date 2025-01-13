@@ -37,18 +37,6 @@ const signup = catchAsync(async (req, res, next) => {
         return next(new CustomError('User could not be created', 500))
     }
 
-    // const token = generateToken({
-    //     id: newUser.id_user,
-    //     username: newUser.username
-    // })
-
-    // res.cookie('token', token, {
-    //     httpOnly: true,
-    //     secure: process.env.NODE_ENV === 'production',
-    //     smeSite: 'Strict',
-    //     maxAge: 24 * 60 * 60 * 1000
-    // })
-
     return res.status(201).json({
         status: 'success',
         message: 'User created successfully',
