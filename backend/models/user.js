@@ -1,5 +1,6 @@
 const {Sequelize, DataTypes} = require('sequelize');
-const sequelize =  require('../config/database')
+const sequelize =  require('../config/database');
+const Recipe = require('./recipe');
 
 const User = sequelize.define(
     'User',
@@ -45,5 +46,8 @@ const User = sequelize.define(
         timestamps: false,
     }
     );
+
+User.hasMany(Recipe, {foreignKey: 'added_by'});
+Recipe.belongsTo(User, {foreignKey: 'added_by'});
 
 module.exports = User;
