@@ -8,17 +8,20 @@ const CustomError  = require('../utils/customError');
 const createRecipe = catchAsync(async (req, res, next) => {
     const body = req.body;
     const authUser = req.user;
+    const imagePath = req.file ? `./images/${req.file.filename}` : null;
     console.log(authUser);
     const newRecipe = await recipe.create({
         name: body.name,
         instructions: body.instructions,
-        added_by: authUser.id
+        added_by: authUser.id,
+        image_path: imagePath
     });
     if(!newRecipe){
         return next(new CustomError('Recipe could not be created', 500));
     }
-    console.log(body.ingredients)
-    const ingredients = body.ingredients;
+
+    // JSON.parse because body.ingredients is a string in formdata
+    const ingredients = JSON.parse(body.ingredients);
     for (const element of ingredients) {
         // Check if ingredient with given id exists
         if (await ingredient.findOne({where: {id_ingredient: element.id_ingredient}}) === null) {
