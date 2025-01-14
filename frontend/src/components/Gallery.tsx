@@ -3,11 +3,11 @@ import Button from "./common/Button.tsx";
 import {useEffect, useState} from "react";
 import RecipeCard from "./common/RecipeCard.tsx";
 import axios from "../api/axios.ts";
-import {RecipeCardData} from "../services/types.ts";
+import {Recipe} from "../services/types.ts";
 
 export default function Gallery(){
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")
-    const [recipes, setRecipes] = useState<RecipeCardData[]>([]);
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
     //TODO: Pagination, recipe interface
     useEffect(() => {
         const fetchRecipes = async () => {

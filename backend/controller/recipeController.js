@@ -65,7 +65,9 @@ const getRecipe = catchAsync(async (req, res, next) => {
 
     return res.status(200).json({
         status: 'success',
-        data: foundRecipe,
+        name: foundRecipe.name,
+        instructions: foundRecipe.instructions,
+        image_url: foundRecipe.image_path ? `${req.protocol}://${req.get('host')}/${foundRecipe.image_path}` : null,
         ingredients: ingredients,
         author: author
     });
@@ -75,10 +77,20 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
         include: [{
             model: user, 
             attributes: ['username', 'id_user']}],
-        attributes: ['id_recipe', 'name']});
+        attributes: ['id_recipe', 'name', 'image_path']});
+
+    const recipesWithImage = recipes.map(recipe => {
+        return {
+            id_recipe: recipe.id_recipe,
+            name: recipe.name,
+            image_url: recipe.image_path 
+            ? `${req.protocol}://${req.get('host')}/${recipe.image_path}` : null,
+            author: recipe.User
+            }
+    });
     res.status(200).json({
         status: 'success',
-        data: recipes
+        data: recipesWithImage
     });
 });
 

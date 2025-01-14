@@ -16,6 +16,7 @@ app.use(cors({
     origin: 'http://localhost:5174',
     credentials: true
 }))
+app.use('/images', express.static('images'));
 const port = process.env.PORT || 3000;
 
 // Routes
