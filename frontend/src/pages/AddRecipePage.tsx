@@ -1,7 +1,7 @@
 import Button from "../components/common/Button.tsx";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
-import React, {useEffect, useRef, useState} from "react";
+import React, {ChangeEvent, useEffect, useRef, useState} from "react";
 import TextInput from "../components/common/TextInput.tsx";
 import styles from "./AddRecipePage.module.css"
 import IngredientSearchBox from "../components/common/IngredientSearchBox.tsx";
@@ -10,10 +10,14 @@ import {AxiosError} from "axios";
 export default function AddRecipePage() {
     const [name, setName] = useState("");
     const [instructions, setInstructions] = useState("");
-    const [photoPath, setPhotoPath] = useState("Nie wybrano pliku");
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [chosenIngredients, setChosenIngredients] = useState<{ id_ingredient: number, name: string }[]>([]);
     const [ingredients, setIngredients] = useState<{id_ingredient: number, quantity: string}[]>([]);
-    const [errormsg, setErrormsg] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
+
+    const MAX_FILE_SIZE = 4;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE * 1024 * 1024;
+
     const instructionsRef = useRef<HTMLTextAreaElement>(null)
 
     const axiosPrivate = useAxiosPrivate()
@@ -44,27 +48,45 @@ export default function AddRecipePage() {
             )
         }
     }
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0];
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                setErrorMsg(`Maksymalny rozmiar pliku to ${MAX_FILE_SIZE} MB`)
+                return;
+            }
+            setSelectedImage(event.target.files[0]);
+            setErrorMsg("")
+        }
+    }
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
-        setErrormsg("")
+        setErrorMsg("")
         if(chosenIngredients.length < 1) {
-            setErrormsg("Musisz wybrać przynajmniej jeden składnik")
+            setErrorMsg("Musisz wybrać przynajmniej jeden składnik")
             return;
         }
 
         try{
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("instructions", instructions);
+            formData.append("ingredients", JSON.stringify(ingredients));
+            if (selectedImage) {
+                formData.append('image', selectedImage);
+            }
+
             const response = await axiosPrivate.post("/recipes/create",
-                JSON.stringify({
-                    name,
-                    instructions,
-                    ingredients
-                }))
+                formData,
+                {
+                    headers: {'Content-Type': 'multipart/form-data'}
+                }
+            )
             setName("")
             setInstructions("")
             setChosenIngredients([])
-            setPhotoPath("Nie wybrano pliku")
-
+            setSelectedImage(null)
 
             const recipeId = response.data.data.id_recipe
             navigate(`/recipe/${recipeId}`)
@@ -85,7 +107,7 @@ export default function AddRecipePage() {
         <div className={styles.wrapper}>
             <form className={styles.form} onSubmit={handleSubmit}>
                 <h1>Dodaj przepis</h1>
-                {errormsg && <p className={styles.errormsg}>{errormsg}</p>}
+                {errorMsg && <p className={styles.errormsg}>{errorMsg}</p>}
                 <TextInput
                     label={"Nazwa przepisu"}
                     type={"text"}
@@ -113,8 +135,19 @@ export default function AddRecipePage() {
                     rows={1}
                 />
                 <div className={styles.addPhoto}>
-                    <Button text={"Dodaj zdjęcie"} type={"button"} variant={"primary"}/>
-                    {photoPath}
+                    <label
+                        className={styles.fileButton}
+                        htmlFor={"fileInput"}>
+                        Dodaj zdjęcie
+                    </label>
+                    <input
+                        className={styles.fileInput}
+                        id={"fileInput"}
+                        type={"file"}
+                        accept={"image/*"}
+                        onChange={handleFileChange}
+                    />
+                    <span>{selectedImage?.name || "Nie wybrano pliku"}</span>
                 </div>
                 <div className={styles.addIngredients}>
                     <h2>Składniki</h2>

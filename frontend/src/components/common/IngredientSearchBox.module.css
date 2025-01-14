@@ -7,7 +7,10 @@
 }
 .searchresults{
     display: flex;
-    height: 132px;
+    border-top: 1px solid var(--accent);
+    width: 100%;
+    box-sizing: border-box;
+    height: 200px;
     padding: 5px;
     justify-content: center;
     align-items: flex-start;

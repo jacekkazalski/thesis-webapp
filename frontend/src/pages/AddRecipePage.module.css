@@ -47,12 +47,35 @@
     gap: 5px;
 }
 .addPhoto button{
+    height: 50px;
+}
+.fileInput{
+    display: none;
+}
+.fileButton{
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--accent);
+    color: var(--white-text);
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    height: 50px;
+}
+.fileButton:hover{
+    background-color: var(--secondary-accent);
+    color: var(--dark-text);
 }
 .addIngredients{
     display: flex;
     flex-direction: column;
     grid-column: 2;
     gap: 10px;
+}
+.addIngredients h2{
+    margin-top: 0;
 }
 .submit{
     width: 100%;

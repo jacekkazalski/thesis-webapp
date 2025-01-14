@@ -22,6 +22,7 @@ export default function IngredientSearchBox({chosenIngredients, setChosenIngredi
         const ingToAdd = allIngredients.find((ingredient) => ingredient.id_ingredient === ingredientId);
         if (!chosenIngredients.some(ing => ing.id_ingredient == ingredientId) && ingToAdd) {
             setChosenIngredients([...chosenIngredients, ingToAdd]);
+            setSearch("")
         }
     };
     const filteredIngredients = allIngredients.filter(ingredient =>
