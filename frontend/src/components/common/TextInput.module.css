@@ -1,4 +1,7 @@
-
+.content{
+        display: flex;
+        flex-direction: column;
+}
 .input{
         display: block;
         background-color: var(--text-background);
@@ -6,12 +9,15 @@
         border-color: var(--accent);
         border-radius: 2px;
         color: var(--dark-text);
-        height: 33px;
+        min-height: 50px;
+        height: 100%;
+        width: 100%;
         padding: 8px 14px;
         font-family: Inter, serif;
         font-size: 16px;
         font-style: normal;
         font-weight: 400;
         line-height: normal;
+        box-sizing: border-box;
 
 }

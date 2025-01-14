@@ -3,6 +3,8 @@ import TextInput from "../components/common/TextInput.tsx";
 import Button from "../components/common/Button.tsx";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import axios from "../api/axios.ts";
+import {AxiosError} from "axios";
 
 
 export default function RegistrationPage() {
@@ -22,40 +24,49 @@ function RegistrationForm() {
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
 
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setError("");
-        //TODO: Replace with axios
+
+        if(password.length < 8) {
+            setError("Hasło musi mieć przynajmniej 8 znaków")
+            return
+        }
+        if(password !== confirmPassword){
+            setError("Hasła nie zgadzają się")
+            return
+        }
+
         try {
-            const response = await fetch("http://localhost:3000/api/auth/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+            await axios.post("/auth/signup",
+                JSON.stringify({
                     email: email,
                     password: password,
                     confirmPassword: confirmPassword,
                     username: username,
-                })
-            });
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || "Signup failed");
-            }
+                }), {
+                    headers: {'Content-Type': 'application/json'},
+                }
+            );
             setSuccess(true)
         } catch (err) {
-            if(err.message === "Email already exists") {
-                setError("Email już istnieje");
+            if(err instanceof AxiosError){
+                if(err.response?.data.message === "Email already exists") {
+                    setError("Email już istnieje");
+                }
+                else if(err.response?.data.message === "Username already exists") {
+                    setError("Zajęta nazwa użytkownika");
+                }
+                else if(err.response?.data.message === "Invalid email") {
+                    setError("Niepoprawny adres email");
+                }
+                else {
+                    setError(err.message);
+                }
+            } else {
+                setError("Rejestracja nieudana");
             }
-            else if(err.message === "Username already exists") {
-                setError("Zajęta nazwa użytkownika");
-            }
-            else {
-                setError(err.message);
-            }
-
         }
 
 
@@ -74,7 +85,7 @@ function RegistrationForm() {
                 </div>) : (
                 <form className={styles['login-form']} onSubmit={handleSubmit}>
                     <h2>Rejestracja</h2>
-                    {error && <p style={{color: "red"}}>{error}</p>}
+                    {error && <p className={styles.errormsg}>{error}</p>}
                     <TextInput
                         label={"E-mail"}
                         type={"text"}
@@ -93,7 +104,7 @@ function RegistrationForm() {
                     />
                     <TextInput
                         label={"Hasło"}
-                        type={"text"}
+                        type={"password"}
                         placeholder={"Hasło"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -101,7 +112,7 @@ function RegistrationForm() {
                     />
                     <TextInput
                         label={"Potwierdź hasło"}
-                        type={"text"}
+                        type={"password"}
                         placeholder={"Potwierdź hasło"}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}

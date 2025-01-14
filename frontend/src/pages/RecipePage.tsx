@@ -32,7 +32,7 @@ export default function RecipePage() {
             <img className={styles.banner} src={placeholderImg} alt="example photo" />
             <div className={styles.info}>
                 <h1>{name}</h1>
-                <Button text={author?.username} type={"button"} variant={"hyperlink"}/>
+                <Button text={""+author?.username} type={"button"} variant={"hyperlink"}/>
             </div>
             <div className={styles.steps}>
                 {instructions}

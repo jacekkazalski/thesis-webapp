@@ -4,10 +4,22 @@ import styles from "./NavBar.module.css";
 import {useNavigate} from "react-router-dom";
 import {faCookieBite} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import useAuth from "../../hooks/useAuth.tsx";
+import {axiosPrivate} from "../../api/axios.ts";
 
 export default function NavBar(){
     const navigate = useNavigate();
-    const isAuthenticated = false;
+    const {auth, setAuth} = useAuth();
+    const isAuthenticated = auth.accessToken;
+    const handleLogout = async () => {
+        try {
+            await axiosPrivate.get("/auth/logout");
+            setAuth({});
+            console.log(auth)
+        } catch (error) {
+            console.log(error)
+        }
+    }
     return(
         <div className={styles.navbar}>
             <div className={styles.logo}>
@@ -20,14 +32,16 @@ export default function NavBar(){
                 <div className={styles.buttons}>
                     <Button
                         variant={"primary"}
-                        text={"Wyloguj"}
-                        type={"button"}
-                        />
-                    <Button
-                        variant={"primary"}
-                        text={"Profil"}
+                        text={""+auth.username}
                         type={"button"}
                         onClick={() => navigate('/user')}/>
+                    <Button
+                        variant={"primary"}
+                        text={"Wyloguj"}
+                        type={"button"}
+                        onClick={handleLogout}
+                        />
+
                 </div>
             ) : (
                 <div className={styles.buttons}>

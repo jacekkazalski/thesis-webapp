@@ -1,10 +1,11 @@
 import Button from "../components/common/Button.tsx";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import TextInput from "../components/common/TextInput.tsx";
 import styles from "./AddRecipePage.module.css"
 import IngredientSearchBox from "../components/common/IngredientSearchBox.tsx";
+import {AxiosError} from "axios";
 
 export default function AddRecipePage() {
     const [name, setName] = useState("");
@@ -12,6 +13,7 @@ export default function AddRecipePage() {
     const [photoPath, setPhotoPath] = useState("Nie wybrano pliku");
     const [chosenIngredients, setChosenIngredients] = useState<{ id_ingredient: number, name: string }[]>([]);
     const [ingredients, setIngredients] = useState<{id_ingredient: number, quantity: string}[]>([]);
+    const [errormsg, setErrormsg] = useState("");
     const instructionsRef = useRef<HTMLTextAreaElement>(null)
 
     const axiosPrivate = useAxiosPrivate()
@@ -45,6 +47,12 @@ export default function AddRecipePage() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
+        setErrormsg("")
+        if(chosenIngredients.length < 1) {
+            setErrormsg("Musisz wybrać przynajmniej jeden składnik")
+            return;
+        }
+
         try{
             const response = await axiosPrivate.post("/recipes/create",
                 JSON.stringify({
@@ -57,15 +65,19 @@ export default function AddRecipePage() {
             setChosenIngredients([])
             setPhotoPath("Nie wybrano pliku")
 
+
             const recipeId = response.data.data.id_recipe
             navigate(`/recipe/${recipeId}`)
         } catch(error){
             // If refresh token expired navigate to login and replace from location to get back
             console.log('ref exp')
             console.log(error)
-            if(error.response.status === 403){
-                navigate('/login', {state: {from: location}, replace: true})
+            if(error instanceof AxiosError){
+                if(error.response?.status === 403){
+                    navigate('/login', {state: {from: location}, replace: true})
+                }
             }
+
 
         }
     }
@@ -73,6 +85,7 @@ export default function AddRecipePage() {
         <div className={styles.wrapper}>
             <form className={styles.form} onSubmit={handleSubmit}>
                 <h1>Dodaj przepis</h1>
+                {errormsg && <p className={styles.errormsg}>{errormsg}</p>}
                 <TextInput
                     label={"Nazwa przepisu"}
                     type={"text"}
@@ -82,15 +95,17 @@ export default function AddRecipePage() {
                     required
                     className={styles.title}
                 />
+
                 <label htmlFor={"instructions"} className={styles.instructionsLabel}>Sposób przygotowania</label>
                 <textarea
                     value={instructions}
                     id={"instructions"}
                     ref={instructionsRef}
+                    placeholder={"Sposób przygotowania..."}
                     onChange={(e) => {
                         setInstructions(e.target.value)
                         if (instructionsRef.current) {
-                            instructionsRef.current.style.height = "0"
+                            instructionsRef.current.style.height = "auto"
                             instructionsRef.current.style.height = `${instructionsRef.current.scrollHeight}px`
                         }
                     }}

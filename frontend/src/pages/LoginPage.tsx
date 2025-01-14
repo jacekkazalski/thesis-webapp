@@ -58,7 +58,7 @@ function LoginForm(){
     return (
         <form className={styles['login-form']} onSubmit={handleSubmit}>
             <h2>Logowanie</h2>
-            {error && <p style={{color: "red"}}>{error}</p>}
+            {error && <p className={styles.errormsg}>{error}</p>}
             <TextInput
                 label={"E-mail"}
                 type={"text"}

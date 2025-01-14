@@ -22,8 +22,8 @@ export default function Gallery(){
             <div className={styles.options}>
                 <Button text={"Sortuj wg"} type={"button"} variant={"ingredient"}/>
                 Sposób wyświetlania:
-                <Button text={"G"} type={"button"} variant={"primary"}/>
-                <Button text={"L"} type={"button"} variant={"primary"}/>
+                <Button text={"G"} type={"button"} variant={"primary"} onClick={() => setViewType("gallery")}/>
+                <Button text={"L"} type={"button"} variant={"primary"} onClick={() => setViewType("list")}/>
             </div>
             <div className={`${styles[viewType]}`}>
                 {recipes.map((recipe) => (<RecipeCard key={recipe.id_recipe} recipe={recipe}/>))}

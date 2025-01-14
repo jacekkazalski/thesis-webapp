@@ -15,6 +15,7 @@ const useRefreshToken = () => {
             setAuth((prev: AuthState) => ({...prev, accessToken: accessToken}))
             return accessToken
         } catch (err) {
+            setAuth({})
             if(err instanceof Error) {
                 console.error(err.message)
             }
