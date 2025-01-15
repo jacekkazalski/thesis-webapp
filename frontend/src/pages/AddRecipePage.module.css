@@ -1,5 +1,5 @@
 .wrapper{
-    background-color: var(--text-background);
+    background-color: var(--site-background);
     width: 100%;
     padding: 5% 10%;
 }
@@ -81,16 +81,21 @@
     width: 100%;
 }
 .ingredientRow{
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 80px;
     flex-wrap: nowrap;
     gap: 2px;
  }
 .ingredientRow button{
-    width: 220px;
+    width: 100%;
     height: 100%;
 }
+.ingredientRow button:hover{
+    background-color: var(--error);
+    color: var(--white-text)
+}
 .ingredientRow input{
-
+    width: 100%;
 }
 .errormsg {
     grid-column: 1;
@@ -103,4 +108,15 @@
     border-radius: 5px;
     background-color: var(--error-background);
     color: var(--error);
+}
+.removeImage:hover {
+    color: var(--error);
+    cursor: pointer;
+    text-decoration: underline;
+}
+.removeImageIcon {
+    display: none;
+}
+.removeImage:hover .removeImageIcon{
+    display: inline;
 }

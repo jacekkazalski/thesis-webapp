@@ -5,16 +5,18 @@ import {useNavigate} from "react-router-dom";
 import {faCookieBite} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import useAuth from "../../hooks/useAuth.tsx";
-import {axiosPrivate} from "../../api/axios.ts";
+import {axiosCustom} from "../../api/axios.ts";
 
 export default function NavBar(){
     const navigate = useNavigate();
     const {auth, setAuth} = useAuth();
-    const isAuthenticated = auth.accessToken;
+    const isAuthenticated = !!auth.accessToken;
     const handleLogout = async () => {
         try {
-            await axiosPrivate.get("/auth/logout");
+            await axiosCustom.get("/auth/logout");
             setAuth({});
+            // Timeout to avoid redirect to login page
+            setTimeout(() => navigate('/'), 0);
             console.log(auth)
         } catch (error) {
             console.log(error)

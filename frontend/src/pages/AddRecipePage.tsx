@@ -1,11 +1,13 @@
 import Button from "../components/common/Button.tsx";
-import useAxiosPrivate from "../hooks/useAxiosPrivate.tsx";
+import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import React, {ChangeEvent, useEffect, useRef, useState} from "react";
 import TextInput from "../components/common/TextInput.tsx";
 import styles from "./AddRecipePage.module.css"
 import IngredientSearchBox from "../components/common/IngredientSearchBox.tsx";
 import {AxiosError} from "axios";
+import {faTrash} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export default function AddRecipePage() {
     const [name, setName] = useState("");
@@ -20,7 +22,7 @@ export default function AddRecipePage() {
 
     const instructionsRef = useRef<HTMLTextAreaElement>(null)
 
-    const axiosPrivate = useAxiosPrivate()
+    const axiosPrivate = useAxiosCustom()
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -55,9 +57,18 @@ export default function AddRecipePage() {
                 setErrorMsg(`Maksymalny rozmiar pliku to ${MAX_FILE_SIZE} MB`)
                 return;
             }
+            const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+            if(!allowedTypes.includes(file.type)) {
+                setErrorMsg("Niedozwolony rodzaj pliku (.JPG, .PNG, .WEBP)")
+                return;
+            }
             setSelectedImage(event.target.files[0]);
             setErrorMsg("")
         }
+    }
+    const handleRemoveFile = () => {
+        setErrorMsg("")
+        setSelectedImage(null);
     }
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -91,7 +102,7 @@ export default function AddRecipePage() {
             const recipeId = response.data.data.id_recipe
             navigate(`/recipe/${recipeId}`)
         } catch(error){
-            // If refresh token expired navigate to login and replace from location to get back
+            // If refresh token expired navigate to log in and replace from location to get back
             console.log('ref exp')
             console.log(error)
             if(error instanceof AxiosError){
@@ -147,7 +158,14 @@ export default function AddRecipePage() {
                         accept={"image/*"}
                         onChange={handleFileChange}
                     />
-                    <span>{selectedImage?.name || "Nie wybrano pliku"}</span>
+                    {selectedImage ? (
+                        <span
+                            className={styles.removeImage}
+                            onClick={handleRemoveFile}
+                        >
+                            {selectedImage.name} <FontAwesomeIcon icon={faTrash} className={styles.removeImageIcon}/>
+                        </span>
+                    ) : (<span>Nie wybrano pliku</span>)}
                 </div>
                 <div className={styles.addIngredients}>
                     <h2>Składniki</h2>

@@ -5,7 +5,7 @@
     width: 100%;
     margin:0;
     padding: 20px 40px;
-    background-color: var(--text-background);
+    background-color: var(--site-background);
 }
 .banner{
     height: 300px;
@@ -32,6 +32,7 @@
     width: 100%;
     border: 1px solid var(--accent);
     white-space: pre-line;
+    padding: 10px;
 }
 .ingredients{
 

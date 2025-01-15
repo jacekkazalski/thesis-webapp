@@ -18,6 +18,7 @@
     gap: 5px;
     flex-wrap: wrap;
     overflow-y: scroll;
+    background-color: var(--site-background);
 }
 .searchresultswrapper{
     display: flex;

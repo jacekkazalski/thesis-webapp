@@ -1,6 +1,6 @@
 .content {
     width: 100%;
-    background-color: var(--text-background);
+    background-color: var(--site-background);
 }
 .options{
     width: 100%;
@@ -10,6 +10,7 @@
     align-items: center;
     border-bottom: 1px solid var(--dark-text);
     padding: 5px 20px;
+    background-color: var(--text-background);
 }
 .gallery {
     display: grid;
