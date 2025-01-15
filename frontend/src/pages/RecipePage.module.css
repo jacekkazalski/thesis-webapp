@@ -33,6 +33,7 @@
     border: 1px solid var(--accent);
     white-space: pre-line;
     padding: 10px;
+    background-color: var(--text-background);
 }
 .ingredients{
 
