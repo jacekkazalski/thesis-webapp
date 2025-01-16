@@ -2,10 +2,16 @@ import TextInput from "../common/TextInput.tsx";
 import Button from "../common/Button.tsx";
 import styles from "./NavBar.module.css";
 import {useNavigate} from "react-router-dom";
-import {faCookieBite} from "@fortawesome/free-solid-svg-icons";
+import {
+    faArrowRightFromBracket,
+    faArrowRightToBracket,
+    faCookieBite,
+    faUserPen
+} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import useAuth from "../../hooks/useAuth.tsx";
 import {axiosCustom} from "../../api/axios.ts";
+import {faUser} from "@fortawesome/free-regular-svg-icons";
 
 export default function NavBar(){
     const navigate = useNavigate();
@@ -35,11 +41,13 @@ export default function NavBar(){
                     <Button
                         variant={"primary"}
                         text={""+auth.username}
+                        icon={faUser}
                         type={"button"}
-                        onClick={() => navigate('/user')}/>
+                        onClick={() => navigate('/user/')}/>
                     <Button
                         variant={"primary"}
                         text={"Wyloguj"}
+                        icon={faArrowRightFromBracket}
                         type={"button"}
                         onClick={handleLogout}
                         />
@@ -50,11 +58,13 @@ export default function NavBar(){
                     <Button
                         variant={"primary"}
                         text={"Logowanie"}
+                        icon={faArrowRightToBracket}
                         type={"button"}
                         onClick={() => navigate('/login')}/>
                     <Button
                         variant={"primary"}
                         text={"Rejestracja"}
+                        icon={faUserPen}
                         type={"button"}
                         onClick={() => navigate('/register')}/>
                 </div>

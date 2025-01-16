@@ -61,6 +61,13 @@ const getRecipe = catchAsync(async (req, res, next) => {
             attributes: ['name']
         }]
     });
+    const ingredientsMapped = ingredients.map(ingredient => {
+        return {
+            id_ingredient: ingredient.id_ingredient,
+            name: ingredient.Ingredient.name,
+            quantity: ingredient.quantity
+        }
+    })
     console.log(ingredients);
 
     return res.status(200).json({
@@ -68,7 +75,7 @@ const getRecipe = catchAsync(async (req, res, next) => {
         name: foundRecipe.name,
         instructions: foundRecipe.instructions,
         image_url: foundRecipe.image_path ? `${req.protocol}://${req.get('host')}/${foundRecipe.image_path}` : null,
-        ingredients: ingredients,
+        ingredients: ingredientsMapped,
         author: author
     });
 });

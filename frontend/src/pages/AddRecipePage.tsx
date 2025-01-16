@@ -6,7 +6,7 @@ import TextInput from "../components/common/TextInput.tsx";
 import styles from "./AddRecipePage.module.css"
 import IngredientSearchBox from "../components/common/IngredientSearchBox.tsx";
 import {AxiosError} from "axios";
-import {faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Ingredient} from "../services/types.ts";
 
@@ -184,7 +184,7 @@ export default function AddRecipePage() {
                         </div>)}
                 </div>
 
-                <Button text={"Dodaj przepis"} type={"submit"} variant={"primary"} className={styles.submit}/>
+                <Button text={"Dodaj przepis"} icon={faPlus} type={"submit"} variant={"primary"} className={styles.submit}/>
             </form>
 
         </div>

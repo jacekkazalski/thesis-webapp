@@ -9,7 +9,8 @@ import {faList,faTable} from "@fortawesome/free-solid-svg-icons";
 export default function Gallery(){
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")
     const [recipes, setRecipes] = useState<Recipe[]>([]);
-    //TODO: Pagination, recipe interface
+    //TODO: Pagination
+
     useEffect(() => {
         const fetchRecipes = async () => {
             const response = await axios.get("/recipes")
@@ -27,7 +28,7 @@ export default function Gallery(){
                 <Button icon={faTable} type={"button"} variant={"primary"} onClick={() => setViewType("gallery")}/>
             </div>
             <div className={`${styles[viewType]}`}>
-                {recipes.map((recipe) => (<RecipeCard key={recipe.id_recipe} recipe={recipe}/>))}
+                {recipes.map((recipe) => (<RecipeCard key={recipe.id_recipe} variant={viewType} recipe={recipe}/>))}
 
             </div>
 
