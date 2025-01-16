@@ -3,10 +3,11 @@ import styles from "./IngredientSearchBox.module.css"
 import Button from "./Button.tsx";
 import React, {useEffect, useState} from "react";
 import axios from "../../api/axios.ts";
+import {Ingredient} from "../../services/types.ts";
 
 export default function IngredientSearchBox({chosenIngredients, setChosenIngredients} : {
-    chosenIngredients: {id_ingredient: number, name: string}[],
-    setChosenIngredients: React.Dispatch<React.SetStateAction<{id_ingredient: number, name: string}[]>>
+    chosenIngredients: Ingredient[],
+    setChosenIngredients: React.Dispatch<React.SetStateAction<Ingredient[]>>
 }) {
     const [allIngredients, setAllIngredients] = useState<{id_ingredient: number, name: string}[]>([]);
     const [search, setSearch] = useState("");

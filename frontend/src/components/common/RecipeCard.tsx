@@ -3,6 +3,8 @@ import Button from "./Button.tsx";
 import {Recipe} from "../../services/types.ts";
 import {useNavigate} from "react-router-dom";
 import placeholderImg from "../../assets/placeholder.png"
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faStar} from "@fortawesome/free-regular-svg-icons";
 interface Props{
     recipe: Recipe
 }
@@ -22,7 +24,11 @@ export default function RecipeCard({recipe}: Props) {
                 <Button text={`${recipe.author.username}`} type={"button"} variant={"hyperlink"}/>
             </div>
             <div className={styles.rating}>
-                /5
+                <FontAwesomeIcon icon={faStar}/>
+                <FontAwesomeIcon icon={faStar}/>
+                <FontAwesomeIcon icon={faStar}/>
+                <FontAwesomeIcon icon={faStar}/>
+                <FontAwesomeIcon icon={faStar}/>
             </div>
             <div className={styles.ingredients}>
                 Składniki 5/5

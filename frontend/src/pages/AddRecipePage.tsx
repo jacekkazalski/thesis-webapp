@@ -1,20 +1,20 @@
 import Button from "../components/common/Button.tsx";
 import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
-import React, {ChangeEvent, useEffect, useRef, useState} from "react";
+import React, {ChangeEvent, useRef, useState} from "react";
 import TextInput from "../components/common/TextInput.tsx";
 import styles from "./AddRecipePage.module.css"
 import IngredientSearchBox from "../components/common/IngredientSearchBox.tsx";
 import {AxiosError} from "axios";
 import {faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {Ingredient} from "../services/types.ts";
 
 export default function AddRecipePage() {
     const [name, setName] = useState("");
     const [instructions, setInstructions] = useState("");
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [chosenIngredients, setChosenIngredients] = useState<{ id_ingredient: number, name: string }[]>([]);
-    const [ingredients, setIngredients] = useState<{id_ingredient: number, quantity: string}[]>([]);
+    const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
     const [errorMsg, setErrorMsg] = useState("");
 
     const MAX_FILE_SIZE = 4;
@@ -26,20 +26,13 @@ export default function AddRecipePage() {
     const navigate = useNavigate()
     const location = useLocation()
 
-
-    // Update ingredient array for the request
-    useEffect(() => {
-        setIngredients(chosenIngredients.map(ingredient => ({
-            id_ingredient: ingredient.id_ingredient,
-            quantity: ""
-        })))
-        console.log(ingredients)
-    }, [chosenIngredients]);
     // Update array with quantity on input change
     const handleQuantityChange = (ingredientId: number, quantity: string) => {
-        setIngredients(prev => prev.map(ing =>
+        setChosenIngredients(prev => prev.map(ing =>
         ing.id_ingredient === ingredientId
         ? {...ing, quantity: quantity} : ing))
+
+        console.log(chosenIngredients)
     }
     // Remove ingredient from chosen ingredients
     const handleRemoveIngredient = (ingredientId: number) => {
@@ -83,7 +76,7 @@ export default function AddRecipePage() {
             const formData = new FormData();
             formData.append("name", name);
             formData.append("instructions", instructions);
-            formData.append("ingredients", JSON.stringify(ingredients));
+            formData.append("ingredients", JSON.stringify(chosenIngredients));
             if (selectedImage) {
                 formData.append('image', selectedImage);
             }
@@ -185,6 +178,7 @@ export default function AddRecipePage() {
                                 label={""}
                                 type={"text"}
                                 placeholder={"Ilość"}
+                                value={ingredient.quantity}
                                 onChange={(e) => handleQuantityChange(ingredient.id_ingredient, e.target.value)}
                             />
                         </div>)}

@@ -14,3 +14,9 @@ export interface AuthState {
     username?: string;
     accessToken?: string;
 }
+
+export interface Ingredient {
+    id_ingredient: number,
+    name: string,
+    quantity?: string
+}
