@@ -7,7 +7,8 @@ import axios from '../api/axios.ts'
 import {faEdit, faHeart, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {faStar, faUser} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {Ingredient} from "../services/types.ts";
+import {Ingredient} from "../utils/types.ts";
+import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
 
 export default function RecipePage() {
     const [name, setName] = useState("");
@@ -18,6 +19,16 @@ export default function RecipePage() {
     const {recipeId} = useParams<{ recipeId: string }>();
 
     const navigate = useNavigate();
+    const axiosCustom = useAxiosCustom();
+
+    const handleFavourite = async () => {
+        try {
+           await axiosCustom.post(`/recipes/favourites`,
+                JSON.stringify({id_recipe: recipeId}))
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
     useEffect(() => {
         const fetchRecipe = async () => {
@@ -56,7 +67,13 @@ export default function RecipePage() {
                     <FontAwesomeIcon icon={faStar}/>
                     <FontAwesomeIcon icon={faStar}/>
                 </div>
-                <Button type={"button"} variant={"primary"} icon={faHeart} className={styles.favButton}/>
+                <Button
+                    type={"button"}
+                    variant={"primary"}
+                    icon={faHeart}
+                    className={styles.favButton}
+                    onClick={handleFavourite}
+                />
                 <Button type={"button"} variant={"primary"} icon={faTrash}/>
                 <Button type={"button"} variant={"primary"} icon={faEdit}/>
             </div>

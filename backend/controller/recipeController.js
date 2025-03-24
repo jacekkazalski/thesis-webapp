@@ -2,6 +2,7 @@ const recipe = require('../models/recipe');
 const ingredient_recipe = require('../models/ingredient_recipe');
 const ingredient = require('../models/ingredient');
 const user = require('../models/user');
+const favourite = require('../models/favourite');
 const catchAsync = require('../utils/catchAsync');
 const CustomError  = require('../utils/customError');
 
@@ -10,6 +11,12 @@ const createRecipe = catchAsync(async (req, res, next) => {
     const authUser = req.user;
     const imagePath = req.file ? `./images/${req.file.filename}` : null;
     console.log(authUser);
+    if(!body.name || body.name.trim() === '' || 
+        !body.instructions || body.instructions.trim() === '' || 
+        !body.ingredients){
+        return next(new CustomError('Missing required fields', 400));
+    }
+    //TODO: Add transaction
     const newRecipe = await recipe.create({
         name: body.name,
         instructions: body.instructions,
@@ -100,5 +107,27 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
         data: recipesWithImage
     });
 });
+const addToFavourites = catchAsync(async (req, res, next) => {
+    const body = req.body;
+    const authUser = req.user;
+    const newFavourite = await favourite.create({
+        id_user: authUser.id,
+        id_recipe: body.id_recipe
+    });
+    res.status(201).json({
+        status: 'success',
+        data: newFavourite
+    });
+});
+const removeFromFavourites = catchAsync(async (req, res, next) => {
+    const body = req.body;
+    const authUser = req.user;
+    await favourite.destroy({
+        where: {
+            id_user: authUser.id,
+            id_recipe: body.id_recipe
+        }
+    });
+});
 
-module.exports = {createRecipe, getRecipe, getAllRecipes}
+module.exports = {createRecipe, getRecipe, getAllRecipes, addToFavourites, removeFromFavourites};
