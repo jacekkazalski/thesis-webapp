@@ -1,6 +1,6 @@
 import useAuth from "./useAuth.tsx";
 import axios from "../api/axios.ts"
-import {AuthState} from "../services/types.ts";
+import {AuthState} from "../utils/types.ts";
 
 const useRefreshToken = () => {
     const {setAuth} = useAuth()

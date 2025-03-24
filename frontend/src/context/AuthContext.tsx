@@ -1,5 +1,5 @@
 import { createContext, useState, ReactNode } from 'react';
-import {AuthState} from "../services/types.ts";
+import {AuthState} from "../utils/types.ts";
 
 interface AuthContextType {
     auth: AuthState;

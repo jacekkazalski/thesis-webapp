@@ -3,7 +3,7 @@ import Button from "./common/Button.tsx";
 import {useEffect, useState} from "react";
 import RecipeCard from "./common/RecipeCard.tsx";
 import axios from "../api/axios.ts";
-import {Recipe} from "../services/types.ts";
+import {Recipe} from "../utils/types.ts";
 import {faList,faTable} from "@fortawesome/free-solid-svg-icons";
 
 export default function Gallery(){

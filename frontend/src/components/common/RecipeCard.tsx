@@ -1,6 +1,6 @@
 import styles from './RecipeCard.module.css'
 import Button from "./Button.tsx";
-import {Recipe} from "../../services/types.ts";
+import {Recipe} from "../../utils/types.ts";
 import {useNavigate} from "react-router-dom";
 import placeholderImg from "../../assets/placeholder.png"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

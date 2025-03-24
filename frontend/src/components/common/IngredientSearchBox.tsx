@@ -3,7 +3,7 @@ import styles from "./IngredientSearchBox.module.css"
 import Button from "./Button.tsx";
 import React, {useEffect, useState} from "react";
 import axios from "../../api/axios.ts";
-import {Ingredient} from "../../services/types.ts";
+import {Ingredient} from "../../utils/types.ts";
 
 export default function IngredientSearchBox({chosenIngredients, setChosenIngredients} : {
     chosenIngredients: Ingredient[],

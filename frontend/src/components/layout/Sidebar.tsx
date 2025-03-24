@@ -6,7 +6,7 @@ import Checkbox from "../common/Checkbox.tsx";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faHouse, faPlus, faClock, faDice } from "@fortawesome/free-solid-svg-icons";
 import {useState} from "react";
-import {Ingredient} from "../../services/types.ts";
+import {Ingredient} from "../../utils/types.ts";
 
 export default function Sidebar(){
     const navigate = useNavigate();

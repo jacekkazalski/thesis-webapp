@@ -8,7 +8,7 @@ import IngredientSearchBox from "../components/common/IngredientSearchBox.tsx";
 import {AxiosError} from "axios";
 import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {Ingredient} from "../services/types.ts";
+import {Ingredient} from "../utils/types.ts";
 
 export default function AddRecipePage() {
     const [name, setName] = useState("");
