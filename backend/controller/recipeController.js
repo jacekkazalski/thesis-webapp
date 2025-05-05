@@ -86,6 +86,36 @@ const getRecipe = catchAsync(async (req, res, next) => {
         author: author
     });
 });
+const deleteRecipe = catchAsync(async (req, res, next) => {
+    const {id_recipe} = req.query;
+    const authUser = req.user;
+    if(!id_recipe){
+        return next(new CustomError('Missing required fields', 400));
+    }
+    // Check if recipe exists
+    const foundRecipe = await recipe.findOne({
+        where: {id_recipe: id_recipe},
+    });
+    if(!foundRecipe){
+        return next(new CustomError('Recipe not found', 404));
+    }
+    // Check if user is author
+    if(foundRecipe.added_by !== authUser.id){
+        return next(new CustomError('Unauthorized operation', 403));
+    }
+    // Delete recipe
+    await ingredient_recipe.destroy({
+        where: {id_recipe: id_recipe},
+    });
+
+    await recipe.destroy({
+        where: {id_recipe: id_recipe},
+    });
+    return res.status(200).json({
+        status: 'success',
+        message: 'Recipe deleted successfully'
+    });
+});
 const getAllRecipes = catchAsync(async (req, res, next) => {
     const recipes = await recipe.findAll({
         include: [{
@@ -196,4 +226,4 @@ const isAuthor = catchAsync(async (req, res, next) => {
     });
 });
 
-module.exports = {createRecipe, getRecipe, getAllRecipes, toggleFavourite, isFavourtie, isAuthor};
+module.exports = {createRecipe, getRecipe, getAllRecipes, toggleFavourite, isFavourtie, isAuthor, deleteRecipe};

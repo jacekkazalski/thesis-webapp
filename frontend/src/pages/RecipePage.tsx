@@ -32,7 +32,20 @@ export default function RecipePage() {
         } catch (err) {
             console.log(err)
         }
-        console.log("isfav afterclick", isFavourite);
+    }
+
+    const handleDelete = async () => {
+
+        const confirmed = window.confirm("Czy na pewno chcesz usunąć ten przepis?")
+        if (!confirmed) return;
+
+        try {
+            await axiosCustom.delete(`/recipes/delete/`, {params: {id_recipe: recipeId}})
+
+            navigate("/")
+        } catch (err) {
+            console.log(err)
+        }
     }
 
 
@@ -100,7 +113,12 @@ export default function RecipePage() {
                 />
                 {isAuthor && (
                     <>
-                        <Button type={"button"} variant={"primary"} icon={faTrash}/>
+                        <Button
+                            type={"button"}
+                            variant={"primary"}
+                            icon={faTrash}
+                            onClick={handleDelete}
+                        />
                         <Button type={"button"} variant={"primary"} icon={faEdit}/>
                     </>)}
 
