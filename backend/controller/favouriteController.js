@@ -1,0 +1,68 @@
+const favourite = require('../models/favourite');
+const catchAsync = require('../utils/catchAsync');
+const CustomError = require('../utils/customError');
+
+const toggleFavourite = catchAsync(async (req, res, next) => {
+    const body = req.body;
+    const authUser = req.user;
+    // Check if favourite exists
+    const existingFavourite = await favourite.findOne({
+        where: {
+            id_user: authUser.id,
+            id_recipe: body.id_recipe
+        }
+    });
+    if (existingFavourite) {
+        // If it exists, delete it
+        await favourite.destroy({
+            where: {
+                id_user: authUser.id,
+                id_recipe: body.id_recipe
+            }
+        });
+        return res.status(200).json({
+            status: 'success',
+            message: 'Favourite removed',
+            isFavourite: false
+        });
+    }
+    // If it doesn't exist, create it
+    const newFavourite = await favourite.create({
+        id_user: authUser.id,
+        id_recipe: body.id_recipe
+    });
+    return res.status(201).json({
+        status: 'success',
+        message: 'Added to favourites ',
+        isFavourite: true
+    });
+
+
+});
+
+const isFavourite = catchAsync(async (req, res, next) => {
+    const authUser = req.user;
+    const { id_recipe } = req.query;
+    if (!id_recipe) {
+        return next(new CustomError('Missing required fields', 400));
+    }
+    const favouriteRecipe = await favourite.findOne({
+        where: {
+            id_user: authUser.id,
+            id_recipe: id_recipe
+        }
+    });
+    if (favouriteRecipe) {
+        return res.status(200).json({
+            status: 'success',
+            isFavourite: true
+        });
+    } else {
+        return res.status(200).json({
+            status: 'success',
+            isFavourite: false
+        });
+    }
+});
+
+module.exports = { toggleFavourite, isFavourite };

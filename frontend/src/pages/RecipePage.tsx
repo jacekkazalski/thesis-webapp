@@ -26,7 +26,7 @@ export default function RecipePage() {
 
     const handleFavourite = async () => {
         try {
-            const response = await axiosCustom.post(`/recipes/favourites`,
+            const response = await axiosCustom.post(`/favourites/toggle`,
                 JSON.stringify({id_recipe: recipeId}))
             setIsFavourite(response.data.isFavourite)
         } catch (err) {
@@ -52,7 +52,7 @@ export default function RecipePage() {
     useEffect(() => {
         const checkIfFavourite = async () => {
             try{
-                const response = await axiosCustom.get('/recipes/favourites/check', { params: { id_recipe: recipeId }})
+                const response = await axiosCustom.get('/favourites/check', { params: { id_recipe: recipeId }})
                 setIsFavourite(response.data.isFavourite)
             } catch (err) {
                 console.log(err)

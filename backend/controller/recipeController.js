@@ -5,47 +5,6 @@ const user = require('../models/user');
 const favourite = require('../models/favourite');
 const catchAsync = require('../utils/catchAsync');
 const CustomError  = require('../utils/customError');
-
-const createRecipe = catchAsync(async (req, res, next) => {
-    const body = req.body;
-    const authUser = req.user;
-    const imagePath = req.file ? `./images/${req.file.filename}` : null;
-    console.log(authUser);
-    if(!body.name || body.name.trim() === '' || 
-        !body.instructions || body.instructions.trim() === '' || 
-        !body.ingredients){
-        return next(new CustomError('Missing required fields', 400));
-    }
-    //TODO: Add transaction
-    const newRecipe = await recipe.create({
-        name: body.name,
-        instructions: body.instructions,
-        added_by: authUser.id,
-        image_path: imagePath
-    });
-    if(!newRecipe){
-        return next(new CustomError('Recipe could not be created', 500));
-    }
-
-    // JSON.parse because body.ingredients is a string in formdata
-    const ingredients = JSON.parse(body.ingredients);
-    for (const element of ingredients) {
-        // Check if ingredient with given id exists
-        if (await ingredient.findOne({where: {id_ingredient: element.id_ingredient}}) === null) {
-            return next(new CustomError('Ingredient does not exist', 404));
-        }
-        await ingredient_recipe.create({
-            id_ingredient: element.id_ingredient,
-            id_recipe: newRecipe.id_recipe,
-            quantity: element.quantity
-        });
-    }
-
-    return res.status(201).json({
-        status: 'success',
-        data: {id_recipe: newRecipe.id_recipe}});
-});
-
 const getRecipe = catchAsync(async (req, res, next) => {
     const {id_recipe} = req.query;
     if(!id_recipe){
@@ -86,6 +45,48 @@ const getRecipe = catchAsync(async (req, res, next) => {
         author: author
     });
 });
+const createRecipe = catchAsync(async (req, res, next) => {
+    const body = req.body;
+    const authUser = req.user;
+    const imagePath = req.file ? `./images/${req.file.filename}` : null;
+    console.log(authUser);
+
+    // Check if parameters aren't empty strings and are present
+    if(!body.name || body.name.trim() === '' || 
+        !body.instructions || body.instructions.trim() === '' || 
+        !body.ingredients){
+        return next(new CustomError('Missing required fields', 400));
+    }
+    //TODO: Add transaction
+    const newRecipe = await recipe.create({
+        name: body.name,
+        instructions: body.instructions,
+        added_by: authUser.id,
+        image_path: imagePath
+    });
+    if(!newRecipe){
+        return next(new CustomError('Recipe could not be created', 500));
+    }
+
+    // JSON.parse because body.ingredients is a string in formdata
+    const ingredients = JSON.parse(body.ingredients);
+    for (const element of ingredients) {
+        // Check if ingredient with given id exists
+        if (await ingredient.findOne({where: {id_ingredient: element.id_ingredient}}) === null) {
+            return next(new CustomError('Ingredient does not exist', 404));
+        }
+        await ingredient_recipe.create({
+            id_ingredient: element.id_ingredient,
+            id_recipe: newRecipe.id_recipe,
+            quantity: element.quantity
+        });
+    }
+
+    return res.status(201).json({
+        status: 'success',
+        data: {id_recipe: newRecipe.id_recipe}});
+});
+
 const deleteRecipe = catchAsync(async (req, res, next) => {
     const {id_recipe} = req.query;
     const authUser = req.user;
@@ -103,11 +104,11 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
     if(foundRecipe.added_by !== authUser.id){
         return next(new CustomError('Unauthorized operation', 403));
     }
-    // Delete recipe
+    // Delete records from ingredient_recipe table
     await ingredient_recipe.destroy({
         where: {id_recipe: id_recipe},
     });
-
+    // Delete recipe
     await recipe.destroy({
         where: {id_recipe: id_recipe},
     });
@@ -137,68 +138,6 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
         data: recipesWithImage
     });
 });
-const toggleFavourite = catchAsync(async (req, res, next) => {
-    const body = req.body;
-    const authUser = req.user;
-
-    // Check if favourite exists
-    const existingFavourite = await favourite.findOne({
-        where: {
-            id_user: authUser.id,
-            id_recipe: body.id_recipe
-        }
-    });
-    if (existingFavourite) {
-        // If it exists, delete it
-        await favourite.destroy({
-            where: {
-                id_user: authUser.id,
-                id_recipe: body.id_recipe
-            }
-        });
-        return res.status(200).json({
-            status: 'success',
-            message: 'Favourite removed',
-            isFavourite: false
-        });
-    } else {
-        // If it doesn't exist, create it
-        const newFavourite = await favourite.create({
-            id_user: authUser.id,
-            id_recipe: body.id_recipe
-        });
-        return res.status(201).json({
-            status: 'success',
-            message: 'Added to favourites ',
-            isFavourite: true
-        });
-    }
-
-});
-const isFavourtie = catchAsync(async (req, res, next) => {
-    const authUser = req.user;
-    const {id_recipe} = req.query;
-    if(!id_recipe){
-        return next(new CustomError('Missing required fields', 400));
-    }
-    const favouriteRecipe = await favourite.findOne({
-        where: {
-            id_user: authUser.id,
-            id_recipe: id_recipe
-        }
-    });
-    if (favouriteRecipe) {
-        return res.status(200).json({
-            status: 'success',
-            isFavourite: true
-        });
-    } else {
-        return res.status(200).json({
-            status: 'success',
-            isFavourite: false
-        });
-    }
-});
 const isAuthor = catchAsync(async (req, res, next) => {
     const authUser = req.user;
     const {id_recipe} = req.query;
@@ -226,4 +165,4 @@ const isAuthor = catchAsync(async (req, res, next) => {
     });
 });
 
-module.exports = {createRecipe, getRecipe, getAllRecipes, toggleFavourite, isFavourtie, isAuthor, deleteRecipe};
+module.exports = {createRecipe, getRecipe, getAllRecipes, isAuthor, deleteRecipe};

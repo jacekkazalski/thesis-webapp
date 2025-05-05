@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRouter = require('./route/authRoute');
 const recipeRouter = require('./route/recipeRoute');
 const ingredientRouter = require('./route/ingredientRoute');
+const favouriteRouter = require('./route/favouriteRoute');
 const errorHandler = require('./utils/errorHandler');
 const CustomError = require('./utils/customError');
 const cookieParser = require('cookie-parser');
@@ -23,6 +24,7 @@ const port = process.env.PORT || 3000;
 app.use('/api/auth', authRouter)
 app.use('/api/recipes', recipeRouter)
 app.use('/api/ingredients', ingredientRouter)
+app.use('/api/favourites', favouriteRouter)
 
 app.use('*', (req, res, next) => {
     throw new CustomError(`Route ${req.originalUrl} not found`, 404)
