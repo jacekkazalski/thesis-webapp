@@ -107,27 +107,93 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
         data: recipesWithImage
     });
 });
-const addToFavourites = catchAsync(async (req, res, next) => {
+const toggleFavourite = catchAsync(async (req, res, next) => {
     const body = req.body;
     const authUser = req.user;
-    const newFavourite = await favourite.create({
-        id_user: authUser.id,
-        id_recipe: body.id_recipe
-    });
-    res.status(201).json({
-        status: 'success',
-        data: newFavourite
-    });
-});
-const removeFromFavourites = catchAsync(async (req, res, next) => {
-    const body = req.body;
-    const authUser = req.user;
-    await favourite.destroy({
+
+    // Check if favourite exists
+    const existingFavourite = await favourite.findOne({
         where: {
             id_user: authUser.id,
             id_recipe: body.id_recipe
         }
     });
+    if (existingFavourite) {
+        // If it exists, delete it
+        await favourite.destroy({
+            where: {
+                id_user: authUser.id,
+                id_recipe: body.id_recipe
+            }
+        });
+        return res.status(200).json({
+            status: 'success',
+            message: 'Favourite removed',
+            isFavourite: false
+        });
+    } else {
+        // If it doesn't exist, create it
+        const newFavourite = await favourite.create({
+            id_user: authUser.id,
+            id_recipe: body.id_recipe
+        });
+        return res.status(201).json({
+            status: 'success',
+            message: 'Added to favourites ',
+            isFavourite: true
+        });
+    }
+
+});
+const isFavourtie = catchAsync(async (req, res, next) => {
+    const authUser = req.user;
+    const {id_recipe} = req.query;
+    if(!id_recipe){
+        return next(new CustomError('Missing required fields', 400));
+    }
+    const favouriteRecipe = await favourite.findOne({
+        where: {
+            id_user: authUser.id,
+            id_recipe: id_recipe
+        }
+    });
+    if (favouriteRecipe) {
+        return res.status(200).json({
+            status: 'success',
+            isFavourite: true
+        });
+    } else {
+        return res.status(200).json({
+            status: 'success',
+            isFavourite: false
+        });
+    }
+});
+const isAuthor = catchAsync(async (req, res, next) => {
+    const authUser = req.user;
+    const {id_recipe} = req.query;
+    
+    if(!id_recipe){
+        return next(new CustomError('Missing required fields', 400));
+    }
+    // Check if recipe exists
+    const foundRecipe = await recipe.findOne({ 
+        where: {id_recipe: id_recipe},
+    });
+    if(!foundRecipe){
+        return next(new CustomError('Recipe not found', 404));
+    }
+    // Check if user is author
+    if(foundRecipe.added_by !== authUser.id){
+        return res.status(200).json({
+            status: 'success',
+            isAuthor: false
+        });
+    }
+    return res.status(200).json({
+        status: 'success',
+        isAuthor: true
+    });
 });
 
-module.exports = {createRecipe, getRecipe, getAllRecipes, addToFavourites, removeFromFavourites};
+module.exports = {createRecipe, getRecipe, getAllRecipes, toggleFavourite, isFavourtie, isAuthor};

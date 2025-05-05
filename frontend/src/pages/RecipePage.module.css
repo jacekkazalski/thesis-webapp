@@ -36,14 +36,24 @@
     height: min-content;
 
 }
-.favButton{
+.favButtonDisabled{
     background-color: transparent;
     color: var(--accent);
 }
-.favButton:hover{
-    color: hotpink;
+.favButtonDisabled:hover{
+    color: var(--error);
     background-color: transparent;
-    border-color: hotpink;
+    border-color: var(--error);
+}
+.favButtonEnabled{
+    background-color: transparent;
+    border-color: var(--error);
+    color: var(--error);
+}
+.favButtonEnabled:hover{
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: transparent;
 }
 .steps{
     border: 1px solid var(--accent);

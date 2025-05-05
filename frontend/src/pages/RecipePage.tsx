@@ -6,6 +6,7 @@ import placeholderImg from "../assets/placeholder.png"
 import axios from '../api/axios.ts'
 import {faEdit, faHeart, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {faStar, faUser} from "@fortawesome/free-regular-svg-icons";
+import {faHeart as  emptyHeart} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Ingredient} from "../utils/types.ts";
 import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
@@ -17,20 +18,41 @@ export default function RecipePage() {
     const [author, setAuthor] = useState<{username: string, id_user: number}>()
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const {recipeId} = useParams<{ recipeId: string }>();
+    const [isFavourite, setIsFavourite] = useState(false);
+    const [isAuthor, setIsAuthor] = useState(false);
 
     const navigate = useNavigate();
     const axiosCustom = useAxiosCustom();
 
     const handleFavourite = async () => {
         try {
-           await axiosCustom.post(`/recipes/favourites`,
+            const response = await axiosCustom.post(`/recipes/favourites`,
                 JSON.stringify({id_recipe: recipeId}))
+            setIsFavourite(response.data.isFavourite)
         } catch (err) {
             console.log(err)
         }
+        console.log("isfav afterclick", isFavourite);
     }
 
+
     useEffect(() => {
+        const checkIfFavourite = async () => {
+            try{
+                const response = await axiosCustom.get('/recipes/favourites/check', { params: { id_recipe: recipeId }})
+                setIsFavourite(response.data.isFavourite)
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        const checkIfAuthor = async () => {
+            try{
+                const response = await axiosCustom.get('/recipes/author/check', { params: { id_recipe: recipeId }})
+                setIsAuthor(response.data.isAuthor)
+            } catch (err) {
+                console.log(err)
+            }
+        }
         const fetchRecipe = async () => {
             const response = await axios.get("/recipes/recipe", {
                 params: {
@@ -45,6 +67,8 @@ export default function RecipePage() {
             setImageUrl(response.data.image_url)
         }
         fetchRecipe();
+        checkIfFavourite();
+        checkIfAuthor();
 
     }, [recipeId]);
     return(
@@ -70,12 +94,16 @@ export default function RecipePage() {
                 <Button
                     type={"button"}
                     variant={"primary"}
-                    icon={faHeart}
-                    className={styles.favButton}
+                    icon={isFavourite? faHeart : emptyHeart}
+                    className={isFavourite? styles.favButtonEnabled: styles.favButtonDisabled}
                     onClick={handleFavourite}
                 />
-                <Button type={"button"} variant={"primary"} icon={faTrash}/>
-                <Button type={"button"} variant={"primary"} icon={faEdit}/>
+                {isAuthor && (
+                    <>
+                        <Button type={"button"} variant={"primary"} icon={faTrash}/>
+                        <Button type={"button"} variant={"primary"} icon={faEdit}/>
+                    </>)}
+
             </div>
             <div className={styles.ingredientsAndSteps}>
             <div className={styles.ingredients}>
