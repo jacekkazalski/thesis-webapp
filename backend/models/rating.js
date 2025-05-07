@@ -1,35 +1,41 @@
-'use strict';
-const {DataTypes} = require('sequelize');
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Rating extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
-  }
-  Rating.init({
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('Rating', {
     id_user: {
-      type:DataTypes.INTEGER,
-       primaryKey:true
-      },
-
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'User',
+        key: 'id_user'
+      }
+    },
     id_recipe: {
-      type:DataTypes.INTEGER,
-      primaryKey:true
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'Recipe',
+        key: 'id_recipe'
+      }
     },
     value: {
       type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {
-    sequelize,
-    modelName: 'Rating',
+    tableName: 'Rating',
+    schema: 'public',
+    timestamps: true,
+    indexes: [
+      {
+        name: "Rating_pkey",
+        unique: true,
+        fields: [
+          { name: "id_user" },
+          { name: "id_recipe" },
+        ]
+      },
+    ]
   });
-  return Rating;
 };

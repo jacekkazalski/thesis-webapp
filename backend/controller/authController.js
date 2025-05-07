@@ -1,5 +1,5 @@
 const sequelize = require('../config/database');
-const initModels = require('../models4/init-models');
+const initModels = require('../models/init-models');
 const {User} = initModels(sequelize);
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
