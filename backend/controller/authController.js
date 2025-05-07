@@ -147,6 +147,7 @@ const authenticateToken = (req, res, next) => {
         return next(new CustomError('Unauthorized', 401))
     }
     const token = authHeader.split(' ')[1]
+    console.log('tututut')
     console.log(token)
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         // Invalid/expired access token

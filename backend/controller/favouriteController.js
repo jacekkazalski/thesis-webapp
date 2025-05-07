@@ -1,4 +1,6 @@
-const favourite = require('../models/favourite');
+const sequelize = require('../config/database');
+const initModels = require('../models4/init-models');
+const { Favourite} = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
 
@@ -6,7 +8,7 @@ const toggleFavourite = catchAsync(async (req, res, next) => {
     const body = req.body;
     const authUser = req.user;
     // Check if favourite exists
-    const existingFavourite = await favourite.findOne({
+    const existingFavourite = await Favourite.findOne({
         where: {
             id_user: authUser.id,
             id_recipe: body.id_recipe
@@ -14,7 +16,7 @@ const toggleFavourite = catchAsync(async (req, res, next) => {
     });
     if (existingFavourite) {
         // If it exists, delete it
-        await favourite.destroy({
+        await Favourite.destroy({
             where: {
                 id_user: authUser.id,
                 id_recipe: body.id_recipe
@@ -27,7 +29,7 @@ const toggleFavourite = catchAsync(async (req, res, next) => {
         });
     }
     // If it doesn't exist, create it
-    const newFavourite = await favourite.create({
+    const newFavourite = await Favourite.create({
         id_user: authUser.id,
         id_recipe: body.id_recipe
     });
@@ -46,7 +48,7 @@ const isFavourite = catchAsync(async (req, res, next) => {
     if (!id_recipe) {
         return next(new CustomError('Missing required fields', 400));
     }
-    const favouriteRecipe = await favourite.findOne({
+    const favouriteRecipe = await Favourite.findOne({
         where: {
             id_user: authUser.id,
             id_recipe: id_recipe
