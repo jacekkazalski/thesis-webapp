@@ -1,24 +1,23 @@
-const {DataTypes} = require('sequelize');
-const sequelize =  require('../config/database');
-const Recipe = sequelize.define(
-  'Recipe',
-  {
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('Recipe', {
     id_recipe: {
-      allowNull: false,
       autoIncrement: true,
-      primaryKey: true,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     instructions: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
     },
     image_path: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING(255),
+      allowNull: true
     },
     added_by: {
       type: DataTypes.INTEGER,
@@ -26,13 +25,20 @@ const Recipe = sequelize.define(
       references: {
         model: 'User',
         key: 'id_user'
-      },
-    },
-  },
-  {
-    freezeTableName: true,
+      }
+    }
+  }, {
+    tableName: 'Recipe',
+    schema: 'public',
     timestamps: false,
-  }
-);
-
-module.exports = Recipe;
+    indexes: [
+      {
+        name: "Recipe_pkey",
+        unique: true,
+        fields: [
+          { name: "id_recipe" },
+        ]
+      },
+    ]
+  });
+};

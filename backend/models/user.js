@@ -1,53 +1,60 @@
-const {Sequelize, DataTypes} = require('sequelize');
-const sequelize =  require('../config/database');
-const Recipe = require('./recipe');
-
-const User = sequelize.define(
-    'User',
-    {
-      id_user: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: {
-          msg: 'Username already exists',
-        }
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: {
-          msg: 'Email already exists',
-        },
-        validate: {
-          isEmail: {
-            msg: 'Invalid email',
-          },
-        },
-      },
-      refresh_token: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      id_diet: {
-        type: DataTypes.INTEGER,
-      }
+const Sequelize = require('sequelize');
+module.exports = function(sequelize, DataTypes) {
+  return sequelize.define('User', {
+    id_user: {
+      autoIncrement: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
     },
-    {
-        freezeTableName: true,
-        timestamps: false,
+    username: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: "User_username_key"
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: "User_email_key"
+    },
+    refresh_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    id_diet: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
-    );
-
-User.hasMany(Recipe, {foreignKey: 'added_by'});
-Recipe.belongsTo(User, {foreignKey: 'added_by'});
-
-module.exports = User;
+  }, {
+    tableName: 'User',
+    schema: 'public',
+    timestamps: false,
+    indexes: [
+      {
+        name: "User_email_key",
+        unique: true,
+        fields: [
+          { name: "email" },
+        ]
+      },
+      {
+        name: "User_pkey",
+        unique: true,
+        fields: [
+          { name: "id_user" },
+        ]
+      },
+      {
+        name: "User_username_key",
+        unique: true,
+        fields: [
+          { name: "username" },
+        ]
+      },
+    ]
+  });
+};

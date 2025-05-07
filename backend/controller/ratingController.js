@@ -1,5 +1,5 @@
 const sequelize = require('../config/database');
-const initModels = require('../models4/init-models');
+const initModels = require('../models/init-models');
 const {Rating} = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');

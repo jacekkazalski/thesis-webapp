@@ -15,7 +15,9 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:5173',
+    // 5173 default port for Vite
+    // 5174 default port for Vite with https
+    origin: 'http://localhost:5174',
     credentials: true
 }))
 app.use('/images', express.static('images'));
