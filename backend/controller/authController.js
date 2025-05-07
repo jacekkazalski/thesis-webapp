@@ -1,4 +1,6 @@
-const user = require('../models/user')
+const sequelize = require('../config/database');
+const initModels = require('../models4/init-models');
+const {User} = initModels(sequelize);
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const catchAsync = require('../utils/catchAsync')
@@ -26,7 +28,7 @@ const signup = catchAsync(async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const newUser = await user.create({
+    const newUser = await User.create({
         username: username,
         email: email,
         password: hashedPassword,
@@ -57,7 +59,7 @@ const login = catchAsync(async (req, res, next) => {
         return next(new CustomError('Missing required fields', 400))
     }
 
-    const result = await user.findOne({
+    const result = await User.findOne({
         where: { email: email },
     })
     if (!result || !await bcrypt.compare(password, result.password)) {
@@ -93,7 +95,7 @@ const refresh = catchAsync(async (req, res, next) => {
         return next(new CustomError('Unauthorized', 401))
     }
     const refreshToken = cookies.jwt
-    const result = await user.findOne({
+    const result = await User.findOne({
         where: { refresh_token: refreshToken },
     })
     if(!result) {
@@ -119,7 +121,7 @@ const logout = catchAsync(async (req, res, next) => {
     }
     const refreshToken = cookies.jwt
     // Find refresh token in database
-    const result = await user.findOne({
+    const result = await User.findOne({
         where: { refresh_token: refreshToken },
     })
     if(!result) {
