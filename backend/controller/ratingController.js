@@ -12,7 +12,7 @@ const getUserRating = catchAsync(async (req, res, next) => {
     }
     const foundRating = await Rating.findOne({
         where: {
-            id_user: authUser.id_user,
+            id_user: authUser.id,
             id_recipe: id_recipe
         }
     });

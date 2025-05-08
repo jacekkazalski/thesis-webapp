@@ -1,4 +1,5 @@
 const sequelize = require('../config/database');
+const { Op, fn, col } = require('sequelize');
 const initModels = require('../models/init-models');
 const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating } = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
@@ -108,10 +109,10 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
     // Create a transaction to delete the recipe and its associated data
     const transaction = await Recipe.sequelize.transaction();
     try {
-        await Rating.destroy({where: { id_recipe: id_recipe }});
-        await Ingredient_recipe.destroy({where: { id_recipe: id_recipe },});
+        await Rating.destroy({ where: { id_recipe: id_recipe } });
+        await Ingredient_recipe.destroy({ where: { id_recipe: id_recipe }, });
         await Favourite.destroy({ where: { id_recipe: id_recipe } });
-        await Recipe.destroy({where: { id_recipe: id_recipe }});
+        await Recipe.destroy({ where: { id_recipe: id_recipe } });
 
         await transaction.commit();
 
@@ -125,22 +126,56 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
     }
 });
 const getAllRecipes = catchAsync(async (req, res, next) => {
+    const searchQuery = req.query.search || null;
+    const ingredients = req.query.ingredient || null;
+    console.log(ingredients);
+    // Newest: id_recipe desc, Oldest: id_recipe asc, Highest rating: rating desc, Most ingredients: ingredients desc
+    //TODO: Ingredient count is not working (mixed js and sql)
+    //TODO: Matching ingredients only
+    const allowedSortParams = ['id_recipe', 'name', 'rating', 'ingredients'];
+    const sortParam = allowedSortParams.includes(req.query.sort) ? req.query.sort : 'id_recipe';
+    const sortOrder = req.query.order === 'desc' ? 'DESC' : 'ASC';
     const recipes = await Recipe.findAll({
-        include: [{
-            model: User,
-            as: 'added_by_User',
-            attributes: ['username', 'id_user']
-        }],
-        attributes: ['id_recipe', 'name', 'image_path']
+        where: searchQuery ? { name: { [Op.iLike]: `%${searchQuery}%` } } : undefined,
+        include: [
+            {
+                model: User,
+                as: 'added_by_User',
+                attributes: ['username', 'id_user']
+            },
+            {
+                model: Rating,
+                as: 'Ratings',
+                attributes: [],
+
+            },
+            {
+                model: Ingredient_recipe,
+                as: 'Ingredient_recipes',
+                attributes: [],
+            }
+        ],
+        attributes: [
+            'id_recipe',
+            'name',
+            'image_path',
+            [fn('AVG', col('Ratings.value')), 'rating'],
+            [fn('COUNT', ingredients.includes( col('Ingredient_recipes.id_ingredient'))), 'ingredients']
+        ],
+        group: ['Recipe.id_recipe', 'added_by_User.id_user', 'Ingredient_recipes.id_recipe'],
+        order: [[sortParam, sortOrder]],
     });
 
     const recipesWithImage = recipes.map(recipe => {
+        //console.log(recipe.toJSON());
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
             image_url: recipe.image_path
                 ? `${req.protocol}://${req.get('host')}/${recipe.image_path}` : null,
             author: recipe.added_by_User,
+            rating: recipe.get('rating') ? parseFloat(recipe.get('rating')) : null,
+            ingredients: recipe.get('ingredients') ? parseInt(recipe.get('ingredients')) : null
         }
     });
     res.status(200).json({
