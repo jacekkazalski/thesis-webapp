@@ -7,12 +7,6 @@ const catchAsync = require('../utils/catchAsync')
 const CustomError = require('../utils/customError')
 require('dotenv').config()
 
-const generateToken = (payload) => {
-    return jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE_IN,
-    })
-}
-
 const signup = catchAsync(async (req, res, next) => {
     const { username, email, password, confirmPassword } = req.body;
 
