@@ -1,18 +1,29 @@
-import styles from "./LoginPage.module.css";
-import TextInput from "../components/common/TextInput.tsx";
-import Button from "../components/common/Button.tsx";
-import {useState} from "react";
-import {useNavigate} from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../api/axios.ts";
-import {AxiosError} from "axios";
-
+import { AxiosError } from "axios";
+import {
+    Box,
+    Button,
+    TextField,
+    Typography,
+    Paper,
+    Alert
+} from "@mui/material";
 
 export default function RegistrationPage() {
     return (
-        <div>
-            <RegistrationForm/>
-        </div>
-    )
+        <Box
+            sx={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
+            <RegistrationForm />
+        </Box>
+    );
 }
 
 function RegistrationForm() {
@@ -24,18 +35,17 @@ function RegistrationForm() {
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
 
-
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setError("");
 
-        if(password.length < 8) {
-            setError("Hasło musi mieć przynajmniej 8 znaków")
-            return
+        if (password.length < 8) {
+            setError("Hasło musi mieć przynajmniej 8 znaków");
+            return;
         }
-        if(password !== confirmPassword){
-            setError("Hasła nie zgadzają się")
-            return
+        if (password !== confirmPassword) {
+            setError("Hasła nie zgadzają się");
+            return;
         }
 
         try {
@@ -46,19 +56,19 @@ function RegistrationForm() {
                     confirmPassword: confirmPassword,
                     username: username,
                 }), {
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                 }
             );
-            setSuccess(true)
+            setSuccess(true);
         } catch (err) {
-            if(err instanceof AxiosError){
-                if(err.response?.data.message === "Email already exists") {
+            if (err instanceof AxiosError) {
+                if (err.response?.data.message === "Email already exists") {
                     setError("Email już istnieje");
                 }
-                else if(err.response?.data.message === "Username already exists") {
+                else if (err.response?.data.message === "Username already exists") {
                     setError("Zajęta nazwa użytkownika");
                 }
-                else if(err.response?.data.message === "Invalid email") {
+                else if (err.response?.data.message === "Invalid email") {
                     setError("Niepoprawny adres email");
                 }
                 else {
@@ -68,62 +78,97 @@ function RegistrationForm() {
                 setError("Rejestracja nieudana");
             }
         }
+    };
 
-
-    }
     return (
-        <>
+        <Box
+            component={Paper}
+            elevation={3}
+            sx={{
+                width: 320,
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+                borderRadius: 2,
+                border: "2px solid",
+            }}
+        >
             {success ? (
-                <div>
-                    <h2>Rejestracja udana</h2>
+                <>
+                    <Typography variant="h5" component="h2" gutterBottom>
+                        Rejestracja udana
+                    </Typography>
                     <Button
-                        text={"Zaloguj się"}
-                        type={"button"}
-                        variant={"primary"}
+                        variant="contained"
                         onClick={() => navigate("/login")}
-                    />
-                </div>) : (
-                <form className={styles['login-form']} onSubmit={handleSubmit}>
-                    <h2>Rejestracja</h2>
-                    {error && <p className={styles.errormsg}>{error}</p>}
-                    <TextInput
-                        label={"E-mail"}
-                        type={"text"}
-                        placeholder={"E-mail"}
+                        fullWidth
+                    >
+                        Zaloguj się
+                    </Button>
+                </>
+            ) : (
+                <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+                    <Typography variant="h5" component="h2" gutterBottom>
+                        Rejestracja
+                    </Typography>
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+                    <TextField
+                        label="E-mail"
+                        type="email"
+                        placeholder="E-mail"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        fullWidth
+                        autoFocus
+                        margin="normal"
                     />
-                    <TextInput
-                        label={"Nazwa użytkownika"}
-                        type={"text"}
-                        placeholder={"Nazwa użytkownika"}
+                    <TextField
+                        label="Nazwa użytkownika"
+                        type="text"
+                        placeholder="Nazwa użytkownika"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
+                        fullWidth
+                        margin="normal"
                     />
-                    <TextInput
-                        label={"Hasło"}
-                        type={"password"}
-                        placeholder={"Hasło"}
+                    <TextField
+                        label="Hasło"
+                        type="password"
+                        placeholder="Hasło"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        fullWidth
+                        margin="normal"
                     />
-                    <TextInput
-                        label={"Potwierdź hasło"}
-                        type={"password"}
-                        placeholder={"Potwierdź hasło"}
+                    <TextField
+                        label="Potwierdź hasło"
+                        type="password"
+                        placeholder="Potwierdź hasło"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
+                        fullWidth
+                        margin="normal"
                     />
-                    <Button variant={"primary"} text={"Zarejestruj"} type={"submit"}/>
-
-
-
-                </form>)}
-        </>
-
-    )
+                    <Button
+                        variant="contained"
+                        type="submit"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        Zarejestruj
+                    </Button>
+                </form>
+            )}
+        </Box>
+    );
 }

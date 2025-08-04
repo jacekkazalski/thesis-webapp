@@ -1,75 +1,92 @@
-import TextInput from "../common/TextInput.tsx";
-import Button from "../common/Button.tsx";
-import styles from "./NavBar.module.css";
-import {useNavigate} from "react-router-dom";
 import {
-    faArrowRightFromBracket,
-    faArrowRightToBracket,
-    faCookieBite,
-    faUserPen
-} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+    AppBar,
+    Toolbar,
+    Typography,
+    Button,
+    IconButton,
+    TextField,
+    Box
+} from '@mui/material';
+import { useNavigate } from "react-router-dom";
+import {Cookie, Logout, Login, Person, PersonAdd} from "@mui/icons-material";
 import useAuth from "../../hooks/useAuth.tsx";
-import {axiosCustom} from "../../api/axios.ts";
-import {faUser} from "@fortawesome/free-regular-svg-icons";
+import { axiosCustom } from "../../api/axios.ts";
 
-export default function NavBar(){
+export default function NavBar() {
     const navigate = useNavigate();
-    const {auth, setAuth} = useAuth();
+    const { auth, setAuth } = useAuth();
     const isAuthenticated = !!auth.accessToken;
+
     const handleLogout = async () => {
         try {
             await axiosCustom.get("/auth/logout");
             setAuth({});
-            // Timeout to avoid redirect to login page
             setTimeout(() => navigate('/'), 0);
             console.log(auth)
         } catch (error) {
             console.log(error)
         }
     }
-    return(
-        <div className={styles.navbar}>
-            <div className={styles.logo}>
-                <h2 onClick={() => navigate("/")}><FontAwesomeIcon icon={faCookieBite}/> Co w lodówce</h2>
-            </div>
-            <div className={styles.searchbar}>
-                <TextInput label={""} type={"text"} placeholder={"Szukaj..."}/>
-            </div>
-            {isAuthenticated ? (
-                <div className={styles.buttons}>
-                    <Button
-                        variant={"primary"}
-                        text={""+auth.username}
-                        icon={faUser}
-                        type={"button"}
-                        onClick={() => navigate('/user/')}/>
-                    <Button
-                        variant={"primary"}
-                        text={"Wyloguj"}
-                        icon={faArrowRightFromBracket}
-                        type={"button"}
-                        onClick={handleLogout}
-                        />
 
-                </div>
-            ) : (
-                <div className={styles.buttons}>
-                    <Button
-                        variant={"primary"}
-                        text={"Logowanie"}
-                        icon={faArrowRightToBracket}
-                        type={"button"}
-                        onClick={() => navigate('/login')}/>
-                    <Button
-                        variant={"primary"}
-                        text={"Rejestracja"}
-                        icon={faUserPen}
-                        type={"button"}
-                        onClick={() => navigate('/register')}/>
-                </div>
-            )}
-
-        </div>
-    )
+    return (
+        <AppBar position="static" color="default" elevation={2}>
+            <Toolbar>
+                <IconButton size="large"edge="start" color="inherit" onClick={() => navigate("/")}>
+                    <Cookie fontSize='inherit'/>
+                </IconButton>
+                <Typography
+                    variant="h6"
+                    color="inherit"
+                    sx={{ flexGrow: 1, cursor: 'pointer' }}
+                    onClick={() => navigate("/")}
+                >
+                    Co w lodówce
+                </Typography>
+                <Box sx={{ flexGrow: 2, mx: 2 }}>
+                    <TextField
+                        variant="outlined"
+                        size="small"
+                        placeholder="Szukaj..."
+                        fullWidth
+                    />
+                </Box>
+                {isAuthenticated ? (
+                    <>
+                        <Button
+                            variant='outlined'
+                            startIcon={<Person />}
+                            onClick={() => navigate('/user/')}
+                        >
+                            {auth.username}
+                        </Button>
+                        <Button
+                        variant='outlined'
+                            startIcon={<Logout />}
+                            onClick={handleLogout}
+                        >
+                            Wyloguj
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <Button
+                            variant='contained'
+                            startIcon={<Login />}
+                            onClick={() => navigate('/login')}
+                        >
+                            Zaloguj
+                        </Button>
+                        <Box sx={{mx:1}} />
+                        <Button
+                            variant='outlined'
+                            startIcon={<PersonAdd />}
+                            onClick={() => navigate('/register')}
+                        >
+                            Zarejestruj
+                        </Button>
+                    </>
+                )}
+            </Toolbar>
+        </AppBar>
+    );
 }

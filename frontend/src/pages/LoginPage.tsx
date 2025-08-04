@@ -1,82 +1,121 @@
-import TextInput from "../components/common/TextInput.tsx";
-import Button from "../components/common/Button.tsx";
-import styles from "./LoginPage.module.css"
-import React, {useState} from "react";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.tsx";
-import {useLocation, useNavigate} from "react-router-dom";
-import axios from "../api/axios.ts"
-import {AxiosError} from "axios";
+import axios from "../api/axios.ts";
+import { AxiosError } from "axios";
+import {
+    Box,
+    Button,
+    TextField,
+    Typography,
+    Paper,
+    Alert
+} from "@mui/material";
 
 export default function LoginPage() {
-    return(
-            <LoginForm/>
-    )
+    return <LoginForm />;
 }
 
-function LoginForm(){
-    const {setAuth} = useAuth();
-
+function LoginForm() {
+    const { setAuth } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || "/"
+    const from = location.state?.from?.pathname || "/";
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault()
-        setError("")
+        event.preventDefault();
+        setError("");
         try {
-            const response = await axios.post("/auth/login",
-                JSON.stringify({email, password}),
+            const response = await axios.post(
+                "/auth/login",
+                JSON.stringify({ email, password }),
                 {
-                    headers: {'Content-Type': 'application/json'},
-                    withCredentials: true
+                    headers: { "Content-Type": "application/json" },
+                    withCredentials: true,
                 }
-            )
+            );
             const accessToken = response?.data?.accessToken;
             const username = response?.data?.username;
-            setAuth({accessToken: accessToken, username: username, email: email})
-            setEmail('')
-            setPassword('')
-            navigate(from, {replace: true})
+            setAuth({ accessToken, username, email });
+            setEmail("");
+            setPassword("");
+            navigate(from, { replace: true });
         } catch (err) {
-            if(err instanceof AxiosError) {
+            if (err instanceof AxiosError) {
                 if (err.response?.data.message === "Invalid email or password") {
-                    setError("Błędny login lub hasło")
-                }
-                else {
-                    setError("Błąd logowania")
+                    setError("Błędny login lub hasło");
+                } else {
+                    setError("Błąd logowania");
                 }
             } else {
-                setError("Błąd logowania")
+                setError("Błąd logowania");
             }
         }
+    };
 
-    }
     return (
-        <form className={styles['login-form']} onSubmit={handleSubmit}>
-            <h2>Logowanie</h2>
-            {error && <p className={styles.errormsg}>{error}</p>}
-            <TextInput
-                label={"E-mail"}
-                type={"text"}
-                placeholder={"E-mail"}
+        <Box
+        sx={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+        }}
+    >
+        <Box
+            component={Paper}
+            elevation={3}
+            sx={{
+                width: 320,
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+            }}
+        >
+            <Typography variant="h5" component="h2" gutterBottom>
+                Logowanie
+            </Typography>
+            {error && (
+                <Alert severity="error" sx={{ width: "100%" }}>
+                    {error}
+                </Alert>
+            )}
+            <TextField
+                label="E-mail"
+                type="email"
+                placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                fullWidth
+                autoFocus
+                margin="normal"
             />
-            <TextInput
-                label={"Hasło"}
-                type={"password"}
-                placeholder={"Hasło"}
+            <TextField
+                label="Hasło"
+                type="password"
+                placeholder="Hasło"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                margin="normal"
+                fullWidth
             />
-            <Button variant={"primary"} text={"Zaloguj"} type={"submit"}/>
-
-        </form>
-    )
+            <Button
+                variant="contained"
+                type="submit"
+                fullWidth
+                onClick={handleSubmit}
+            >
+                Zaloguj
+            </Button>
+        </Box>
+    </Box>
+    );
 }
