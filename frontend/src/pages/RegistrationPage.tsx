@@ -91,8 +91,6 @@ function RegistrationForm() {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: 2,
-                borderRadius: 2,
-                border: "2px solid",
             }}
         >
             {success ? (
