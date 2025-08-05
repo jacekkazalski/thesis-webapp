@@ -1,37 +1,49 @@
-import styles from './Gallery.module.css'
-import Button from "./common/Button.tsx";
 import {useEffect, useState} from "react";
 import RecipeCard from "./common/RecipeCard.tsx";
 import axios from "../api/axios.ts";
 import {Recipe} from "../utils/types.ts";
-import {faList,faTable} from "@fortawesome/free-solid-svg-icons";
+import {Box, Grid, Stack, Button, MenuItem, Select, FormControl, FormHelperText} from "@mui/material";
 
 export default function Gallery(){
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [sortBy, setSortBy] = useState("rating")
     //TODO: Pagination
 
     useEffect(() => {
         const fetchRecipes = async () => {
-            const response = await axios.get("/recipes")
+            const response = await axios.get("/recipes", { params: { sortBy } });
             console.log(response.data.data)
             setRecipes(response.data.data)
         }
         fetchRecipes();
-    }, []);
+    }, [sortBy]);
     return(
-        <div className={styles.content}>
-            <div className={styles.options}>
-                <Button text={"Sortuj wg"} type={"button"} variant={"ingredient"}/>
-                Sposób wyświetlania:
-                <Button icon={faList} type={"button"} variant={"primary"} onClick={() => setViewType("list")}/>
-                <Button icon={faTable} type={"button"} variant={"primary"} onClick={() => setViewType("gallery")}/>
-            </div>
-            <div className={`${styles[viewType]}`}>
-                {recipes.map((recipe) => (<RecipeCard key={recipe.id_recipe} variant={viewType} recipe={recipe}/>))}
+        <Box>
+            <Box>
+                <Stack direction="row" spacing={1}>
+                    <FormControl size="small" sx={{ minWidth: 160 }}>
+                        <Select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            defaultValue="rating"
+                        >
+                            <MenuItem value="rating">Najwyżej oceniane</MenuItem>
+                            <MenuItem value="ingredients">Pasujące składniki</MenuItem>
+                            <MenuItem value="id_recipe">Najnowsze</MenuItem>
+                        </Select>
+                        <FormHelperText>Sortuj przepisy</FormHelperText>
+                    </FormControl>
+                </Stack>
+            </Box>
+            <Grid container spacing={2}>
+                {recipes.map((recipe) => (
+                    <Grid size={{xs: 12, sm:6, md: 4, lg: 3, xl: 2}} key={recipe.id_recipe}>
+                        <RecipeCard recipe={recipe}/>
+                    </Grid>
+                ))}
+            </Grid>
 
-            </div>
-
-        </div>
+        </Box>
     )
 }

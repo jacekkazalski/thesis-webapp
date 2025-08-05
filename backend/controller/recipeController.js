@@ -132,9 +132,9 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
     // Newest: id_recipe desc, Oldest: id_recipe asc, Highest rating: rating desc, Most ingredients: ingredients desc
     //TODO: Ingredient count is not working (mixed js and sql)
     //TODO: Matching ingredients only
-    const allowedSortParams = ['id_recipe', 'name', 'rating', 'ingredients'];
-    const sortParam = allowedSortParams.includes(req.query.sort) ? req.query.sort : 'id_recipe';
-    const sortOrder = req.query.order === 'desc' ? 'DESC' : 'ASC';
+    const allowedSortParams = ['id_recipe', 'rating', 'ingredients'];
+    const sortParam = allowedSortParams.includes(req.query.sortBy) ? req.query.sortBy : 'id_recipe';
+    var sortOrder = 'DESC';
     const recipes = await Recipe.findAll({
         where: searchQuery ? { name: { [Op.iLike]: `%${searchQuery}%` } } : undefined,
         include: [
@@ -159,13 +159,11 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
             'id_recipe',
             'name',
             'image_path',
-            [fn('AVG', col('Ratings.value')), 'rating'],
-            ingredients
-      ? [literal(`COUNT(CASE WHEN "Ingredient_recipes"."id_ingredient" IN (${ingredients.join(',')}) THEN 1 END)`), 'ingredients']
-      : [fn('COUNT', col('Ingredient_recipes.id_ingredient')), 'ingredients']
-        ],
+            [fn('AVG', col('Ratings.value')), 'rating'],],
         group: ['Recipe.id_recipe', 'added_by_User.id_user', 'Ingredient_recipes.id_recipe'],
-        order: [[sortParam, sortOrder]],
+        order: [sortParam === 'rating'
+        ? [literal('"rating" DESC NULLS LAST')]
+        : [sortParam, sortOrder]],
     });
 
     const recipesWithImage = recipes.map(recipe => {

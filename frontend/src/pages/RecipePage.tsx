@@ -16,6 +16,7 @@ export default function RecipePage() {
     const { recipeId } = useParams<{ recipeId: string }>();
     const [isFavourite, setIsFavourite] = useState(false);
     const [isAuthor, setIsAuthor] = useState(false);
+    const [userRating, setUserRating] = useState<number | null>(null);
 
     const navigate = useNavigate();
     const axiosCustom = useAxiosCustom();
@@ -39,6 +40,14 @@ export default function RecipePage() {
             await axiosCustom.delete(`/recipes/delete/`, { params: { id_recipe: recipeId } })
 
             navigate("/")
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    const handleRatingChange = async (newValue: number) => {
+        try {
+            await axiosCustom.post(`/ratings/add`,
+                JSON.stringify({ id_recipe: recipeId, value: newValue }))
         } catch (err) {
             console.log(err)
         }
@@ -107,7 +116,11 @@ export default function RecipePage() {
     
                         <Rating
                             name="recipe-rating"
-                        // TODO: implement rating
+                            value={userRating}
+                            onChange={(_event, newValue) => {
+                                setUserRating(newValue || 0);
+                                handleRatingChange(newValue || 0);
+                            }}
                         />
                         <Tooltip title={isFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}>
                             {/* TODO: fav colors */}

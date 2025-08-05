@@ -57,7 +57,7 @@ export default function NavBar() {
                 <NavButton
                     icon={Add}
                     text="Dodaj"
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/create")}
                 />
                 <NavButton
                     icon={Schedule}
