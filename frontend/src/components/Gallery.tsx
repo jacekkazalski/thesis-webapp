@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import RecipeCard from "./common/RecipeCard.tsx";
 import axios from "../api/axios.ts";
 import {Recipe} from "../utils/types.ts";
-import {Box, Grid, Stack, Button, MenuItem, Select, FormControl, FormHelperText} from "@mui/material";
+import {Box, Grid, Stack, MenuItem, Select, FormControl, FormHelperText} from "@mui/material";
 
 export default function Gallery(){
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")

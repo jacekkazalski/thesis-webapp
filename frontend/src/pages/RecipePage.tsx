@@ -4,8 +4,8 @@ import placeholderImg from "../assets/placeholder.png"
 import axios from '../api/axios.ts'
 import { Ingredient } from "../utils/types.ts";
 import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
-import { Box, Typography, IconButton, Paper, Button, Stack, Avatar, Tooltip, Rating, List, ListItem, ListItemText } from "@mui/material";
-import { Favorite, FavoriteBorder, Edit, Delete, Person } from "@mui/icons-material";
+import { Box, Typography, IconButton, Paper, Stack, Avatar, Tooltip, Rating, List, ListItem, ListItemText } from "@mui/material";
+import { Favorite, FavoriteBorder, Edit, Delete } from "@mui/icons-material";
 
 export default function RecipePage() {
     const [name, setName] = useState("");

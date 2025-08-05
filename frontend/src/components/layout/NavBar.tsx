@@ -3,7 +3,6 @@ import {
     Toolbar,
     Typography,
     Button,
-    IconButton,
     Collapse,
     TextField,
     Box,
@@ -12,7 +11,7 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-import {Kitchen, Logout, Login, Person, PersonAdd, HomeOutlined,Add, Schedule, CasinoOutlined, SearchOutlined, Preview} from "@mui/icons-material";
+import {Logout, Login, Person, PersonAdd, HomeOutlined,Add, Schedule, CasinoOutlined, SearchOutlined} from "@mui/icons-material";
 import useAuth from "../../hooks/useAuth.tsx";
 import { axiosCustom } from "../../api/axios.ts";
 import { useEffect, useRef, useState } from 'react';
