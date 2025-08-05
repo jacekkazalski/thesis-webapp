@@ -1,4 +1,5 @@
 import NavBar from "./NavBar.tsx";
+
 import {Outlet} from "react-router-dom";
 import styles from './Layout.module.css'
 

@@ -98,7 +98,13 @@ export default function RecipePage() {
                         {name}
                     </Typography>
                     <Stack direction="row" spacing={1} alignItems="center">
-                        <Avatar/>
+                        <Stack direction="row" spacing={1} alignItems="center" onClick={() => navigate(`/user/${author?.id_user}`)} sx={{ cursor: 'pointer' }}>
+                            <Avatar sx={{ bgcolor: 'secondary.main'}} />
+                            <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
+                                {author?.username || "Nieznany autor"}
+                            </Typography>
+                        </Stack>
+    
                         <Rating
                             name="recipe-rating"
                         // TODO: implement rating
