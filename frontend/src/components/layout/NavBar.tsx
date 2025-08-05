@@ -4,18 +4,28 @@ import {
     Typography,
     Button,
     IconButton,
+    Collapse,
     TextField,
-    Box
+    Box,
+    Stack,
+    useMediaQuery,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
-import {Cookie, Logout, Login, Person, PersonAdd} from "@mui/icons-material";
+import {Kitchen, Logout, Login, Person, PersonAdd, HomeOutlined,Add, Schedule, CasinoOutlined, SearchOutlined, Preview} from "@mui/icons-material";
 import useAuth from "../../hooks/useAuth.tsx";
 import { axiosCustom } from "../../api/axios.ts";
+import { useEffect, useRef, useState } from 'react';
 
 export default function NavBar() {
     const navigate = useNavigate();
     const { auth, setAuth } = useAuth();
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchValue, setSearchValue] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const isAuthenticated = !!auth.accessToken;
+    const theme = useTheme()
+    const isWide = useMediaQuery(theme.breakpoints.up('md'))
 
     const handleLogout = async () => {
         try {
@@ -27,67 +37,126 @@ export default function NavBar() {
             console.log(error)
         }
     }
+    useEffect(() => {
+        if (showSearch && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }
+    , [showSearch]);
 
     return (
-        <AppBar position="static" color="default" elevation={2}>
+        <AppBar position="static" elevation={3} color="default">
             <Toolbar>
-                <IconButton size="large"edge="start" color="inherit" onClick={() => navigate("/")}>
-                    <Cookie fontSize='inherit'/>
-                </IconButton>
-                <Typography
-                    variant="h6"
-                    color="inherit"
-                    sx={{ flexGrow: 1, cursor: 'pointer' }}
+                <Stack direction="row">
+                    {/* Logo or Title */}
+                <NavButton
+                    icon={HomeOutlined}
+                    text="Główna"
                     onClick={() => navigate("/")}
+                />
+                <NavButton
+                    icon={Add}
+                    text="Dodaj"
+                    onClick={() => navigate("/")}
+                />
+                <NavButton
+                    icon={Schedule}
+                    text="Nowe"
+                    onClick={() => navigate("/")}
+                />
+                <NavButton
+                    icon={CasinoOutlined}
+                    text="Losuj"
+                    onClick={() => navigate("/")}
+                />
+              
+                <Box
+                    display="flex"
+                    alignItems="center"
                 >
-                    Co w lodówce
-                </Typography>
-                <Box sx={{ flexGrow: 2, mx: 2 }}>
-                    <TextField
-                        variant="outlined"
-                        size="small"
-                        placeholder="Szukaj..."
-                        fullWidth
-                    />
+                   {isWide ? (
+                            <TextField
+                                variant="outlined"
+                                inputRef={searchInputRef}
+                                size="small"
+                                placeholder="Szukaj..."
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                                sx={{ width: '100%' }}
+                            />
+                        ) : (
+                            <>
+                              <NavButton
+                    icon={SearchOutlined}
+                    text="Szukaj"
+                    onClick={() => setShowSearch((prev: any) => !prev)}
+                />
+                             <Collapse in={showSearch} orientation='horizontal' sx={{ width: '100%' }}>
+                                <TextField
+                                    variant="outlined"
+                                    inputRef={searchInputRef}
+                                    size="small"
+                                    placeholder="Szukaj..."
+                                    value={searchValue}
+                                    onChange={(e) => setSearchValue(e.target.value)}
+                                    sx={{ width: '100%' }}
+                                />
+                            </Collapse>
+                            </>
+                           
+                        )}
                 </Box>
-                {isAuthenticated ? (
-                    <>
-                        <Button
-                            variant='outlined'
-                            startIcon={<Person />}
-                            onClick={() => navigate('/user/')}
-                        >
-                            {auth.username}
-                        </Button>
-                        <Box sx={{mx:1}} />
-                        <Button
-                        variant='outlined'
-                            startIcon={<Logout />}
-                            onClick={handleLogout}
-                        >
-                            Wyloguj
-                        </Button>
-                    </>
-                ) : (
-                    <>
-                        <Button
-                            variant='contained'
-                            startIcon={<Login />}
-                            onClick={() => navigate('/login')}
-                        >
-                            Zaloguj
-                        </Button>
-                        <Box sx={{mx:1}} />
-                        <Button
-                            variant='outlined'
-                            startIcon={<PersonAdd />}
-                            onClick={() => navigate('/register')}
-                        >
-                            Zarejestruj
-                        </Button>
-                    </>
-                )}
+            </Stack>
+           <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
+    {isAuthenticated ? (
+        <>
+            <NavButton
+                icon={Person}
+                text={auth.username ?? "Profil"}
+                onClick={() => navigate('/user/')}
+            />
+            <NavButton
+                icon={Logout}
+                text="Wyloguj"
+                onClick={handleLogout}
+            />
+        </>
+    ) : (
+        <>
+            <NavButton
+                icon={Login}
+                text="Zaloguj"
+                onClick={() => navigate('/login')}
+            />
+            <NavButton
+                icon={PersonAdd}
+                text="Zarejestruj"
+                onClick={() => navigate('/register')}
+            />
+        </>
+    )}
+</Stack>
+               
             </Toolbar>
         </AppBar>
+    );
+}
+export function NavButton({icon: Icon, text, onClick}: {icon: React.ElementType, text: string, onClick: () => void}) {
+    return (
+        <Button
+            onClick={onClick}
+            color="primary"
+            sx={{
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                py: 1,
+            }}
+        >
+            <Icon sx={{ fontSize: 25 }} />
+            <Typography variant="caption" sx={{ textTransform: 'none', fontSize: 12 }}>
+                {text}
+            </Typography>
+        </Button>
     );
 }
