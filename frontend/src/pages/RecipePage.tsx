@@ -1,23 +1,19 @@
-import styles from './RecipePage.module.css'
-import Button from "../components/common/Button.tsx";
-import {useNavigate, useParams} from "react-router-dom";
-import {useEffect, useState} from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import placeholderImg from "../assets/placeholder.png"
 import axios from '../api/axios.ts'
-import {faEdit, faHeart, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {faStar, faUser} from "@fortawesome/free-regular-svg-icons";
-import {faHeart as  emptyHeart} from "@fortawesome/free-regular-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {Ingredient} from "../utils/types.ts";
+import { Ingredient } from "../utils/types.ts";
 import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
+import { Box, Typography, IconButton, Paper, Button, Stack, Avatar, Tooltip, Rating, List, ListItem, ListItemText } from "@mui/material";
+import { Favorite, FavoriteBorder, Edit, Delete, Person } from "@mui/icons-material";
 
 export default function RecipePage() {
     const [name, setName] = useState("");
     const [instructions, setInstructions] = useState("");
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-    const [author, setAuthor] = useState<{username: string, id_user: number}>()
+    const [author, setAuthor] = useState<{ username: string, id_user: number }>()
     const [imageUrl, setImageUrl] = useState<string | null>(null);
-    const {recipeId} = useParams<{ recipeId: string }>();
+    const { recipeId } = useParams<{ recipeId: string }>();
     const [isFavourite, setIsFavourite] = useState(false);
     const [isAuthor, setIsAuthor] = useState(false);
 
@@ -27,7 +23,7 @@ export default function RecipePage() {
     const handleFavourite = async () => {
         try {
             const response = await axiosCustom.post(`/favourites/toggle`,
-                JSON.stringify({id_recipe: recipeId}))
+                JSON.stringify({ id_recipe: recipeId }))
             setIsFavourite(response.data.isFavourite)
         } catch (err) {
             console.log(err)
@@ -40,7 +36,7 @@ export default function RecipePage() {
         if (!confirmed) return;
 
         try {
-            await axiosCustom.delete(`/recipes/delete/`, {params: {id_recipe: recipeId}})
+            await axiosCustom.delete(`/recipes/delete/`, { params: { id_recipe: recipeId } })
 
             navigate("/")
         } catch (err) {
@@ -51,16 +47,16 @@ export default function RecipePage() {
 
     useEffect(() => {
         const checkIfFavourite = async () => {
-            try{
-                const response = await axiosCustom.get('/favourites/check', { params: { id_recipe: recipeId }})
+            try {
+                const response = await axiosCustom.get('/favourites/check', { params: { id_recipe: recipeId } })
                 setIsFavourite(response.data.isFavourite)
             } catch (err) {
                 console.log(err)
             }
         }
         const checkIfAuthor = async () => {
-            try{
-                const response = await axiosCustom.get('/recipes/author/check', { params: { id_recipe: recipeId }})
+            try {
+                const response = await axiosCustom.get('/recipes/author/check', { params: { id_recipe: recipeId } })
                 setIsAuthor(response.data.isAuthor)
             } catch (err) {
                 console.log(err)
@@ -84,59 +80,79 @@ export default function RecipePage() {
         checkIfAuthor();
 
     }, [recipeId]);
-    return(
-        <div className={styles.content}>
-            <img className={styles.banner} src={imageUrl || placeholderImg} alt="example photo"/>
-            <div className={styles.info}>
-
-                <h1>{name}</h1>
-                <Button
-                    text={"" + author?.username}
-                    icon={faUser}
-                    type={"button"}
-                    variant={"hyperlink"}
-                    onClick={() => navigate(`user/${author?.id_user}`)}
+    return (
+        <Box sx={{ width: '80%', p: 2, alignContent: 'center', mx: 'auto' }}>
+            <Paper elevation={3} sx={{ overflow: 'hidden', mb: 2 }}>
+                <Box
+                    component="img"
+                    src={imageUrl || placeholderImg}
+                    alt="recipe photo"
+                    sx={{
+                        width: '100%',
+                        objectFit: 'cover',
+                        height: { xs: 200, md: 300 }
+                    }}
                 />
-                <div>
-                    <FontAwesomeIcon icon={faStar}/>
-                    <FontAwesomeIcon icon={faStar}/>
-                    <FontAwesomeIcon icon={faStar}/>
-                    <FontAwesomeIcon icon={faStar}/>
-                    <FontAwesomeIcon icon={faStar}/>
-                </div>
-                <Button
-                    type={"button"}
-                    variant={"primary"}
-                    icon={isFavourite? faHeart : emptyHeart}
-                    className={isFavourite? styles.favButtonEnabled: styles.favButtonDisabled}
-                    onClick={handleFavourite}
-                />
-                {isAuthor && (
-                    <>
-                        <Button
-                            type={"button"}
-                            variant={"primary"}
-                            icon={faTrash}
-                            onClick={handleDelete}
+                <Box sx={{ p: 2 }}>
+                    <Typography variant='h4' sx={{ flexGrow: 1, mb: 1 }}>
+                        {name}
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar/>
+                        <Rating
+                            name="recipe-rating"
+                        // TODO: implement rating
                         />
-                        <Button type={"button"} variant={"primary"} icon={faEdit}/>
-                    </>)}
+                        <Tooltip title={isFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}>
+                            {/* TODO: fav colors */}
+                            <IconButton onClick={handleFavourite}>
 
-            </div>
-            <div className={styles.ingredientsAndSteps}>
-            <div className={styles.ingredients}>
-                    {ingredients.map((ingredient) => (
-                        <div className={styles.ingredientRow} key={ingredient.id_ingredient}>
-                            {ingredient.name} {ingredient.quantity}
-                        </div>
-                    ))}
-                </div>
-                <div className={styles.steps}>
-                    {instructions}
-                </div>
-            </div>
+                                {isFavourite ? <Favorite /> : <FavoriteBorder />}
+                            </IconButton>
+                        </Tooltip>
+                        {isAuthor && (
+                            <>
+                                <Tooltip title="Usuń przepis">
+                                    <IconButton onClick={handleDelete}>
+                                        <Delete />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Edytuj przepis">
+                                    <IconButton onClick={() => navigate(`/recipes/edit/${recipeId}`)}>
+                                        <Edit />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
+                    </Stack>
+                </Box>
+            </Paper>
+            <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={2}
+                sx={{ width: '100%' }}
+            >
+                <Paper elevation={2} sx={{flex: 1, p:2}}>
+                    <Typography variant="h6" gutterBottom>
+                        Składniki
+                    </Typography>
+                    <List >
+                        {ingredients.map((ingredient) => (
+                            <ListItem key={ingredient.id_ingredient}>
+                                <ListItemText primary={ingredient.name} secondary={ingredient.quantity} />
+                            </ListItem>
+                        ))}
+                    </List>
+                </Paper>
+                <Paper elevation={2} sx={{flex: 2, p:2}}>
+                    <Typography variant="h6" gutterBottom>
+                        Instrukcje
+                    </Typography>
+                    <Typography sx={{ whiteSpace: 'pre-line' }}>{instructions}</Typography>
+                </Paper>
+            </Stack>
 
 
-        </div>
+        </Box>
     )
 }

@@ -9,7 +9,7 @@ export default function MainLayout() {
         <div className={styles.layout}>
             <NavBar/>
             <div className={styles.content}>
-                <Sidebar/>
+                {/* <Sidebar/> */}
                 <div className={styles.children}>
                     <Outlet/>
                 </div>

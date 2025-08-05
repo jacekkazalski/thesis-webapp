@@ -59,6 +59,7 @@ export default function NavBar() {
                         >
                             {auth.username}
                         </Button>
+                        <Box sx={{mx:1}} />
                         <Button
                         variant='outlined'
                             startIcon={<Logout />}
