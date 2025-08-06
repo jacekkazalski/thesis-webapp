@@ -1,15 +1,14 @@
 import NavBar from "./NavBar.tsx";
 
 import {Outlet} from "react-router-dom";
-import styles from './Layout.module.css'
 
 
 export default function MainLayout() {
     return(
-        <div className={styles.layout}>
+        <div>
             <NavBar/>
-            <div className={styles.content}>
-                <div className={styles.children}>
+            <div >
+                <div >
                     <Outlet/>
                 </div>
             </div>
