@@ -13,7 +13,16 @@ import {
 } from "@mui/material";
 
 export default function LoginPage() {
-    return <LoginForm />;
+    return <Box
+        sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            mt: 8
+    }}
+    >
+        <LoginForm/>
+    </Box>;
 }
 
 function LoginForm() {
@@ -58,14 +67,6 @@ function LoginForm() {
     };
 
     return (
-        <Box
-        sx={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        }}
-    >
         <Box
             component={Paper}
             elevation={3}
@@ -116,6 +117,5 @@ function LoginForm() {
                 Zaloguj
             </Button>
         </Box>
-    </Box>
     );
 }
