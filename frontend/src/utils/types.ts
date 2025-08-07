@@ -3,11 +3,12 @@ export interface Recipe {
   name: string;
   instructions: string;
   image_url?: string;
-  rating: number;
+  rating?: number;
   author: {
     username: string;
     id_user: number;
   };
+  ingredients: Ingredient[];
 }
 export interface AuthState {
   email?: string;

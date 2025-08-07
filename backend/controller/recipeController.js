@@ -20,6 +20,12 @@ const getRecipe = catchAsync(async (req, res, next) => {
         where: { id_user: foundRecipe.added_by },
         attributes: ['id_user', 'username']
     });
+    const rating = await Rating.findOne({
+        where: { id_recipe: id_recipe },
+        attributes: [[fn('AVG', col('value')), 'averageRating']]
+    });
+
+    const ratingParameter = rating ? parseFloat(rating.get('averageRating')) : null;
     const ingredients = await Ingredient_recipe.findAll({
         where: { id_recipe: id_recipe },
         include: [{
@@ -42,7 +48,8 @@ const getRecipe = catchAsync(async (req, res, next) => {
         instructions: foundRecipe.instructions,
         image_url: foundRecipe.image_path ? `${req.protocol}://${req.get('host')}/${foundRecipe.image_path}` : null,
         ingredients: ingredientsMapped,
-        author: author
+        author: author,
+        rating: ratingParameter
     });
 });
 const createRecipe = catchAsync(async (req, res, next) => {

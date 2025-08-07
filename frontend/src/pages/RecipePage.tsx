@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import placeholderImg from "../assets/placeholder.png";
 import axios from "../api/axios";
-import { Ingredient } from "../utils/types";
+import { Ingredient, Recipe } from "../utils/types";
 import useAxiosCustom from "../hooks/useAxiosCustom";
 import {
   Box,
@@ -26,11 +26,7 @@ import { Favorite, FavoriteBorder, Edit, Delete } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
 
 export default function RecipePage() {
-  const [name, setName] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [author, setAuthor] = useState<{ username: string; id_user: number }>();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
   const { recipeId } = useParams<{ recipeId: string }>();
   const [isFavourite, setIsFavourite] = useState(false);
   const [isAuthor, setIsAuthor] = useState(false);
@@ -115,12 +111,7 @@ export default function RecipePage() {
           id_recipe: recipeId,
         },
       });
-
-      setName(response.data.name);
-      setInstructions(response.data.instructions);
-      setIngredients(response.data.ingredients);
-      setAuthor(response.data.author);
-      setImageUrl(response.data.image_url);
+      setRecipe(response.data);
     };
     fetchRecipe();
     checkIfFavourite();
@@ -149,7 +140,7 @@ export default function RecipePage() {
       <Paper elevation={3} sx={{ overflow: "hidden", mb: 2 }}>
         <Box
           component="img"
-          src={imageUrl || placeholderImg}
+          src={recipe?.image_url || placeholderImg}
           alt="recipe photo"
           sx={{
             width: "100%",
@@ -159,29 +150,33 @@ export default function RecipePage() {
         />
         <Box sx={{ p: 2 }}>
           <Typography variant="h4" sx={{ flexGrow: 1, mb: 1 }}>
-            {name}
+            {recipe.name}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Stack
               direction="row"
               spacing={1}
               alignItems="center"
-              onClick={() => navigate(`/user/${author?.id_user}`)}
+              onClick={() => navigate(`/user/${recipe.author?.id_user}`)}
               sx={{ cursor: "pointer" }}
             >
               <Avatar sx={{ bgcolor: "secondary.main" }} />
               <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
-                {author?.username || "Nieznany autor"}
+                {recipe.author?.username || "Nieznany autor"}
               </Typography>
             </Stack>
+            <Stack>
+              <Typography variant="caption">Twoja ocena</Typography>
+              <Rating
+                name="recipe-rating"
+                value={userRating}
+                onChange={(_event, newValue) => {
+                  handleRatingChange(newValue || 0);
+                }}
+              />
+            </Stack>
+            <Typography>{recipe?.rating}</Typography>
 
-            <Rating
-              name="recipe-rating"
-              value={userRating}
-              onChange={(_event, newValue) => {
-                handleRatingChange(newValue || 0);
-              }}
-            />
             <Tooltip
               title={isFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
             >
@@ -219,7 +214,7 @@ export default function RecipePage() {
             Składniki
           </Typography>
           <List>
-            {ingredients.map((ingredient) => (
+            {recipe.ingredients.map((ingredient) => (
               <ListItem key={ingredient.id_ingredient}>
                 <ListItemText
                   primary={ingredient.name}
@@ -234,7 +229,7 @@ export default function RecipePage() {
             Instrukcje
           </Typography>
           <Typography sx={{ whiteSpace: "pre-line" }}>
-            {instructions}
+            {recipe.instructions}
           </Typography>
         </Paper>
       </Stack>
