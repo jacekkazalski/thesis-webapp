@@ -10,7 +10,6 @@ import {
   IconButton,
   Paper,
   Stack,
-  Avatar,
   Tooltip,
   Rating,
   List,
@@ -22,8 +21,15 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import { Favorite, FavoriteBorder, Edit, Delete } from "@mui/icons-material";
+import {
+  Favorite,
+  FavoriteBorder,
+  Edit,
+  Delete,
+  PersonOutlineOutlined,
+} from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
+import { NavButton } from "../components/layout/NavBar";
 
 export default function RecipePage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -159,55 +165,70 @@ export default function RecipePage() {
           <Typography variant="h4" sx={{ flexGrow: 1, mb: 1 }}>
             {recipe?.name}
           </Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              onClick={() => navigate(`/user/${recipe?.author?.id_user}`)}
-              sx={{ cursor: "pointer" }}
-            >
-              <Avatar sx={{ bgcolor: "secondary.main" }} />
-              <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
-                {recipe?.author?.username || "Nieznany autor"}
-              </Typography>
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            // justifyContent="space-between"
+            sx={{
+              flexWrap: "wrap",
+              gap: 2,
+            }}
+          >
+            <Stack direction="row">
+              {/*<Typography variant="caption">Autor</Typography>*/}
+              <NavButton
+                icon={PersonOutlineOutlined}
+                text={recipe?.author?.username || ""}
+                onClick={() => navigate(`/user/${recipe?.author?.id_user}`)}
+              />
+              <Tooltip
+                title={
+                  isFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych"
+                }
+              >
+                <IconButton onClick={handleFavourite}>
+                  {isFavourite ? (
+                    <Favorite color="secondary" />
+                  ) : (
+                    <FavoriteBorder />
+                  )}
+                </IconButton>
+              </Tooltip>
+              {isAuthor && (
+                <>
+                  <Tooltip title="Usuń przepis">
+                    <IconButton onClick={handleDelete}>
+                      <Delete color="error" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Edytuj przepis">
+                    <IconButton
+                      onClick={() => navigate(`/recipes/edit/${recipeId}`)}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
             </Stack>
+
             <Stack>
-              <Typography variant="caption">Twoja ocena</Typography>
+              <Typography variant="overline">
+                Twoja ocena {userRating ?? "Brak"}
+              </Typography>
               <Rating
                 name="recipe-rating"
-                value={userRating}
+                value={userRating ?? 0}
                 onChange={(_event, newValue) => {
                   handleRatingChange(newValue || 0);
                 }}
               />
             </Stack>
-            <Typography>{recipe?.rating}</Typography>
-
-            <Tooltip
-              title={isFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
-            >
-              {/* TODO: fav colors */}
-              <IconButton onClick={handleFavourite}>
-                {isFavourite ? <Favorite /> : <FavoriteBorder />}
-              </IconButton>
-            </Tooltip>
-            {isAuthor && (
-              <>
-                <Tooltip title="Usuń przepis">
-                  <IconButton onClick={handleDelete}>
-                    <Delete />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Edytuj przepis">
-                  <IconButton
-                    onClick={() => navigate(`/recipes/edit/${recipeId}`)}
-                  >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
+            <Stack>
+              <Typography variant="overline">Średnia ocen</Typography>
+              <Rating readOnly value={recipe?.rating} />
+            </Stack>
           </Stack>
         </Box>
       </Paper>
