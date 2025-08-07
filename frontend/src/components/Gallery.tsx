@@ -3,10 +3,19 @@ import RecipeCard from "./common/RecipeCard.tsx";
 import axios from "../api/axios.ts";
 import {Ingredient, Recipe} from "../utils/types.ts";
 import {
-    Box, Grid, Stack, MenuItem, Select, FormControl, FormHelperText, ToggleButtonGroup,
-    ToggleButton, Tooltip, Autocomplete, TextField
+    Box,
+    FormControl,
+    FormHelperText,
+    Grid,
+    MenuItem,
+    Select,
+    Stack,
+    ToggleButton,
+    ToggleButtonGroup,
+    Tooltip
 } from "@mui/material";
 import {FormatListBulleted, ViewModule} from "@mui/icons-material";
+import {IngredientMultiSelect} from "./IngredientMultiSelect.tsx";
 
 export default function Gallery() {
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")
@@ -68,7 +77,7 @@ export default function Gallery() {
                     {/*<Button variant="contained" color="secondary">Szukaj</Button>*/}
                 </Stack>
             </Stack>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} p={2}>
                 {recipes.map((recipe) => (
                     <Grid size={{xs: 12, sm: 6, md: 4, lg: 3, xl: 2}} key={recipe.id_recipe}>
                         <RecipeCard recipe={recipe}/>
@@ -81,43 +90,3 @@ export default function Gallery() {
 }
 
 
-interface IngredientMultiSelectProps {
-    options: Ingredient[];
-    value: Ingredient[];
-    onChange: (value: Ingredient[]) => void;
-    label?: string;
-    placeholder?: string;
-}
-
-//TODO: add ingredient categories to autocomplete, once added to the data base
-function IngredientMultiSelect({
-                                   options,
-                                   value,
-                                   onChange,
-                                   label = "Wybierz składniki",
-                                   placeholder = "Wyszukaj składnik"
-                               }: IngredientMultiSelectProps) {
-    return (
-        <Autocomplete
-            multiple
-            filterSelectedOptions
-            renderInput={(params) =>
-                (<TextField {...params} label={label} placeholder={placeholder}/>)}
-            options={options}
-            getOptionLabel={(option) => option.name}
-            value={value}
-            onChange={(_, newValue) => onChange(newValue)}
-            sx={{width: "80%"}}
-            // renderValue={(selected, getItemProps) =>
-            //     selected.map((option, index) => (
-            //         <Chip
-            //             label={option.name}
-            //             {...getItemProps({index})}
-            //             key={option.id_ingredient}
-            //         />
-            //     ))
-            //}
-        />
-    )
-
-}
