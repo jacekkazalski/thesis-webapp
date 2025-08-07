@@ -16,8 +16,14 @@ import {
   List,
   ListItem,
   ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import { Favorite, FavoriteBorder, Edit, Delete } from "@mui/icons-material";
+import useAuth from "../hooks/useAuth";
 
 export default function RecipePage() {
   const [name, setName] = useState("");
@@ -29,11 +35,17 @@ export default function RecipePage() {
   const [isFavourite, setIsFavourite] = useState(false);
   const [isAuthor, setIsAuthor] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { auth } = useAuth();
 
   const navigate = useNavigate();
   const axiosCustom = useAxiosCustom();
 
   const handleFavourite = async () => {
+    if (!auth.accessToken) {
+      setIsModalOpen(true);
+      return;
+    }
     try {
       const response = await axiosCustom.post(
         `/favourites/toggle`,
@@ -60,6 +72,11 @@ export default function RecipePage() {
     }
   };
   const handleRatingChange = async (newValue: number) => {
+    if (!auth.accessToken) {
+      setIsModalOpen(true);
+      return;
+    }
+
     try {
       await axiosCustom.post(
         `/ratings/add`,
@@ -68,6 +85,7 @@ export default function RecipePage() {
     } catch (err) {
       console.log(err);
     }
+    setUserRating(newValue);
   };
 
   useEffect(() => {
@@ -110,6 +128,24 @@ export default function RecipePage() {
   }, [recipeId, axiosCustom]);
   return (
     <Box sx={{ width: "80%", p: 2, alignContent: "center", mx: "auto" }}>
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <DialogTitle>Musisz się zalogować</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Ta akcja jest dostępna tylko dla zalogowanych użytkowników.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsModalOpen(false)}>Anuluj</Button>
+          <Button
+            onClick={() =>
+              navigate("/login", { state: { from: `/recipe/${recipeId}` } })
+            }
+          >
+            Zaloguj się
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Paper elevation={3} sx={{ overflow: "hidden", mb: 2 }}>
         <Box
           component="img"
@@ -143,7 +179,6 @@ export default function RecipePage() {
               name="recipe-rating"
               value={userRating}
               onChange={(_event, newValue) => {
-                setUserRating(newValue || 0);
                 handleRatingChange(newValue || 0);
               }}
             />
