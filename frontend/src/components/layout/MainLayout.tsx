@@ -1,17 +1,16 @@
 import NavBar from "./NavBar.tsx";
 
-import {Outlet} from "react-router-dom";
-
+import { Outlet } from "react-router-dom";
 
 export default function MainLayout() {
-    return(
+  return (
+    <div>
+      <NavBar />
+      <div>
         <div>
-            <NavBar/>
-            <div >
-                <div >
-                    <Outlet/>
-                </div>
-            </div>
+          <Outlet />
         </div>
-    )
+      </div>
+    </div>
+  );
 }

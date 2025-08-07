@@ -1,8 +1,8 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App'
-import './index.css'
-import {ThemeProvider, createTheme} from '@mui/material/styles'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 // const theme = createTheme({
 //   palette: {
@@ -25,8 +25,8 @@ import {ThemeProvider, createTheme} from '@mui/material/styles'
 //   },
 // });
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-      <App />
+    <App />
   </StrictMode>,
-)
+);
