@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import placeholderImg from "../assets/placeholder.png";
 import axios from "../api/axios";
-import { Ingredient, Recipe } from "../utils/types";
+import { Recipe } from "../utils/types";
 import useAxiosCustom from "../hooks/useAxiosCustom";
 import {
   Box,
@@ -113,9 +113,16 @@ export default function RecipePage() {
       });
       setRecipe(response.data);
     };
+    const checkUserRating = async () => {
+      const response = await axiosCustom.get(
+        `/ratings/user?id_recipe=${recipeId}`,
+      );
+      setUserRating(response.data.rating);
+    };
     fetchRecipe();
     checkIfFavourite();
     checkIfAuthor();
+    checkUserRating();
   }, [recipeId, axiosCustom]);
   return (
     <Box sx={{ width: "80%", p: 2, alignContent: "center", mx: "auto" }}>
@@ -150,19 +157,19 @@ export default function RecipePage() {
         />
         <Box sx={{ p: 2 }}>
           <Typography variant="h4" sx={{ flexGrow: 1, mb: 1 }}>
-            {recipe.name}
+            {recipe?.name}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Stack
               direction="row"
               spacing={1}
               alignItems="center"
-              onClick={() => navigate(`/user/${recipe.author?.id_user}`)}
+              onClick={() => navigate(`/user/${recipe?.author?.id_user}`)}
               sx={{ cursor: "pointer" }}
             >
               <Avatar sx={{ bgcolor: "secondary.main" }} />
               <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
-                {recipe.author?.username || "Nieznany autor"}
+                {recipe?.author?.username || "Nieznany autor"}
               </Typography>
             </Stack>
             <Stack>
@@ -214,7 +221,7 @@ export default function RecipePage() {
             Składniki
           </Typography>
           <List>
-            {recipe.ingredients.map((ingredient) => (
+            {recipe?.ingredients.map((ingredient) => (
               <ListItem key={ingredient.id_ingredient}>
                 <ListItemText
                   primary={ingredient.name}
@@ -229,7 +236,7 @@ export default function RecipePage() {
             Instrukcje
           </Typography>
           <Typography sx={{ whiteSpace: "pre-line" }}>
-            {recipe.instructions}
+            {recipe?.instructions}
           </Typography>
         </Paper>
       </Stack>
