@@ -9,6 +9,7 @@ import {
   Typography,
   Paper,
   Alert,
+  Link,
 } from "@mui/material";
 
 export default function RegistrationPage() {
@@ -80,18 +81,7 @@ function RegistrationForm() {
   };
 
   return (
-    <Box
-      component={Paper}
-      elevation={3}
-      sx={{
-        width: 320,
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
+    <Box>
       {success ? (
         <>
           <Typography variant="h5" component="h2" gutterBottom>
@@ -106,7 +96,18 @@ function RegistrationForm() {
           </Button>
         </>
       ) : (
-        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        <Box
+          component={Paper}
+          elevation={3}
+          sx={{
+            width: 320,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
           <Typography variant="h5" component="h2" gutterBottom>
             Rejestracja
           </Typography>
@@ -156,10 +157,18 @@ function RegistrationForm() {
             fullWidth
             margin="normal"
           />
-          <Button variant="contained" type="submit" fullWidth sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            fullWidth
+            sx={{ mt: 2 }}
+          >
             Zarejestruj
           </Button>
-        </form>
+          <Link href={"/login"} variant="body2" underline="hover">
+            Masz już konto? Zaloguj się
+          </Link>
+        </Box>
       )}
     </Box>
   );

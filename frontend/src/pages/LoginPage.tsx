@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth.tsx";
-import axios from "../api/axios.ts";
+import useAuth from "../hooks/useAuth";
+import axios from "../api/axios";
 import { AxiosError } from "axios";
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Typography,
   Paper,
   Alert,
+  Link,
 } from "@mui/material";
 
 export default function LoginPage() {
@@ -31,7 +32,7 @@ function LoginForm() {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from || "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -118,6 +119,9 @@ function LoginForm() {
       >
         Zaloguj
       </Button>
+      <Link href={"/register"} variant="body2" underline="hover">
+        Nie masz konta? Zarejestruj się
+      </Link>
     </Box>
   );
 }
