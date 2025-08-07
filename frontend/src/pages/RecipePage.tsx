@@ -1,9 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import placeholderImg from "../assets/placeholder.png"
-import axios from '../api/axios.ts'
-import { Ingredient } from "../utils/types.ts";
-import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
+import axios from '../api/axios'
+import { Ingredient } from "../utils/types";
+import useAxiosCustom from "../hooks/useAxiosCustom";
 import { Box, Typography, IconButton, Paper, Stack, Avatar, Tooltip, Rating, List, ListItem, ListItemText } from "@mui/material";
 import { Favorite, FavoriteBorder, Edit, Delete } from "@mui/icons-material";
 
@@ -88,7 +88,7 @@ export default function RecipePage() {
         checkIfFavourite();
         checkIfAuthor();
 
-    }, [recipeId]);
+    }, [recipeId, axiosCustom]);
     return (
         <Box sx={{ width: '80%', p: 2, alignContent: 'center', mx: 'auto' }}>
             <Paper elevation={3} sx={{ overflow: 'hidden', mb: 2 }}>

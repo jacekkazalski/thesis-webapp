@@ -1,6 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axios.ts";
+import axios from "../api/axios";
 import { AxiosError } from "axios";
 import {
     Box,

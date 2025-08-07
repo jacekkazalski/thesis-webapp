@@ -1,8 +1,8 @@
-import useAxiosCustom from "../hooks/useAxiosCustom.tsx";
+import useAxiosCustom from "../hooks/useAxiosCustom";
 import {useLocation, useNavigate} from "react-router-dom";
 import React, {ChangeEvent, useEffect, useState} from "react";
 import {AxiosError} from "axios";
-import {Ingredient} from "../utils/types.ts";
+import {Ingredient} from "../utils/types";
 import {
     Box,
     Paper,
@@ -13,7 +13,7 @@ import {
     IconButton, Tooltip, Chip, Grid
 } from "@mui/material";
 import {Delete, UploadFile} from "@mui/icons-material";
-import {IngredientMultiSelect} from "../components/IngredientMultiSelect.tsx";
+import {IngredientMultiSelect} from "../components/IngredientMultiSelect";
 
 export default function AddRecipePage() {
     const [name, setName] = useState("");
@@ -120,7 +120,7 @@ export default function AddRecipePage() {
         } catch (error) {
             console.log(error)
         }
-    }, []);
+    }, [axiosPrivate]);
     return (
         <Box
             sx={{width: '80%', p: 2, alignContent: 'center', mx: 'auto'}}

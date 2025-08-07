@@ -1,12 +1,12 @@
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
-import LoginPage from "./pages/LoginPage.tsx";
-import RegistrationPage from "./pages/RegistrationPage.tsx";
-import MainPage from "./pages/MainPage.tsx";
-import MainLayout from "./components/layout/MainLayout.tsx";
-import RecipePage from "./pages/RecipePage.tsx";
-import {AuthProvider} from "./context/AuthContext.tsx";
-import RequireAuth from "./components/auth/RequireAuth.tsx";
-import AddRecipePage from "./pages/AddRecipePage.tsx";
+import LoginPage from "./pages/LoginPage";
+import RegistrationPage from "./pages/RegistrationPage";
+import MainPage from "./pages/MainPage";
+import MainLayout from "./components/layout/MainLayout";
+import RecipePage from "./pages/RecipePage";
+import {AuthProvider} from "./context/AuthContext";
+import RequireAuth from "./components/auth/RequireAuth";
+import AddRecipePage from "./pages/AddRecipePage";
 
 function App() {
 

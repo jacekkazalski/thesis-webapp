@@ -1,5 +1,5 @@
 
-import {Recipe} from "../../utils/types.ts";
+import {Recipe} from "../../utils/types";
 import {useNavigate} from "react-router-dom";
 import {Box, Card, CardContent, CardMedia, Stack, Typography, CardActionArea, Avatar, Rating} from "@mui/material";
 import placeholderImg from "../../assets/placeholder.png";

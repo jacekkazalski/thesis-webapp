@@ -1,15 +1,15 @@
-import {axiosCustom} from "../api/axios.ts";
-import useRefreshToken from "./useRefreshToken.tsx";
-import useAuth from "./useAuth.tsx";
+import {axiosCustom} from "../api/axios";
+import useRefreshToken from "./useRefreshToken";
+import useAuth from "./useAuth";
 import {useEffect} from "react";
 
-// Attach interceptors to automatically refresh access token
+// Attach interceptors to automatically refresh the access token
 const useAxiosCustom = () => {
     const refresh = useRefreshToken()
     const {auth} = useAuth()
 
     useEffect(() => {
-        // Add authorization header if it's missing
+        // Add an authorization header if it's missing
         const requestIntercept = axiosCustom.interceptors.request.use(
             config => {
                 if(!config.headers['Authorization']) {

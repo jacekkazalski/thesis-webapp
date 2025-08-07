@@ -12,9 +12,9 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 import {Logout, Login, Person, PersonAdd, HomeOutlined,Add, Schedule, CasinoOutlined, SearchOutlined} from "@mui/icons-material";
-import useAuth from "../../hooks/useAuth.tsx";
-import { axiosCustom } from "../../api/axios.ts";
-import { useEffect, useRef, useState } from 'react';
+import useAuth from "../../hooks/useAuth";
+import { axiosCustom } from "../../api/axios";
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function NavBar() {
     const navigate = useNavigate();
@@ -88,7 +88,7 @@ export default function NavBar() {
                               <NavButton
                     icon={SearchOutlined}
                     text="Szukaj"
-                    onClick={() => setShowSearch((prev: any) => !prev)}
+                    onClick={() => setShowSearch((prev: boolean) => !prev)}
                 />
                              <Collapse in={showSearch} orientation='horizontal' sx={{ width: '100%' }}>
                                 <TextField

@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
-import RecipeCard from "./common/RecipeCard.tsx";
-import axios from "../api/axios.ts";
-import {Ingredient, Recipe} from "../utils/types.ts";
+import RecipeCard from "./common/RecipeCard";
+import axios from "../api/axios";
+import {Ingredient, Recipe} from "../utils/types";
 import {
     Box,
     FormControl,
@@ -15,7 +15,7 @@ import {
     Tooltip
 } from "@mui/material";
 import {FormatListBulleted, ViewModule} from "@mui/icons-material";
-import {IngredientMultiSelect} from "./IngredientMultiSelect.tsx";
+import {IngredientMultiSelect} from "./IngredientMultiSelect";
 
 export default function Gallery() {
     const [viewType, setViewType] = useState<"gallery" | "list">("gallery")
@@ -24,7 +24,7 @@ export default function Gallery() {
     const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
     const [sortBy, setSortBy] = useState("rating")
     //TODO: Pagination
-    const handleViewTypeChange = (_: any, newViewType:((prevState: "gallery" | "list") => "gallery" | "list") | null) => {
+    const handleViewTypeChange = (newViewType: ((prevState: "gallery" | "list") => "gallery" | "list") | null) => {
         if (newViewType != null) {
             setViewType(newViewType)
         }
@@ -57,10 +57,15 @@ export default function Gallery() {
                             <MenuItem value="ingredients">Pasujące składniki</MenuItem>
                             <MenuItem value="id_recipe">Najnowsze</MenuItem>
                         </Select>
-                        <FormHelperText>Sortuj przepisy</FormHelperText>
+                        <FormHelperText>Sortuj    przepisy</FormHelperText>
                     </FormControl>
-                    <Stack direction="column"><ToggleButtonGroup value={viewType} exclusive size="small"
-                                                                 onChange={handleViewTypeChange}>
+                    <Stack direction="column">
+                        <ToggleButtonGroup
+                            value={viewType}
+                            exclusive
+                            size="small"
+                            onChange={(_, value) => handleViewTypeChange(value)}
+                        >
                         <Tooltip title="Galeria"><ToggleButton value="gallery">
                             <ViewModule/>
                         </ToggleButton></Tooltip>

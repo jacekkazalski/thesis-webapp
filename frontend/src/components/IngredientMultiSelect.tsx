@@ -1,4 +1,4 @@
-import {Ingredient} from "../utils/types.ts";
+import {Ingredient} from "../utils/types";
 import {Autocomplete, TextField} from "@mui/material";
 
 interface IngredientMultiSelectProps {
