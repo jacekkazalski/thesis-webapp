@@ -81,7 +81,7 @@ const login = catchAsync(async (req, res, next) => {
             sameSite: 'Strict'
         })
 
-    return res.json({ accessToken, username: result.username, email: result.email })
+    return res.json({ accessToken, id_user: result.id_user, username: result.username, email: result.email })
 })
 const refresh = catchAsync(async (req, res, next) => {
     const cookies = req.cookies

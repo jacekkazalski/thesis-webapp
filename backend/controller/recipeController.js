@@ -135,7 +135,7 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
 const getAllRecipes = catchAsync(async (req, res, next) => {
     const searchQuery = req.query.search || null;
     const ingredients = req.query.ingredient ? Array.isArray(req.query.ingredient) ? req.query.ingredient.map(Number) : null : null
-    console.log(ingredients);
+    //console.log(ingredients);
     // Newest: id_recipe desc, Oldest: id_recipe asc, Highest rating: rating desc, Most ingredients: ingredients desc
     //TODO: Ingredient count is not working (mixed js and sql)
     //TODO: Matching ingredients only
@@ -174,7 +174,7 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
     });
 
     const recipesWithImage = recipes.map(recipe => {
-        console.log(recipe.toJSON());
+        //console.log(recipe.toJSON());
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
