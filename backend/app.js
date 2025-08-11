@@ -6,6 +6,7 @@ const recipeRouter = require('./route/recipeRoute');
 const ingredientRouter = require('./route/ingredientRoute');
 const favouriteRouter = require('./route/favouriteRoute');
 const ratingRouter = require('./route/ratingRoute');
+const userRouter = require('./route/userRoute');
 const errorHandler = require('./utils/errorHandler');
 const CustomError = require('./utils/customError');
 const cookieParser = require('cookie-parser');
@@ -29,6 +30,7 @@ app.use('/api/recipes', recipeRouter)
 app.use('/api/ingredients', ingredientRouter)
 app.use('/api/favourites', favouriteRouter)
 app.use('/api/ratings', ratingRouter)
+app.use('/api/users', userRouter)
 
 app.use('*', (req, res, next) => {
     throw new CustomError(`Route ${req.originalUrl} not found`, 404)
