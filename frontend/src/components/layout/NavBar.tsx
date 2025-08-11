@@ -32,18 +32,18 @@ export default function NavBar() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const isAuthenticated = !!auth.accessToken;
+  const isAuthenticated = auth && !!auth.accessToken;
   const theme = useTheme();
   const isWide = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleLogout = async () => {
     try {
       await axiosCustom.get("/auth/logout");
-      setAuth({});
-      setTimeout(() => navigate("/"), 0);
-      console.log(auth);
+      setAuth(null);
+      //setTimeout(() => navigate("/"), 0);
+      navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error("Error logging out:", error);
     }
   };
   useEffect(() => {
@@ -116,12 +116,12 @@ export default function NavBar() {
           </Box>
         </Stack>
         <Stack direction="row" spacing={1} sx={{ ml: "auto" }}>
-          {isAuthenticated ? (
+          {isAuthenticated && auth ? (
             <>
               <NavButton
                 icon={Person}
                 text={auth.username ?? "Profil"}
-                onClick={() => navigate("/user/")}
+                onClick={() => navigate(`/user/${auth.id_user}`)}
               />
               <NavButton icon={Logout} text="Wyloguj" onClick={handleLogout} />
             </>

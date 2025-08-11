@@ -11,6 +11,7 @@ export interface Recipe {
   ingredients: Ingredient[];
 }
 export interface AuthState {
+  id_user: number;
   email?: string;
   username?: string;
   accessToken?: string;
@@ -20,4 +21,8 @@ export interface Ingredient {
   id_ingredient: number;
   name: string;
   quantity?: string;
+}
+export interface User {
+  id_user: number;
+  username: string;
 }

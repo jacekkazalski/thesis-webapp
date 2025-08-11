@@ -52,7 +52,8 @@ function LoginForm() {
       );
       const accessToken = response?.data?.accessToken;
       const username = response?.data?.username;
-      setAuth({ accessToken, username, email });
+      const id_user = response?.data?.id_user;
+      setAuth({ accessToken, username, email, id_user });
       setEmail("");
       setPassword("");
       navigate(from, { replace: true });

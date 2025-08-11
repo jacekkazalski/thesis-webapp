@@ -7,6 +7,7 @@ import RecipePage from "./pages/RecipePage";
 import { AuthProvider } from "./context/AuthContext";
 import RequireAuth from "./components/auth/RequireAuth";
 import AddRecipePage from "./pages/AddRecipePage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<MainPage />} />
             <Route path="/recipe/:recipeId" element={<RecipePage />} />
+            <Route path="/user/:userId" element={<ProfilePage />} />
             <Route element={<RequireAuth />}>
               <Route path={"/create"} element={<AddRecipePage />} />
             </Route>
