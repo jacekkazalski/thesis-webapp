@@ -216,5 +216,23 @@ const isAuthor = catchAsync(async (req, res, next) => {
         isAuthor: true
     });
 });
+const getRecipesByUser = catchAsync(async (req, res, next) => {
+    const user_id = req.id_user;
+    const recipes = await Recipe.findAll({
+        where: { added_by: user_id },
+        include: [
+            {
+                model: User,
+                as: 'added_by_User',
+                attributes: ['username', 'id_user']
+            },
+        ]
+    })
+    return res.status(200).json({
+        status: 'success',
+        data: recipes
+    });
+})
 
-module.exports = { createRecipe, getRecipe, getAllRecipes, isAuthor, deleteRecipe };
+
+module.exports = { createRecipe, getRecipe, getAllRecipes, isAuthor, deleteRecipe, getRecipesByUser };
