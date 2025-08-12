@@ -1,10 +1,10 @@
-# Thesis Web Application
+# What's in the fridge - Thesis Web Application
 
 A web application that allows users to easily search for culinary recipes based on ingredient selection from a predefined database.
 
 ## Description
 
-This project is a bachelor's thesis application (Praca inżynierska) that provides an intuitive interface for discovering recipes. Users can select from available ingredients in the database, and the application will suggest matching recipes, making meal planning and cooking more accessible and organized.
+This project is a part of bachelor's thesis (Praca inżynierska) that provides an intuitive interface for discovering recipes. Users can select from available ingredients in the database, and the application will suggest matching recipes, making meal planning and cooking more accessible, organized and preventing food waste.
 
 ## Project Structure
 
@@ -19,6 +19,8 @@ thesis-webapp/
 ## Technology Stack
 
 - **Primary Languages**: TypeScript, JavaScript
+- **Frontend Framework**: React with TypeScript
+- **Backend Framework**: Express wih Sequelize ORM
 - **Architecture**: Full-stack web application with separate frontend and backend
 
 ## Features
