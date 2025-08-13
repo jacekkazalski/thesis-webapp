@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import RecipeCard from "./common/RecipeCard";
 import axios from "../api/axios";
 import { Ingredient, Recipe } from "../utils/types";
 import {
   Box,
   FormControl,
   FormHelperText,
-  Grid,
   MenuItem,
   Select,
   Stack,
@@ -16,6 +14,7 @@ import {
 } from "@mui/material";
 import { FormatListBulleted, ViewModule } from "@mui/icons-material";
 import { IngredientMultiSelect } from "./IngredientMultiSelect";
+import RecipeGrid from "./RecipeGrid";
 
 export default function Gallery() {
   const [viewType, setViewType] = useState<"gallery" | "list">("gallery");
@@ -90,16 +89,7 @@ export default function Gallery() {
           {/*<Button variant="contained" color="secondary">Szukaj</Button>*/}
         </Stack>
       </Stack>
-      <Grid container spacing={2} p={2}>
-        {recipes.map((recipe) => (
-          <Grid
-            size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
-            key={recipe.id_recipe}
-          >
-            <RecipeCard recipe={recipe} />
-          </Grid>
-        ))}
-      </Grid>
+      <RecipeGrid recipes={recipes} />
     </Box>
   );
 }

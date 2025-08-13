@@ -30,6 +30,8 @@ import {
 } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
 import { NavButton } from "../components/layout/NavBar";
+import { Grid } from "@mui/material/esm";
+import RecipeCard from "../components/common/RecipeCard";
 
 export default function RecipePage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -44,7 +46,7 @@ export default function RecipePage() {
   const axiosCustom = useAxiosCustom();
 
   const handleFavourite = async () => {
-    if (!auth.accessToken) {
+    if (!auth?.accessToken) {
       setIsModalOpen(true);
       return;
     }
@@ -74,7 +76,7 @@ export default function RecipePage() {
     }
   };
   const handleRatingChange = async (newValue: number) => {
-    if (!auth.accessToken) {
+    if (!auth?.accessToken) {
       setIsModalOpen(true);
       return;
     }
@@ -227,7 +229,7 @@ export default function RecipePage() {
             </Stack>
             <Stack>
               <Typography variant="overline">Średnia ocen</Typography>
-              <Rating readOnly value={recipe?.rating} />
+              <Rating readOnly value={recipe?.rating ?? 0} />
             </Stack>
           </Stack>
         </Box>
