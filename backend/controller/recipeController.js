@@ -1,5 +1,5 @@
 const sequelize = require('../config/database');
-const { Op, fn, col, literal } = require('sequelize');
+const { Op, fn, col, literal} = require('sequelize');
 const initModels = require('../models/init-models');
 const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating } = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
@@ -132,7 +132,7 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
         return next(new CustomError('Recipe could not be deleted', 500));
     }
 });
-const getAllRecipes = catchAsync(async (req, res, next) => {
+const getRecipes = catchAsync(async (req, res, next) => {
     const searchQuery = req.query.search || null;
     const ingredients = req.query.ingredient ? Array.isArray(req.query.ingredient) ? req.query.ingredient.map(Number) : null : null
     //console.log(ingredients);
@@ -141,40 +141,63 @@ const getAllRecipes = catchAsync(async (req, res, next) => {
     //TODO: Matching ingredients only
     const allowedSortParams = ['id_recipe', 'rating', 'ingredients'];
     const sortParam = allowedSortParams.includes(req.query.sortBy) ? req.query.sortBy : 'id_recipe';
+    const authorUserId = req.query.authorId || null;
+    const favUserId = req.query.favId || null;
     var sortOrder = 'DESC';
-    const recipes = await Recipe.findAll({
-        where: searchQuery ? { name: { [Op.iLike]: `%${searchQuery}%` } } : undefined,
-        include: [
-            {
-                model: User,
-                as: 'added_by_User',
-                attributes: ['username', 'id_user']
-            },
-            {
-                model: Rating,
-                as: 'Ratings',
-                attributes: [],
 
+    let whereClause = {}
+    if (searchQuery) {
+        whereClause.name = { [Op.iLike]: `%${searchQuery}%` };
+    }
+    if(authorUserId){
+        whereClause.added_by = authorUserId;
+    }
+    const includes = [
+        {
+            model: User,
+            as: 'added_by_User',
+            attributes: ['username', 'id_user']
+        },
+        {
+            model: Rating,
+            as: 'Ratings',
+            attributes: [],
+
+        },
+        {
+            model: Ingredient_recipe,
+            as: 'Ingredient_recipes',
+            attributes: [],
+        },
+    ]
+    const group = ['Recipe.id_recipe', 'added_by_User.id_user', 'Ingredient_recipes.id_recipe'];
+    // Condition for searching only for recipes added to favourites by a specific user
+    if (favUserId) {
+        includes.push({
+            model: Favourite,
+            as: 'Favourites',
+            where: {
+                id_user: favUserId
             },
-            {
-                model: Ingredient_recipe,
-                as: 'Ingredient_recipes',
-                attributes: [],
-            }
-        ],
+            required: true
+        })
+        group.push('Favourites.id_recipe', 'Favourites.id_user');
+    }
+    const recipes = await Recipe.findAll({
+        where: whereClause,
+        include: includes,
         attributes: [
             'id_recipe',
             'name',
             'image_path',
             [fn('AVG', col('Ratings.value')), 'rating'],],
-        group: ['Recipe.id_recipe', 'added_by_User.id_user', 'Ingredient_recipes.id_recipe'],
+        group: group,
         order: [sortParam === 'rating'
         ? [literal('"rating" DESC NULLS LAST')]
         : [sortParam, sortOrder]],
     });
 
     const recipesWithImage = recipes.map(recipe => {
-        //console.log(recipe.toJSON());
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
@@ -197,14 +220,14 @@ const isAuthor = catchAsync(async (req, res, next) => {
     if (!id_recipe) {
         return next(new CustomError('Missing required fields', 400));
     }
-    // Check if recipe exists
+    // Check if a recipe exists
     const foundRecipe = await Recipe.findOne({
         where: { id_recipe: id_recipe },
     });
     if (!foundRecipe) {
         return next(new CustomError('Recipe not found', 404));
     }
-    // Check if user is author
+    // Check if the user is the author
     if (foundRecipe.added_by !== authUser.id) {
         return res.status(200).json({
             status: 'success',
@@ -216,23 +239,8 @@ const isAuthor = catchAsync(async (req, res, next) => {
         isAuthor: true
     });
 });
-const getRecipesByUser = catchAsync(async (req, res, next) => {
-    const user_id = req.id_user;
-    const recipes = await Recipe.findAll({
-        where: { added_by: user_id },
-        include: [
-            {
-                model: User,
-                as: 'added_by_User',
-                attributes: ['username', 'id_user']
-            },
-        ]
-    })
-    return res.status(200).json({
-        status: 'success',
-        data: recipes
-    });
-})
 
 
-module.exports = { createRecipe, getRecipe, getAllRecipes, isAuthor, deleteRecipe, getRecipesByUser };
+
+
+module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe };

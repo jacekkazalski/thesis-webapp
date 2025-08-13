@@ -67,17 +67,4 @@ const isFavourite = catchAsync(async (req, res, next) => {
     }
 });
 
-const getUserFavourites = catchAsync(async (req, res, next) => {
-    const user_id = req.id_user;
-    const favourites = await Favourite.findAll({
-        where: {
-            id_user: user_id
-        }
-    });
-    return res.status(200).json({
-        status: 'success',
-        data: favourites
-    });
-})
-
-module.exports = { toggleFavourite, isFavourite, getUserFavourites };
+module.exports = { toggleFavourite, isFavourite };
