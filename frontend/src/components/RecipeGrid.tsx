@@ -1,6 +1,6 @@
 import { Recipe } from "../utils/types";
 import { Grid } from "@mui/material";
-import RecipeCard from "./common/RecipeCard";
+import RecipeCard from "./RecipeCard";
 
 interface RecipeGridProps {
   recipes: Recipe[];

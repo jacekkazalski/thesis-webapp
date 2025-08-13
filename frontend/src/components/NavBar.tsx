@@ -22,8 +22,8 @@ import {
   CasinoOutlined,
   SearchOutlined,
 } from "@mui/icons-material";
-import useAuth from "../../hooks/useAuth";
-import { axiosCustom } from "../../api/axios";
+import useAuth from "../hooks/useAuth";
+import { axiosCustom } from "../api/axios";
 import React, { useEffect, useRef, useState } from "react";
 
 export default function NavBar() {

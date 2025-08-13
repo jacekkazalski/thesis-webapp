@@ -29,9 +29,7 @@ import {
   PersonOutlineOutlined,
 } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
-import { NavButton } from "../components/layout/NavBar";
-import { Grid } from "@mui/material/esm";
-import RecipeCard from "../components/common/RecipeCard";
+import { NavButton } from "../components/NavBar";
 
 export default function RecipePage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);

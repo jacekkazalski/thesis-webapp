@@ -1,4 +1,4 @@
-import { Recipe } from "../../utils/types";
+import { Recipe } from "../utils/types";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -11,7 +11,7 @@ import {
   Avatar,
   Rating,
 } from "@mui/material";
-import placeholderImg from "../../assets/placeholder.png";
+import placeholderImg from "../assets/placeholder.png";
 interface Props {
   recipe: Recipe;
 }
