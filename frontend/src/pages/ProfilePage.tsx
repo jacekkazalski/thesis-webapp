@@ -55,7 +55,7 @@ export default function ProfilePage() {
     setTabValue(newValue);
   };
   return (
-    <Box sx={{ width: "80%", p: 2, alignContent: "center", mx: "auto" }}>
+    <>
       <Paper elevation={3}>
         <Typography variant="h3" p={2}>
           {user?.username}
@@ -81,6 +81,6 @@ export default function ProfilePage() {
           <RecipeGrid recipes={favoriteRecipes} />
         </TabPanel>
       </Paper>
-    </Box>
+    </>
   );
 }

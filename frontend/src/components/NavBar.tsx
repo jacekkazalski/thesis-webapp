@@ -8,9 +8,10 @@ import {
   Box,
   Stack,
   useMediaQuery,
+  ClickAwayListener,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Logout,
   Login,
@@ -23,24 +24,35 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
-import { axiosCustom } from "../api/axios";
+import axios, { axiosCustom } from "../api/axios";
 import React, { useEffect, useRef, useState } from "react";
 
 export default function NavBar() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get("search") || "",
+  );
   const { auth, setAuth } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const isAuthenticated = auth && !!auth.accessToken;
   const theme = useTheme();
   const isWide = useMediaQuery(theme.breakpoints.up("md"));
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim() !== "") {
+      navigate(`/?search=${searchValue}`);
+      if (!isWide) {
+        setShowSearch(false);
+      }
+    }
+  };
   const handleLogout = async () => {
     try {
       await axiosCustom.get("/auth/logout");
       setAuth(null);
-      //setTimeout(() => navigate("/"), 0);
       navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -51,6 +63,16 @@ export default function NavBar() {
       searchInputRef.current.focus();
     }
   }, [showSearch]);
+
+  const getRandomRecipe = async () => {
+    try {
+      const response = await axios.get("/recipes/random");
+      const id = response.data.id_recipe;
+      navigate(`/recipe/${id}`);
+    } catch (error) {
+      console.error("Error fetching random recipe:", error);
+    }
+  };
 
   return (
     <AppBar position="static" elevation={3} color="default">
@@ -75,20 +97,22 @@ export default function NavBar() {
           <NavButton
             icon={CasinoOutlined}
             text="Losuj"
-            onClick={() => navigate("/")}
+            onClick={getRandomRecipe}
           />
 
           <Box display="flex" alignItems="center">
             {isWide ? (
-              <TextField
-                variant="outlined"
-                inputRef={searchInputRef}
-                size="small"
-                placeholder="Szukaj..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                sx={{ width: "100%" }}
-              />
+              <form onSubmit={handleSearch}>
+                <TextField
+                  variant="outlined"
+                  inputRef={searchInputRef}
+                  size="small"
+                  placeholder="Szukaj..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  sx={{ width: "100%" }}
+                />
+              </form>
             ) : (
               <>
                 <NavButton
@@ -96,21 +120,25 @@ export default function NavBar() {
                   text="Szukaj"
                   onClick={() => setShowSearch((prev: boolean) => !prev)}
                 />
-                <Collapse
-                  in={showSearch}
-                  orientation="horizontal"
-                  sx={{ width: "100%" }}
-                >
-                  <TextField
-                    variant="outlined"
-                    inputRef={searchInputRef}
-                    size="small"
-                    placeholder="Szukaj..."
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
+                {showSearch && (
+                  <Collapse
+                    in={showSearch}
+                    orientation="horizontal"
                     sx={{ width: "100%" }}
-                  />
-                </Collapse>
+                  >
+                    <form onSubmit={handleSearch}>
+                      <TextField
+                        variant="outlined"
+                        inputRef={searchInputRef}
+                        size="small"
+                        placeholder="Szukaj..."
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        sx={{ width: "100%" }}
+                      />
+                    </form>
+                  </Collapse>
+                )}
               </>
             )}
           </Box>
