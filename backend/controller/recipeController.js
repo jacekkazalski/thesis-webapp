@@ -1,5 +1,5 @@
 const sequelize = require('../config/database');
-const { Op, fn, col, literal} = require('sequelize');
+const { Op, fn, col, literal } = require('sequelize');
 const initModels = require('../models/init-models');
 const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating } = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
@@ -45,6 +45,7 @@ const getRecipe = catchAsync(async (req, res, next) => {
     return res.status(200).json({
         status: 'success',
         name: foundRecipe.name,
+        id_recipe: foundRecipe.id_recipe,
         instructions: foundRecipe.instructions,
         image_url: foundRecipe.image_path ? `${req.protocol}://${req.get('host')}/${foundRecipe.image_path}` : null,
         ingredients: ingredientsMapped,
@@ -52,6 +53,24 @@ const getRecipe = catchAsync(async (req, res, next) => {
         rating: ratingParameter
     });
 });
+const getRandomRecipe = catchAsync(async (req, res, next) => {
+    const count = await Recipe.count();
+    if (count === 0) {
+        return next(new CustomError('No recipes found', 404));
+    }
+    const randomIndex = Math.floor(Math.random() * count);
+    const randomRecipe = await Recipe.findOne({
+        limit: 1,
+        offset: randomIndex,
+    });
+    if (!randomRecipe) {
+        return next(new CustomError('No recipes found', 404));
+    }
+    return res.status(200).json({
+        status: 'success',
+        id_recipe: randomRecipe.id_recipe,
+    });
+})
 const createRecipe = catchAsync(async (req, res, next) => {
     const body = req.body;
     const authUser = req.user;
@@ -137,7 +156,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
     const ingredients = req.query.ingredient ? Array.isArray(req.query.ingredient) ? req.query.ingredient.map(Number) : null : null
     //console.log(ingredients);
     // Newest: id_recipe desc, Oldest: id_recipe asc, Highest rating: rating desc, Most ingredients: ingredients desc
-    //TODO: Ingredient count is not working (mixed js and sql)
+    //TODO: Ingredient count is not working
     //TODO: Matching ingredients only
     const allowedSortParams = ['id_recipe', 'rating', 'ingredients'];
     const sortParam = allowedSortParams.includes(req.query.sortBy) ? req.query.sortBy : 'id_recipe';
@@ -149,7 +168,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
     if (searchQuery) {
         whereClause.name = { [Op.iLike]: `%${searchQuery}%` };
     }
-    if(authorUserId){
+    if (authorUserId) {
         whereClause.added_by = authorUserId;
     }
     const includes = [
@@ -164,13 +183,8 @@ const getRecipes = catchAsync(async (req, res, next) => {
             attributes: [],
 
         },
-        {
-            model: Ingredient_recipe,
-            as: 'Ingredient_recipes',
-            attributes: [],
-        },
     ]
-    const group = ['Recipe.id_recipe', 'added_by_User.id_user', 'Ingredient_recipes.id_recipe'];
+    const group = ['Recipe.id_recipe', 'added_by_User.id_user'];
     // Condition for searching only for recipes added to favourites by a specific user
     if (favUserId) {
         includes.push({
@@ -184,6 +198,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
         group.push('Favourites.id_recipe', 'Favourites.id_user');
     }
     const recipes = await Recipe.findAll({
+        logging: console.log,
         where: whereClause,
         include: includes,
         attributes: [
@@ -191,13 +206,30 @@ const getRecipes = catchAsync(async (req, res, next) => {
             'name',
             'image_path',
             [fn('AVG', col('Ratings.value')), 'rating'],],
+
         group: group,
         order: [sortParam === 'rating'
-        ? [literal('"rating" DESC NULLS LAST')]
-        : [sortParam, sortOrder]],
+            ? [literal('"rating" DESC NULLS LAST')]
+            : [sortParam, sortOrder]],
     });
 
-    const recipesWithImage = recipes.map(recipe => {
+    const recipeIds = recipes.map(r => r.id_recipe);
+    const recipe_ingredients = await Ingredient_recipe.findAll({
+        where: { id_recipe: recipeIds },
+        include: [
+            {
+                model: Ingredient,
+                as: 'id_ingredient_Ingredient',
+                attributes: ['id_ingredient', 'name']
+            }
+        ]
+    });
+    const recipesWithDetails = recipes.map(recipe => {
+        const recipeIngredients = recipe_ingredients.filter(i => i.id_recipe === recipe.id_recipe)
+            .map(i => ({
+                id_ingredient: i.id_ingredient_Ingredient.id_ingredient,
+                name: i.id_ingredient_Ingredient.name
+            }));
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
@@ -205,12 +237,12 @@ const getRecipes = catchAsync(async (req, res, next) => {
                 ? `${req.protocol}://${req.get('host')}/${recipe.image_path}` : null,
             author: recipe.added_by_User,
             rating: recipe.get('rating') ? parseFloat(recipe.get('rating')) : null,
-            ingredients: recipe.get('ingredients') ? parseInt(recipe.get('ingredients')) : null
+            ingredients: recipeIngredients
         }
     });
     res.status(200).json({
         status: 'success',
-        data: recipesWithImage
+        data: recipesWithDetails
     });
 });
 const isAuthor = catchAsync(async (req, res, next) => {
@@ -243,4 +275,4 @@ const isAuthor = catchAsync(async (req, res, next) => {
 
 
 
-module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe };
+module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe, getRandomRecipe };

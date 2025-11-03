@@ -12,10 +12,14 @@ const useRefreshToken = () => {
       });
       const accessToken = response.data.accessToken;
 
-      setAuth((prev: AuthState) => ({ ...prev, accessToken: accessToken }));
+      setAuth((prev: AuthState | null) =>
+        prev
+          ? { ...prev, accessToken: accessToken }
+          : { accessToken, id_user: 0, username: "", email: "" },
+      );
       return accessToken;
     } catch (err) {
-      setAuth({});
+      setAuth(null);
       if (err instanceof Error) {
         console.error(err.message);
       }

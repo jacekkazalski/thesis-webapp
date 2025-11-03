@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:dev": "kill-port 3000 && nodemon app.js"
+    "dev": "kill-port 3000 && nodemon app.js"
   },
   "author": "",
   "license": "ISC",

@@ -91,47 +91,43 @@ export default function RecipePage() {
   };
 
   useEffect(() => {
-    const checkIfFavourite = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axiosCustom.get("/favourites/check", {
+        const recipeRes = await axios.get("/recipes/recipe", {
           params: { id_recipe: recipeId },
         });
-        setIsFavourite(response.data.isFavourite);
+        setRecipe(recipeRes.data);
+
+        const [favRes, authorRes, ratingRes] = await Promise.allSettled([
+          axiosCustom.get("/favourites/check", {
+            params: { id_recipe: recipeId },
+          }),
+          axiosCustom.get("/recipes/author/check", {
+            params: { id_recipe: recipeId },
+          }),
+          axiosCustom.get(`/ratings/user?id_recipe=${recipeId}`),
+        ]);
+
+        if (favRes.status === "fulfilled") {
+          setIsFavourite(favRes.value.data.isFavourite);
+        }
+
+        if (authorRes.status === "fulfilled") {
+          setIsAuthor(authorRes.value.data.isAuthor);
+        }
+
+        if (ratingRes.status === "fulfilled") {
+          setUserRating(ratingRes.value.data.rating);
+        }
       } catch (err) {
-        console.log(err);
+        console.error("Error fetching recipe:", err);
       }
     };
-    const checkIfAuthor = async () => {
-      try {
-        const response = await axiosCustom.get("/recipes/author/check", {
-          params: { id_recipe: recipeId },
-        });
-        setIsAuthor(response.data.isAuthor);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    const fetchRecipe = async () => {
-      const response = await axios.get("/recipes/recipe", {
-        params: {
-          id_recipe: recipeId,
-        },
-      });
-      setRecipe(response.data);
-    };
-    const checkUserRating = async () => {
-      const response = await axiosCustom.get(
-        `/ratings/user?id_recipe=${recipeId}`,
-      );
-      setUserRating(response.data.rating);
-    };
-    fetchRecipe();
-    checkIfFavourite();
-    checkIfAuthor();
-    checkUserRating();
-  }, [recipeId, axiosCustom]);
+
+    fetchData();
+  }, [recipeId]);
   return (
-    <Box sx={{ width: "80%", p: 2, alignContent: "center", mx: "auto" }}>
+    <>
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <DialogTitle>Musisz się zalogować</DialogTitle>
         <DialogContent>
@@ -169,14 +165,12 @@ export default function RecipePage() {
             direction="row"
             spacing={1}
             alignItems="center"
-            // justifyContent="space-between"
             sx={{
               flexWrap: "wrap",
               gap: 2,
             }}
           >
             <Stack direction="row">
-              {/*<Typography variant="caption">Autor</Typography>*/}
               <NavButton
                 icon={PersonOutlineOutlined}
                 text={recipe?.author?.username || ""}
@@ -261,6 +255,6 @@ export default function RecipePage() {
           </Typography>
         </Paper>
       </Stack>
-    </Box>
+    </>
   );
 }

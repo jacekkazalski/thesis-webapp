@@ -1,5 +1,5 @@
 const { authenticateToken } = require("../controller/authController");
-const {createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe} = require("../controller/recipeController");
+const {createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe, getRandomRecipe} = require("../controller/recipeController");
 const router = require("express").Router();
 const upload = require('../config/multerConfig')
 
@@ -8,5 +8,6 @@ router.route('/recipe').get(getRecipe)
 router.route('/').get(getRecipes)
 router.route('/author/check').get(authenticateToken, isAuthor)
 router.route('/delete').delete(authenticateToken, deleteRecipe)
+router.route('/random').get(getRandomRecipe)
 
 module.exports = router;

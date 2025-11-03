@@ -11,10 +11,13 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
+  useMediaQuery,
 } from "@mui/material";
 import { FormatListBulleted, ViewModule } from "@mui/icons-material";
 import { IngredientMultiSelect } from "./IngredientMultiSelect";
 import RecipeGrid from "./RecipeGrid";
+import { useSearchParams } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 export default function Gallery() {
   const [viewType, setViewType] = useState<"gallery" | "list">("gallery");
@@ -22,7 +25,9 @@ export default function Gallery() {
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
   const [sortBy, setSortBy] = useState("rating");
-  //TODO: Pagination
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
+
   const handleViewTypeChange = (
     newViewType: ((prevState: "gallery" | "list") => "gallery" | "list") | null,
   ) => {
@@ -32,7 +37,9 @@ export default function Gallery() {
   };
   useEffect(() => {
     const fetchRecipes = async () => {
-      const response = await axios.get("/recipes", { params: { sortBy } });
+      const response = await axios.get("/recipes", {
+        params: { sortBy, search: searchQuery },
+      });
       console.log(response.data.data);
       setRecipes(response.data.data);
     };
@@ -42,7 +49,7 @@ export default function Gallery() {
     };
     fetchRecipes();
     fetchIngredients();
-  }, [sortBy, chosenIngredients]);
+  }, [sortBy, chosenIngredients, searchQuery]);
   return (
     <Box>
       <Stack direction="column" p={2} spacing={2}>
@@ -86,7 +93,6 @@ export default function Gallery() {
             value={chosenIngredients}
             onChange={setChosenIngredients}
           />
-          {/*<Button variant="contained" color="secondary">Szukaj</Button>*/}
         </Stack>
       </Stack>
       <RecipeGrid recipes={recipes} />

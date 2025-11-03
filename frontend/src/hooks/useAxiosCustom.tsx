@@ -14,7 +14,7 @@ const useAxiosCustom = () => {
       (config) => {
         if (!config.headers["Authorization"]) {
           console.log("Inteceptor Attaching headers");
-          config.headers["Authorization"] = `Bearer ${auth.accessToken}`;
+          config.headers["Authorization"] = `Bearer ${auth?.accessToken}`;
         }
         return config;
       },

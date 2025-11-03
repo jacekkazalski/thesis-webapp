@@ -8,25 +8,30 @@ import { AuthProvider } from "./context/AuthContext";
 import RequireAuth from "./components/auth/RequireAuth";
 import AddRecipePage from "./pages/AddRecipePage";
 import ProfilePage from "./pages/ProfilePage";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const theme = createTheme();
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/recipe/:recipeId" element={<RecipePage />} />
-            <Route path="/user/:userId" element={<ProfilePage />} />
-            <Route element={<RequireAuth />}>
-              <Route path={"/create"} element={<AddRecipePage />} />
+    <ThemeProvider theme={theme}>
+      <Router>
+        <AuthProvider>
+          <Routes>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/recipe/:recipeId" element={<RecipePage />} />
+              <Route path="/user/:userId" element={<ProfilePage />} />
+              <Route element={<RequireAuth />}>
+                <Route path={"/create"} element={<AddRecipePage />} />
+              </Route>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegistrationPage />} />
             </Route>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegistrationPage />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
-    </Router>
+          </Routes>
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 
