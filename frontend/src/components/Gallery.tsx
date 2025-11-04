@@ -24,7 +24,7 @@ export default function Gallery() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState("highest_rated");
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
@@ -37,8 +37,9 @@ export default function Gallery() {
   };
   useEffect(() => {
     const fetchRecipes = async () => {
+      const ingredientIds = chosenIngredients.map( (i) => i.id_ingredient)
       const response = await axios.get("/recipes", {
-        params: { sortBy, search: searchQuery },
+        params: { sortBy, search: searchQuery, ingredient: ingredientIds },
       });
       console.log(response.data.data);
       setRecipes(response.data.data);
@@ -58,11 +59,11 @@ export default function Gallery() {
             <Select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              defaultValue="rating"
+              defaultValue="ingredients"
             >
-              <MenuItem value="rating">Najwyżej oceniane</MenuItem>
               <MenuItem value="ingredients">Pasujące składniki</MenuItem>
-              <MenuItem value="id_recipe">Najnowsze</MenuItem>
+              <MenuItem value="highest_rated">Najwyżej oceniane</MenuItem>  
+              <MenuItem value="newest">Najnowsze</MenuItem>
             </Select>
             <FormHelperText>Sortuj przepisy</FormHelperText>
           </FormControl>

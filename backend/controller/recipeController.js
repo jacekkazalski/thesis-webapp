@@ -154,15 +154,15 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
 const getRecipes = catchAsync(async (req, res, next) => {
     const searchQuery = req.query.search || null;
     const ingredients = req.query.ingredient ? Array.isArray(req.query.ingredient) ? req.query.ingredient.map(Number) : null : null
+    console.log(ingredients)
     //console.log(ingredients);
     // Newest: id_recipe desc, Oldest: id_recipe asc, Highest rating: rating desc, Most ingredients: ingredients desc
     //TODO: Ingredient count is not working
     //TODO: Matching ingredients only
-    const allowedSortParams = ['id_recipe', 'rating', 'ingredients'];
-    const sortParam = allowedSortParams.includes(req.query.sortBy) ? req.query.sortBy : 'id_recipe';
+    const allowedSortParams = ['newest', 'highest_rated', 'ingredients'];
+    const sortParam = allowedSortParams.includes(req.query.sortBy) ? req.query.sortBy : 'newest';
     const authorUserId = req.query.authorId || null;
     const favUserId = req.query.favId || null;
-    var sortOrder = 'DESC';
 
     let whereClause = {}
     if (searchQuery) {
@@ -208,9 +208,6 @@ const getRecipes = catchAsync(async (req, res, next) => {
             [fn('AVG', col('Ratings.value')), 'rating'],],
 
         group: group,
-        order: [sortParam === 'rating'
-            ? [literal('"rating" DESC NULLS LAST')]
-            : [sortParam, sortOrder]],
     });
 
     const recipeIds = recipes.map(r => r.id_recipe);
@@ -225,11 +222,15 @@ const getRecipes = catchAsync(async (req, res, next) => {
         ]
     });
     const recipesWithDetails = recipes.map(recipe => {
-        const recipeIngredients = recipe_ingredients.filter(i => i.id_recipe === recipe.id_recipe)
+        const recipeIngredientList = recipe_ingredients.filter(i => i.id_recipe === recipe.id_recipe)
             .map(i => ({
                 id_ingredient: i.id_ingredient_Ingredient.id_ingredient,
                 name: i.id_ingredient_Ingredient.name
             }));
+        const recipeIngredientIds = recipeIngredientList.map(r => r.id_ingredient)
+        const matchingIngredients = ingredients?.filter((id) => recipeIngredientIds.includes(id)).length;
+        const totalIngredients = recipeIngredientIds.length;
+        const missingIngredients = totalIngredients-matchingIngredients;
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
@@ -237,12 +238,31 @@ const getRecipes = catchAsync(async (req, res, next) => {
                 ? `${req.protocol}://${req.get('host')}/${recipe.image_path}` : null,
             author: recipe.added_by_User,
             rating: recipe.get('rating') ? parseFloat(recipe.get('rating')) : null,
-            ingredients: recipeIngredients
+            ingredients: recipeIngredientList,
+            matched_ingredients: matchingIngredients,
+            total_ingredients: totalIngredients,
+            missing_ingredients: missingIngredients
         }
     });
+    const recipesSorted = recipesWithDetails;
+    switch(sortParam) {
+        case "newest":
+            recipesSorted.sort((a,b) => a.id_recipe-b.id_recipe);
+            break;
+        case "highest_rated":
+            recipesSorted.sort((a,b) => b.rating - a.rating)
+            break;
+        case "ingredients":
+            recipesSorted.sort((a,b) => {
+                matchingDiff =  b.matched_ingredients-a.matched_ingredients;
+                if (matchingDiff !==0) return matchingDiff;
+                return a.missing_ingredients-b.missing_ingredients
+            }
+            )
+    }
     res.status(200).json({
         status: 'success',
-        data: recipesWithDetails
+        data: recipesSorted
     });
 });
 const isAuthor = catchAsync(async (req, res, next) => {
