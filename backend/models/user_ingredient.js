@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('Ingredient_recipe', {
+  return sequelize.define('User_ingredient', {
     id_ingredient: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -10,30 +10,26 @@ module.exports = function(sequelize, DataTypes) {
         key: 'id_ingredient'
       }
     },
-    id_recipe: {
+    id_user: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: 'Recipe',
-        key: 'id_recipe'
+        model: 'User',
+        key: 'id_user'
       }
-    },
-    quantity: {
-      type: DataTypes.STRING(20),
-      allowNull: true
     }
   }, {
-    tableName: 'Ingredient_recipe',
+    tableName: 'User_ingredient',
     schema: 'public',
     timestamps: false,
     indexes: [
       {
-        name: "Ingredient_recipe_pkey",
+        name: "ingredient_user_pkey",
         unique: true,
         fields: [
           { name: "id_ingredient" },
-          { name: "id_recipe" },
+          { name: "id_user" },
         ]
       },
     ]
