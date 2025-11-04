@@ -152,17 +152,21 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
     }
 });
 const getRecipes = catchAsync(async (req, res, next) => {
-    const searchQuery = req.query.search || null;
-    const ingredients = req.query.ingredient ? Array.isArray(req.query.ingredient) ? req.query.ingredient.map(Number) : null : null
+    const {
+        search: searchQuery,
+        ingredient,
+        sortBy,
+        authorId: authorUserId,
+        favId: favUserId,
+        matchOnly
+    } = req.query
+
+    const ingredients = 
+    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
     console.log(ingredients)
-    //console.log(ingredients);
-    // Newest: id_recipe desc, Oldest: id_recipe asc, Highest rating: rating desc, Most ingredients: ingredients desc
-    //TODO: Ingredient count is not working
-    //TODO: Matching ingredients only
+
     const allowedSortParams = ['newest', 'highest_rated', 'ingredients'];
-    const sortParam = allowedSortParams.includes(req.query.sortBy) ? req.query.sortBy : 'newest';
-    const authorUserId = req.query.authorId || null;
-    const favUserId = req.query.favId || null;
+    const sortParam = allowedSortParams.includes(sortBy) ? sortBy : 'newest';
 
     let whereClause = {}
     if (searchQuery) {
@@ -260,9 +264,11 @@ const getRecipes = catchAsync(async (req, res, next) => {
             }
             )
     }
+    const recipesFiltered = matchOnly ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
+    //console.log(recipesSorted)
     res.status(200).json({
         status: 'success',
-        data: recipesSorted
+        data: recipesFiltered
     });
 });
 const isAuthor = catchAsync(async (req, res, next) => {
