@@ -72,45 +72,110 @@ const getRandomRecipe = catchAsync(async (req, res, next) => {
     });
 })
 const createRecipe = catchAsync(async (req, res, next) => {
-    const body = req.body;
+     const {
+        name,
+        instructions,
+        ingredients,
+    } = req.body;
     const authUser = req.user;
     const imagePath = req.file ? `./images/${req.file.filename}` : null;
     console.log(authUser);
 
     // Check if parameters aren't empty strings and are present
-    if (!body.name || body.name.trim() === '' ||
-        !body.instructions || body.instructions.trim() === '' ||
-        !body.ingredients) {
+     if (!name || name.trim() === '' ||
+        !instructions || instructions.trim() === '' ||
+        !ingredients) {
         return next(new CustomError('Missing required fields', 400));
     }
-    //TODO: Add transaction
-    const newRecipe = await Recipe.create({
-        name: body.name,
-        instructions: body.instructions,
-        added_by: authUser.id,
-        image_path: imagePath
-    });
-    if (!newRecipe) {
+
+    const ingredientList = typeof ingredients === 'string' ? JSON.parse(ingredients) : ingredients;
+    
+    const newRecipe = await sequelize.transaction(async (t) => {
+        const createdRecipe = await Recipe.create({
+            name: name,
+            instructions: instructions,
+            added_by: authUser.id,
+            image_path: imagePath
+    }, { transaction: t });
+    if (!createdRecipe) {
         return next(new CustomError('Recipe could not be created', 500));
     }
-
-    // JSON.parse because body.ingredients is a string in formdata
-    const ingredients = JSON.parse(body.ingredients);
-    for (const element of ingredients) {
+   
+    for (const element of ingredientList) {
         // Check if ingredient with given id exists
-        if (await Ingredient.findOne({ where: { id_ingredient: element.id_ingredient } }) === null) {
-            return next(new CustomError('Ingredient does not exist', 404));
+        const ingredientExists = await Ingredient.findOne({
+            where: { id_ingredient: element.id_ingredient },
+            transaction: t
+        });
+        if (!ingredientExists) {
+            throw new CustomError(`Ingredient with id ${element.id_ingredient} not found`, 404);
         }
         await Ingredient_recipe.create({
             id_ingredient: element.id_ingredient,
-            id_recipe: newRecipe.id_recipe,
+            id_recipe: createdRecipe.id_recipe,
             quantity: element.quantity
-        });
+        }, { transaction: t });
     }
+    return createdRecipe;
+    });
 
     return res.status(201).json({
         status: 'success',
         data: { id_recipe: newRecipe.id_recipe }
+    });
+});
+const updateRecipe = catchAsync(async (req, res, next) => {
+    const {
+        id_recipe,
+        name,
+        instructions,
+        ingredients,
+    } = req.body;
+    const authUser = req.user;
+    const imagePath = req.file ? `./images/${req.file.filename}` : null;
+     // Check if parameters aren't empty strings and are present
+    if (!name || name.trim() === '' ||
+        !instructions || instructions.trim() === '' ||
+        !ingredients) {
+        return next(new CustomError('Missing required fields', 400));
+    }
+    const ingredientList = typeof ingredients === 'string' ? JSON.parse(ingredients) : ingredients;
+    await sequelize.transaction(async (t) => {
+        const foundRecipe = await Recipe.findOne({
+            where: { id_recipe: id_recipe },
+            transaction: t
+        });
+        if (!foundRecipe) throw new CustomError('Recipe not found', 404);
+        // Check if user is author
+        if (foundRecipe.added_by !== authUser.id) throw new CustomError('Unauthorized operation', 403);
+        await Recipe.update({
+            name: name ?? foundRecipe.name,
+            instructions: instructions ?? foundRecipe.instructions,
+            image_path: imagePath ?? foundRecipe.image_path
+        }, {
+            where: { id_recipe: id_recipe },
+            transaction: t
+        });
+        await Ingredient_recipe.destroy({ where: { id_recipe: id_recipe }, transaction: t });
+        // Create new ingredient_recipe entries
+        for (const element of ingredientList) {
+            const ingredientExists = await Ingredient.findOne({
+                where: { id_ingredient: element.id_ingredient },
+                transaction: t
+            });
+            if (!ingredientExists) {
+                throw new CustomError(`Ingredient with id ${element.id_ingredient} not found`, 404);
+            }
+            await Ingredient_recipe.create({
+                id_ingredient: element.id_ingredient,
+                id_recipe: id_recipe,
+                quantity: element.quantity
+            }, { transaction: t });
+        }
+    });
+    return res.status(200).json({
+        status: 'success',
+        message: 'Recipe updated successfully'
     });
 });
 
@@ -285,7 +350,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
             }
             )
     }
-    const recipesFiltered = matchOnly ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
+    let recipesFiltered = matchOnly ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
     recipesFiltered = excludedIngredients.length > 0 ?
         recipesFiltered.filter((recipe) => {
             const recipeIngredientIds = recipe.ingredients.map(i => i.id_ingredient);
@@ -327,4 +392,4 @@ const isAuthor = catchAsync(async (req, res, next) => {
 
 
 
-module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe, getRandomRecipe };
+module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe, getRandomRecipe, updateRecipe};
