@@ -149,5 +149,20 @@ const authenticateToken = (req, res, next) => {
         next()
     })
 }
+const optionalAuthenticateToken = (req, res, next) => {
+    const authHeader = req.headers['Authorization'] || req.headers['authorization']
+    if(!authHeader) {
+        next()
+    }
+    const token = authHeader.split(' ')[1]
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        // Invalid/expired access token
+        if (!err && user) {
+            req.user = user
+        }
+        next()
+    })
+}
 
-module.exports = { signup, login, authenticateToken, refresh, logout }
+
+module.exports = { signup, login, authenticateToken, refresh, logout, optionalAuthenticateToken }

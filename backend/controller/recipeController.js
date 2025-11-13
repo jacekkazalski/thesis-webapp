@@ -158,8 +158,13 @@ const getRecipes = catchAsync(async (req, res, next) => {
         sortBy,
         authorId: authorUserId,
         favId: favUserId,
-        matchOnly
+        matchOnly,
+        useSaved,
+        useDiet,
     } = req.query
+
+
+    const authUser = req.user;
 
     const ingredients = 
     Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
@@ -201,6 +206,22 @@ const getRecipes = catchAsync(async (req, res, next) => {
         })
         group.push('Favourites.id_recipe', 'Favourites.id_user');
     }
+    // User's saved ingredients for logged in users
+    let excludedIngredients = [];
+    let includedIngredients = [];
+    if (authUser && (useSaved || useDiet)) {
+        const userIngredients = await User_ingredient.findAll({
+            where: { id_user: authUser.id },
+        });
+        excludedIngredients = userIngredients
+            .filter(ui => ui.is_excluded)
+            .map(ui => ui.id_ingredient);
+        includedIngredients = userIngredients
+            .filter(ui => !ui.is_excluded)
+            .map(ui => ui.id_ingredient);
+        ingredients?.push(...includedIngredients);
+    }
+
     const recipes = await Recipe.findAll({
         logging: console.log,
         where: whereClause,
@@ -265,6 +286,11 @@ const getRecipes = catchAsync(async (req, res, next) => {
             )
     }
     const recipesFiltered = matchOnly ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
+    recipesFiltered = excludedIngredients.length > 0 ?
+        recipesFiltered.filter((recipe) => {
+            const recipeIngredientIds = recipe.ingredients.map(i => i.id_ingredient);
+            return !recipeIngredientIds.some(id => excludedIngredients.includes(id));
+        }) : recipesFiltered;
     //console.log(recipesSorted)
     res.status(200).json({
         status: 'success',
