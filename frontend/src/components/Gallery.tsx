@@ -3,7 +3,9 @@ import axios from "../api/axios";
 import { Ingredient, Recipe } from "../utils/types";
 import {
   Box,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   FormHelperText,
   MenuItem,
   Select,
@@ -18,8 +20,10 @@ import { IngredientMultiSelect } from "./IngredientMultiSelect";
 import RecipeGrid from "./RecipeGrid";
 import { useSearchParams } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
+import useAuth from "../hooks/useAuth";
 
 export default function Gallery() {
+  const {auth} = useAuth();
   const [viewType, setViewType] = useState<"gallery" | "list">("gallery");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
@@ -27,6 +31,16 @@ export default function Gallery() {
   const [sortBy, setSortBy] = useState("highest_rated");
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+
+  const [pantryChecked, setPantryChecked] = useState<boolean>(false);
+  const [dietChecked, setDietChecked] = useState<boolean>(false);
+  const [matchChecked, setMatchChecked] = useState<boolean>(false);
+
+  useEffect(() => {
+    const logged = !!auth?.accessToken;
+    setPantryChecked(logged);
+    setDietChecked(logged);
+  }, [auth]);
 
   const handleViewTypeChange = (
     newViewType: ((prevState: "gallery" | "list") => "gallery" | "list") | null,
@@ -39,7 +53,14 @@ export default function Gallery() {
     const fetchRecipes = async () => {
       const ingredientIds = chosenIngredients.map( (i) => i.id_ingredient)
       const response = await axios.get("/recipes", {
-        params: { sortBy, search: searchQuery, ingredient: ingredientIds },
+        params: { 
+          sortBy, 
+          search: searchQuery, 
+          ingredient: ingredientIds,
+          useSaved: pantryChecked ? 1 : 0,
+          useDiet: dietChecked ? 1 : 0,
+          matchOnly: matchChecked ? 1 : 0
+         },
       });
       console.log(response.data.data);
       setRecipes(response.data.data);
@@ -50,7 +71,7 @@ export default function Gallery() {
     };
     fetchRecipes();
     fetchIngredients();
-  }, [sortBy, chosenIngredients, searchQuery]);
+  }, [sortBy, chosenIngredients, searchQuery, pantryChecked, dietChecked, matchChecked]);
   return (
     <Box>
       <Stack direction="column" p={2} spacing={2}>
@@ -86,6 +107,58 @@ export default function Gallery() {
               </Tooltip>
             </ToggleButtonGroup>
             <FormHelperText>Sposób wyświetlania</FormHelperText>
+          </Stack>
+          <Stack direction="row" alignItems="start">
+            <FormControlLabel 
+            control={
+            <Checkbox 
+            checked={matchChecked} 
+            onChange={(e) => setMatchChecked(e.target.checked)} 
+            />
+            } 
+            label="Tylko wybrane składniki" 
+            />
+            {auth?.accessToken ? (
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={pantryChecked}
+                      onChange={(e) => setPantryChecked(e.target.checked)}
+                    />
+                  }
+                  label="Spiżarnia"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={dietChecked}
+                      onChange={(e) => setDietChecked(e.target.checked)}
+                    />
+                  }
+                  label="Dieta"
+                />
+              </>
+            ) : (
+              <>
+                <Tooltip title="Musisz być zalogowany, aby użyć tej opcji">
+                  <span>
+                    <FormControlLabel
+                      control={<Checkbox checked={false} disabled />}
+                      label="Spiżarnia"
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title="Musisz być zalogowany, aby użyć tej opcji">
+                  <span>
+                    <FormControlLabel
+                      control={<Checkbox checked={false} disabled />}
+                      label="Dieta"
+                    />
+                  </span>
+                </Tooltip>
+              </>
+            )}
           </Stack>
         </Stack>
         <Stack spacing={2} direction="row">
