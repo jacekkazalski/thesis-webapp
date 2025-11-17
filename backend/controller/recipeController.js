@@ -1,7 +1,7 @@
 const sequelize = require('../config/database');
 const { Op, fn, col, literal } = require('sequelize');
 const initModels = require('../models/init-models');
-const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating } = initModels(sequelize);
+const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating, User_ingredient } = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
 
@@ -274,16 +274,21 @@ const getRecipes = catchAsync(async (req, res, next) => {
     // User's saved ingredients for logged in users
     let excludedIngredients = [];
     let includedIngredients = [];
-    if (authUser && (useSaved || useDiet)) {
+    if (authUser && (useSaved == 1 || useDiet == 1)) {
         const userIngredients = await User_ingredient.findAll({
             where: { id_user: authUser.id },
         });
-        excludedIngredients = userIngredients
-            .filter(ui => ui.is_excluded)
-            .map(ui => ui.id_ingredient);
-        includedIngredients = userIngredients
+        if (useDiet == 1) {
+            excludedIngredients = userIngredients
+                .filter(ui => ui.is_excluded)
+                .map(ui => ui.id_ingredient);
+        }
+        if (useSaved == 1) {
+             includedIngredients = userIngredients
             .filter(ui => !ui.is_excluded)
             .map(ui => ui.id_ingredient);
+        }
+    
         ingredients?.push(...includedIngredients);
     }
 
@@ -350,7 +355,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
             }
             )
     }
-    let recipesFiltered = matchOnly ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
+    let recipesFiltered = matchOnly == 1 ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
     recipesFiltered = excludedIngredients.length > 0 ?
         recipesFiltered.filter((recipe) => {
             const recipeIngredientIds = recipe.ingredients.map(i => i.id_ingredient);

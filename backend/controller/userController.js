@@ -51,24 +51,28 @@ const deleteUser = catchAsync(async (req, res, next) => {
   });
 });
 
-const addUserIngredient = catchAsync(async (req, res, next) => {
+const addUserIngredients = catchAsync(async (req, res, next) => {
     const authUser = req.user;
-    const { id_ingredient } = req.body;
-    const {is_excluded} = req.body;
+    const { ingredient } = req.query;
+    const {is_excluded} = req.query;
+    const ingredients = 
+    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
 
-    if(!id_ingredient || is_excluded === undefined) {
+    if(!ingredients || is_excluded === undefined) {
         return next(new CustomError('Missing required fields', 400))
     }
+    for (const element of ingredients) {
     await User_ingredient.create({
         id_user: authUser.id,
-        id_ingredient: id_ingredient,
+        id_ingredient: element,
         is_excluded: is_excluded
     });
+}
     return res.status(201).json({
         status: 'success',
         data: {
             id_user: authUser.id,
-            id_ingredient: id_ingredient,
+            id_ingredient: ingredients,
             is_excluded: is_excluded
         }
     });
@@ -76,19 +80,21 @@ const addUserIngredient = catchAsync(async (req, res, next) => {
 
 const removeUserIngredient = catchAsync(async (req, res, next) => {
     const authUser = req.user;
-    const { id_ingredient } = req.body;
-    if(!id_ingredient) {
-        return next(new CustomError('Missing required fields', 400))
-    }
+    const { ingredient } = req.query;
+    const ingredients = 
+    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
+    for (const id_ingredient of ingredients) {
+
     await User_ingredient.destroy({
         where: {
             id_user: authUser.id,
             id_ingredient: id_ingredient
         }
     });
+}
     return res.status(200).json({
         status: 'success',
-        message: 'Ingredient removed from user successfully'
+        message: 'Ingredients removed from user successfully'
     });
 });
 
@@ -100,12 +106,19 @@ const getUserIngredients = catchAsync(async (req, res, next) => {
     const user = await User.findOne({
         where: { id_user: authUser.id },
     });
-    const userDiet = await Diet.findOne({
+    let userDietIngredients = [];
+    try {
+        const userDiet = await Diet.findOne({
         where: { id_diet: user.id_diet },
     });
-    const userDietIngredients = await Ingredient_diet.findAll({
+        userDietIngredients = await Ingredient_diet.findAll({
         where: { diet_id: userDiet.id_diet },
     });
+}
+    catch (error) {
+        console.log('No diet assigned to user or error fetching diet ingredients');
+    }
+    
     const allIngredients = userIngredients.concat(userDietIngredients.map(ing => ({
         id_ingredient: ing.id_ingredient,
         id_user: authUser.id,
@@ -141,4 +154,4 @@ const removePredefinedDietFromUser = catchAsync(async (req, res, next) => {
         message: 'Diet removed from user successfully'
     });
 });
-module.exports = {getUser, deleteUser, addUserIngredient, removeUserIngredient, getUserIngredients, addPredefinedDietToUser, removePredefinedDietFromUser}
+module.exports = {getUser, deleteUser, addUserIngredient: addUserIngredients, removeUserIngredient, getUserIngredients, addPredefinedDietToUser, removePredefinedDietFromUser}

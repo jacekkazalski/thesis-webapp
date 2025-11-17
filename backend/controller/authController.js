@@ -153,6 +153,7 @@ const optionalAuthenticateToken = (req, res, next) => {
     const authHeader = req.headers['Authorization'] || req.headers['authorization']
     if(!authHeader) {
         next()
+        return
     }
     const token = authHeader.split(' ')[1]
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
