@@ -1,10 +1,11 @@
-import { Box, Paper, Tabs, Typography, Tab } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { Box, Paper, Tabs, Typography, Tab, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { Recipe, User } from "../utils/types";
 import axios from "../api/axios";
-import { Favorite, NoteAdd } from "@mui/icons-material";
+import { Favorite, NoteAdd, Settings } from "@mui/icons-material";
 import RecipeGrid from "../components/RecipeGrid";
+import useAuth from "../hooks/useAuth";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -27,6 +28,8 @@ export default function ProfilePage() {
   const [tabValue, setTabValue] = useState(0);
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
+  const navigate = useNavigate();
+  const {auth} = useAuth();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -57,10 +60,18 @@ export default function ProfilePage() {
   return (
     <>
       <Paper elevation={3}>
+        <Stack direction="row" alignItems="center" justifyContent="start" p={2}>
         <Typography variant="h3" p={2}>
           {user?.username}
         </Typography>
-
+        {auth?.id_user && auth.id_user.toString() === userId && (
+          <Tooltip title="Ustawienia">
+            <IconButton onClick={() => navigate("/settings")}>
+              <Settings />
+            </IconButton>
+          </Tooltip>
+        )}
+        </Stack>
         <Tabs value={tabValue} onChange={handleTabChange} centered>
           <Tab
             icon={<NoteAdd />}

@@ -9,6 +9,7 @@ import RequireAuth from "./components/auth/RequireAuth";
 import AddRecipePage from "./pages/AddRecipePage";
 import ProfilePage from "./pages/ProfilePage";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import SettingsPage from "./pages/SettingsPage";
 
 const theme = createTheme();
 
@@ -23,7 +24,12 @@ function App() {
               <Route path="/recipe/:recipeId" element={<RecipePage />} />
               <Route path="/user/:userId" element={<ProfilePage />} />
               <Route element={<RequireAuth />}>
+
+               <Route path="/settings" element={<SettingsPage />} />
+              </Route>
+              <Route element={<RequireAuth />}>
                 <Route path={"/create"} element={<AddRecipePage />} />
+               
               </Route>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegistrationPage />} />
