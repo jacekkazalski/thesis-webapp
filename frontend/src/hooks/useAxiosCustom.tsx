@@ -12,9 +12,9 @@ const useAxiosCustom = () => {
     // Add an authorization header if it's missing
     const requestIntercept = axiosCustom.interceptors.request.use(
       (config) => {
-        if (!config.headers["Authorization"]) {
+        if (!config.headers["Authorization"] && auth?.accessToken) {
           console.log("Inteceptor Attaching headers");
-          config.headers["Authorization"] = `Bearer ${auth?.accessToken}`;
+          config.headers["Authorization"] = `Bearer ${auth.accessToken}`;
         }
         return config;
       },

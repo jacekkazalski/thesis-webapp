@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useMemo } from "react";
+import React, { createContext, useState, ReactNode, useMemo, useEffect } from "react";
 import { AuthState } from "../utils/types";
 
 interface AuthContextType {
@@ -9,7 +9,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [auth, setAuth] = useState<AuthState | null>(null);
+  const [auth, setAuthState] = useState<AuthState | null>(null);
+
+  useEffect(() => {
+    const storedAuth = localStorage.getItem("auth");
+    if (storedAuth) {
+      try {
+        setAuthState(JSON.parse(storedAuth));
+      } catch (error) {
+        console.error("Error parsing stored auth:", error);
+        localStorage.removeItem("auth");
+      }
+    }
+  }, []);
+
+  const setAuth: React.Dispatch<React.SetStateAction<AuthState | null>> = (value) => {
+    setAuthState((prev) => {
+      const newAuth = typeof value === 'function' ? value(prev) : value;
+      if (newAuth) {
+        localStorage.setItem("auth", JSON.stringify(newAuth));
+      } else {
+        localStorage.removeItem("auth");
+      }
+      return newAuth;
+    });
+  };
 
   const value = useMemo(() => ({ auth, setAuth }), [auth]);
 
