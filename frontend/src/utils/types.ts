@@ -4,6 +4,8 @@ export interface Recipe {
   instructions: string;
   image_url?: string;
   rating?: number;
+  matched_ingredients?: number;
+  total_ingredients?: number;
   author: {
     username: string;
     id_user: number;

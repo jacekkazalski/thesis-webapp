@@ -54,7 +54,11 @@ export default function RecipeCard({ recipe }: Props) {
               {recipe.author?.username || "Nieznany autor"}
             </Typography>
             <Rating value={recipe.rating} readOnly size="small" />
+            
           </Stack>
+          <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
+              Składniki: {recipe.matched_ingredients || 0}/{recipe.total_ingredients || 0}
+            </Typography>
         </CardContent>
       </Card>
     </Box>
