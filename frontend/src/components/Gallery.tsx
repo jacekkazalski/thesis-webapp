@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "../api/axios";
+import useAxiosCustom from "../hooks/useAxiosCustom";
 import { Ingredient, Recipe } from "../utils/types";
 import {
   Box,
@@ -24,6 +24,7 @@ import useAuth from "../hooks/useAuth";
 
 export default function Gallery() {
   const {auth} = useAuth();
+  const axiosInstance = useAxiosCustom();
   const [viewType, setViewType] = useState<"gallery" | "list">("gallery");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
@@ -52,7 +53,7 @@ export default function Gallery() {
   useEffect(() => {
     const fetchRecipes = async () => {
       const ingredientIds = chosenIngredients.map( (i) => i.id_ingredient)
-      const response = await axios.get("/recipes", {
+      const response = await axiosInstance.get("/recipes", {
         params: { 
           sortBy, 
           search: searchQuery, 
@@ -66,7 +67,7 @@ export default function Gallery() {
       setRecipes(response.data.data);
     };
     const fetchIngredients = async () => {
-      const response = await axios.get("/ingredients");
+      const response = await axiosInstance.get("/ingredients");
       setAllIngredients(response.data.data);
     };
     fetchRecipes();

@@ -232,7 +232,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
     const authUser = req.user;
 
     const ingredients = 
-    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
+    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : [];
     console.log(ingredients)
 
     const allowedSortParams = ['newest', 'highest_rated', 'ingredients'];
@@ -289,7 +289,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
             .map(ui => ui.id_ingredient);
         }
     
-        ingredients?.push(...includedIngredients);
+        ingredients.push(...includedIngredients);
     }
 
     const recipes = await Recipe.findAll({

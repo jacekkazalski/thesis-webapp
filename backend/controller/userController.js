@@ -4,6 +4,7 @@ const initModels = require('../models/init-models');
 const { User, User_ingredient, Rating, Recipe, Ingredient_recipe, Diet, Ingredient_diet} = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
+const diet = require('../models/diet');
 
 
 const getUser = catchAsync(async (req, res, next) => {
@@ -55,8 +56,14 @@ const addUserIngredients = catchAsync(async (req, res, next) => {
     const authUser = req.user;
     const { ingredient } = req.query;
     const {is_excluded} = req.query;
-    const ingredients = 
-    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
+    let ingredients;
+    if (Array.isArray(ingredient)) {
+        ingredients = ingredient.map(Number);
+    } else if (ingredient) {
+        ingredients = [Number(ingredient)];
+    } else {
+        ingredients = null;
+    }
 
     if(!ingredients || is_excluded === undefined) {
         return next(new CustomError('Missing required fields', 400))
@@ -114,6 +121,7 @@ const getUserIngredients = catchAsync(async (req, res, next) => {
         userDietIngredients = await Ingredient_diet.findAll({
         where: { diet_id: userDiet.id_diet },
     });
+    
 }
     catch (error) {
         console.log('No diet assigned to user or error fetching diet ingredients');
@@ -124,9 +132,14 @@ const getUserIngredients = catchAsync(async (req, res, next) => {
         id_user: authUser.id,
         is_excluded: true
     })));
+    let dietIngredients = allIngredients.filter(ing => ing.is_excluded === true);
+    let pantryIngredients = allIngredients.filter(ing => ing.is_excluded === false);
     return res.status(200).json({
         status: 'success',
-        data: allIngredients
+        data: {
+            diet_ingredients: dietIngredients,
+            pantry_ingredients: pantryIngredients
+        }
     });
 });
 
