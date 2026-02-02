@@ -209,7 +209,7 @@ export default function RecipePage() {
 
             <Stack>
               <Typography variant="overline">
-                Twoja ocena {userRating ?? "Brak"}
+                Twoja ocena - {userRating ?? "Brak"}
               </Typography>
               <Rating
                 name="recipe-rating"
@@ -220,7 +220,7 @@ export default function RecipePage() {
               />
             </Stack>
             <Stack>
-              <Typography variant="overline">Średnia ocen</Typography>
+              <Typography variant="overline">Średnia ocen - {recipe?.rating ?? "Brak"}</Typography>
               <Rating readOnly value={recipe?.rating ?? 0} />
             </Stack>
           </Stack>
