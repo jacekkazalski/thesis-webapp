@@ -26,6 +26,7 @@ import {
 import useAuth from "../hooks/useAuth";
 import axios, { axiosCustom } from "../api/axios";
 import React, { useEffect, useRef, useState } from "react";
+import logo from "../assets/cowlodowce_logo.png";
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -79,6 +80,20 @@ export default function NavBar() {
       <Toolbar>
         <Stack direction="row">
           {/* Logo or Title */}
+          <Box
+            component="img"
+            src={logo}
+            alt="logo"
+            sx={{
+              objectFit: "contain",
+              height: 60,
+              width: "auto",
+              mr: 1,
+              alignSelf: "center",
+              cursor: "pointer",
+            }}
+            onClick={() => navigate("/")}
+          />
           <NavButton
             icon={HomeOutlined}
             text="Główna"
