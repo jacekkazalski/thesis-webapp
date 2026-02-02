@@ -165,5 +165,37 @@ const optionalAuthenticateToken = (req, res, next) => {
     })
 }
 
+const changePassword = catchAsync(async (req, res, next) => {
+    const authUser = req.user;
+    const { currentPassword, newPassword } = req.body;
 
-module.exports = { signup, login, authenticateToken, refresh, logout, optionalAuthenticateToken }
+    if (!currentPassword || !newPassword) {
+        return next(new CustomError('Missing required fields', 400))
+    }
+
+    if (newPassword.length < 8) {
+        return next(new CustomError('Password must be at least 8 characters long', 400))
+    }
+
+    const user = await User.findOne({
+        where: { id_user: authUser.id }
+    });
+
+    if (!user || !await bcrypt.compare(currentPassword, user.password)) {
+        return next(new CustomError('Current password is incorrect', 401))
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await user.update({
+        password: hashedPassword
+    });
+
+    return res.status(200).json({
+        status: 'success',
+        message: 'Password changed successfully'
+    });
+});
+
+
+module.exports = { signup, login, authenticateToken, refresh, logout, optionalAuthenticateToken, changePassword }
