@@ -192,8 +192,8 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
     if (!foundRecipe) {
         return next(new CustomError('Recipe not found', 404));
     }
-    // Check if user is author
-    if (foundRecipe.added_by !== authUser.id) {
+    // Check if user is author or moderator
+    if (foundRecipe.added_by !== authUser.id && authUser.role !== 'moderator') {
         return next(new CustomError('Unauthorized operation', 403));
     }
 

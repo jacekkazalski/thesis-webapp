@@ -61,13 +61,13 @@ const login = catchAsync(async (req, res, next) => {
     }
 
     const accessToken = jwt.sign(
-        { username: result.username , id: result.id_user},
+        { username: result.username, id: result.id_user, role: result.role },
         process.env.ACCESS_TOKEN_SECRET,
         //TODO: change expiresIn to 15m
         { expiresIn: '15m' }
     )
     const refreshToken = jwt.sign(
-        { username: result.username, id: result.id_user },
+        { username: result.username, id: result.id_user, role: result.role },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '1d' }
     )
@@ -81,7 +81,7 @@ const login = catchAsync(async (req, res, next) => {
             sameSite: 'Strict'
         })
 
-    return res.json({ accessToken, id_user: result.id_user, username: result.username, email: result.email })
+    return res.json({ accessToken, id_user: result.id_user, username: result.username, email: result.email, role: result.role })
 })
 const refresh = catchAsync(async (req, res, next) => {
     const cookies = req.cookies
@@ -100,7 +100,7 @@ const refresh = catchAsync(async (req, res, next) => {
             return next(new CustomError('Forbidden', 403))
         }
         const accessToken = jwt.sign(
-            { username: result.username , id: result.id_user},
+            { username: result.username, id: result.id_user, role: result.role },
             //TODO: change expiresIn to 15m
             process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
 

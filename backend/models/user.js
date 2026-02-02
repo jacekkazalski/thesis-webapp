@@ -21,6 +21,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       unique: "User_email_key"
     },
+    role: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: 'user'
+    },
     refresh_token: {
       type: DataTypes.STRING(255),
       allowNull: true
