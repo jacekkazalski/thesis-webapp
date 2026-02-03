@@ -226,6 +226,8 @@ const getRecipes = catchAsync(async (req, res, next) => {
         matchOnly,
         useSaved,
         useDiet,
+        page: pageQuery,
+        limit: limitQuery,
     } = req.query
 
 
@@ -233,10 +235,17 @@ const getRecipes = catchAsync(async (req, res, next) => {
 
     const ingredients = 
     Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : [];
-    console.log(ingredients)
 
     const allowedSortParams = ['newest', 'highest_rated', 'ingredients'];
     const sortParam = allowedSortParams.includes(sortBy) ? sortBy : 'newest';
+
+    // Pagination - protect against fetching too many rows
+    const DEFAULT_LIMIT = 50;
+    const MAX_LIMIT = 200;
+    const page = Number(pageQuery) > 0 ? Number(pageQuery) : 1;
+    let limit = Number(limitQuery) > 0 ? Number(limitQuery) : DEFAULT_LIMIT;
+    if (limit > MAX_LIMIT) limit = MAX_LIMIT;
+    const offset = (page - 1) * limit;
 
     let whereClause = {}
     if (searchQuery) {
@@ -292,20 +301,57 @@ const getRecipes = catchAsync(async (req, res, next) => {
         ingredients.push(...includedIngredients);
     }
 
+    // Build attributes and order for server-side sorting
+    const attributes = [
+        'id_recipe',
+        'name',
+        'image_path',
+        [fn('AVG', col('Ratings.value')), 'rating'],
+    ];
+
+    const order = [];
+    switch (sortParam) {
+        case 'newest':
+            // newest first
+            order.push(['id_recipe', 'DESC']);
+            break;
+        case 'highest_rated':
+            // order by aggregated rating
+            // Put recipes with ratings first, then order by rating desc
+            order.push([sequelize.where(fn('AVG', col('Ratings.value')), Op.is, null), 'ASC']);
+            order.push([fn('AVG', col('Ratings.value')), 'DESC']);
+            break;
+        case 'ingredients':
+            // When sorting by ingredients, sort by least missing first, then by most matching
+            if (ingredients && ingredients.length) {
+                // include Ingredient_recipe relation to compute missing and matched counts
+                includes.push({ model: Ingredient_recipe, as: 'Ingredient_recipes', attributes: [] });
+                attributes.push([fn('SUM', literal(`CASE WHEN "Ingredient_recipes"."id_ingredient" NOT IN (${ingredients.join(',')}) THEN 1 ELSE 0 END`)), 'missing_count']);
+                attributes.push([fn('SUM', literal(`CASE WHEN "Ingredient_recipes"."id_ingredient" IN (${ingredients.join(',')}) THEN 1 ELSE 0 END`)), 'matched_count']);
+                order.push([literal('missing_count'), 'ASC']);
+                order.push([literal('matched_count'), 'DESC']);
+            }
+            break;
+        default:
+            order.push(['id_recipe', 'DESC']);
+    }
+
     const recipes = await Recipe.findAll({
-        logging: console.log,
         where: whereClause,
         include: includes,
-        attributes: [
-            'id_recipe',
-            'name',
-            'image_path',
-            [fn('AVG', col('Ratings.value')), 'rating'],],
-
+        attributes: attributes,
         group: group,
+        limit,
+        offset,
+        subQuery: false,
+        order,
     });
 
     const recipeIds = recipes.map(r => r.id_recipe);
+    if (!recipeIds || recipeIds.length === 0) {
+        return res.status(200).json({ status: 'success', data: [] });
+    }
+
     const recipe_ingredients = await Ingredient_recipe.findAll({
         where: { id_recipe: recipeIds },
         include: [
@@ -322,10 +368,10 @@ const getRecipes = catchAsync(async (req, res, next) => {
                 id_ingredient: i.id_ingredient_Ingredient.id_ingredient,
                 name: i.id_ingredient_Ingredient.name
             }));
-        const recipeIngredientIds = recipeIngredientList.map(r => r.id_ingredient)
+        const recipeIngredientIds = recipeIngredientList.map(r => r.id_ingredient);
         const matchingIngredients = ingredients?.filter((id) => recipeIngredientIds.includes(id)).length;
         const totalIngredients = recipeIngredientIds.length;
-        const missingIngredients = totalIngredients-matchingIngredients;
+        const missingIngredients = totalIngredients - matchingIngredients;
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
@@ -339,29 +385,19 @@ const getRecipes = catchAsync(async (req, res, next) => {
             missing_ingredients: missingIngredients
         }
     });
-    const recipesSorted = recipesWithDetails;
-    switch(sortParam) {
-        case "newest":
-            recipesSorted.sort((a,b) => a.id_recipe-b.id_recipe);
-            break;
-        case "highest_rated":
-            recipesSorted.sort((a,b) => b.rating - a.rating)
-            break;
-        case "ingredients":
-            recipesSorted.sort((a,b) => {
-                matchingDiff =  b.matched_ingredients-a.matched_ingredients;
-                if (matchingDiff !==0) return matchingDiff;
-                return a.missing_ingredients-b.missing_ingredients
-            }
-            )
-    }
-    let recipesFiltered = matchOnly == 1 ? recipesSorted.filter((a) => a.missing_ingredients === 0) : recipesSorted;
-    recipesFiltered = excludedIngredients.length > 0 ?
-        recipesFiltered.filter((recipe) => {
+
+    // Applyfilters
+    let recipesFiltered = matchOnly == 1 
+        ? recipesWithDetails.filter((a) => a.missing_ingredients === 0) 
+        : recipesWithDetails;
+    
+    recipesFiltered = excludedIngredients.length > 0
+        ? recipesFiltered.filter((recipe) => {
             const recipeIngredientIds = recipe.ingredients.map(i => i.id_ingredient);
             return !recipeIngredientIds.some(id => excludedIngredients.includes(id));
-        }) : recipesFiltered;
-    //console.log(recipesSorted)
+        })
+        : recipesFiltered;
+
     res.status(200).json({
         status: 'success',
         data: recipesFiltered
