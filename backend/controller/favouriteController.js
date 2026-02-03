@@ -8,7 +8,6 @@ const CustomError = require('../utils/customError');
 const toggleFavourite = catchAsync(async (req, res, next) => {
     const body = req.body;
     const authUser = req.user;
-    // Check if favourite exists
     const existingFavourite = await Favourite.findOne({
         where: {
             id_user: authUser.id,
@@ -16,7 +15,6 @@ const toggleFavourite = catchAsync(async (req, res, next) => {
         }
     });
     if (existingFavourite) {
-        // If it exists, delete it
         await Favourite.destroy({
             where: {
                 id_user: authUser.id,
@@ -29,7 +27,14 @@ const toggleFavourite = catchAsync(async (req, res, next) => {
             isFavourite: false
         });
     }
-    // If it doesn't exist, create it
+    const recipe = await Recipe.findOne({
+        where: {
+            id_recipe: body.id_recipe
+        }
+    });
+    if (!recipe) {
+        return next(new CustomError('Recipe not found', 404));
+    }
     const newFavourite = await Favourite.create({
         id_user: authUser.id,
         id_recipe: body.id_recipe
