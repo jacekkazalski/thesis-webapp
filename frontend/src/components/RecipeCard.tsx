@@ -42,23 +42,33 @@ export default function RecipeCard({ recipe }: Props) {
           </Typography>
         </CardActionArea>
         <CardContent>
-          <Stack
+            <Stack
             direction="row"
             spacing={1}
             alignItems="center"
             onClick={() => navigate(`/user/${recipe.author?.id_user}`)}
             sx={{ cursor: "pointer" }}
-          >
+            >
             <Avatar sx={{ bgcolor: "secondary.main", width: 24, height: 24 }} />
-            <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+              mt: 0.5,
+              maxWidth: 120,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              }}
+            >
               {recipe.author?.username || "Nieznany autor"}
             </Typography>
             <Rating value={recipe.rating} readOnly size="small" />
-            
-          </Stack>
-          <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
-              Składniki: {recipe.matched_ingredients || 0}/{recipe.total_ingredients || 0}
+            </Stack>
+            {(recipe.total_ingredients) && (
+            <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
+              Składniki: {recipe.matched_ingredients || 0}/{recipe.total_ingredients}
             </Typography>
+            )}
         </CardContent>
       </Card>
     </Box>

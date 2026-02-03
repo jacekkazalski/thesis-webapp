@@ -65,11 +65,9 @@ export default function ProfilePage() {
           {user?.username}
         </Typography>
         {auth?.id_user && auth.id_user.toString() === userId && (
-          <Tooltip title="Ustawienia">
-            <IconButton onClick={() => navigate("/settings")}>
-              <Settings />
-            </IconButton>
-          </Tooltip>
+            <Button variant="contained" startIcon={<Settings />} onClick={() => navigate("/settings")}>
+              Ustawienia
+            </Button>
         )}
         </Stack>
         <Tabs value={tabValue} onChange={handleTabChange} centered>
