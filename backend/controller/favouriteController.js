@@ -1,5 +1,6 @@
 const sequelize = require('../config/database');
 const {literal} = require('sequelize');
+const {literal} = require('sequelize');
 const initModels = require('../models/init-models');
 const { Favourite, Recipe, User} = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');

@@ -1,4 +1,4 @@
-
+const { where } = require('sequelize');
 const sequelize = require('../config/database');
 const initModels = require('../models/init-models');
 const {literal} = require('sequelize');
@@ -126,6 +126,7 @@ const getUserIngredients = catchAsync(async (req, res, next) => {
     catch (error) {
         console.log('No diet assigned to user or error fetching diet ingredients');
     }
+
 
     const allIngredients = userIngredients.concat(userDietIngredients.map(ing => ({
         id_ingredient: ing.id_ingredient,

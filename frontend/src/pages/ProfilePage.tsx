@@ -39,14 +39,14 @@ export default function ProfilePage() {
       setUser(response.data);
     };
     const fetchUserRecipes = async () => {
-      const response = await axios.get(`/users/recipes`, {
-        params: { id_user: userId },
+      const response = await axios.get(`/recipes`, {
+        params: { authorId: userId },
       });
       setUserRecipes(response.data.data);
     };
     const fetchUserFavourites = async () => {
-      const response = await axios.get(`/favourites/user`, {
-        params: { id_user: userId },
+      const response = await axios.get(`/recipes`, {
+        params: { favId: userId },
       });
       setFavoriteRecipes(response.data.data);
     };
