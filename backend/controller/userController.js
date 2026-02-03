@@ -89,7 +89,7 @@ const removeUserIngredient = catchAsync(async (req, res, next) => {
     const authUser = req.user;
     const { ingredient } = req.query;
     const ingredients =
-        Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : null;
+        Array.isArray(ingredient) ? ingredient.map(Number) : (ingredient != null ? [Number(ingredient)] : []);
     for (const id_ingredient of ingredients) {
 
         await User_ingredient.destroy({
