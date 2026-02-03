@@ -72,7 +72,7 @@ const getRandomRecipe = catchAsync(async (req, res, next) => {
     });
 })
 const createRecipe = catchAsync(async (req, res, next) => {
-     const {
+    const {
         name,
         instructions,
         ingredients,
@@ -82,41 +82,41 @@ const createRecipe = catchAsync(async (req, res, next) => {
     console.log(authUser);
 
     // Check if parameters aren't empty strings and are present
-     if (!name || name.trim() === '' ||
+    if (!name || name.trim() === '' ||
         !instructions || instructions.trim() === '' ||
         !ingredients) {
         return next(new CustomError('Missing required fields', 400));
     }
 
     const ingredientList = typeof ingredients === 'string' ? JSON.parse(ingredients) : ingredients;
-    
+
     const newRecipe = await sequelize.transaction(async (t) => {
         const createdRecipe = await Recipe.create({
             name: name,
             instructions: instructions,
             added_by: authUser.id,
             image_path: imagePath
-    }, { transaction: t });
-    if (!createdRecipe) {
-        return next(new CustomError('Recipe could not be created', 500));
-    }
-   
-    for (const element of ingredientList) {
-        // Check if ingredient with given id exists
-        const ingredientExists = await Ingredient.findOne({
-            where: { id_ingredient: element.id_ingredient },
-            transaction: t
-        });
-        if (!ingredientExists) {
-            throw new CustomError(`Ingredient with id ${element.id_ingredient} not found`, 404);
-        }
-        await Ingredient_recipe.create({
-            id_ingredient: element.id_ingredient,
-            id_recipe: createdRecipe.id_recipe,
-            quantity: element.quantity
         }, { transaction: t });
-    }
-    return createdRecipe;
+        if (!createdRecipe) {
+            return next(new CustomError('Recipe could not be created', 500));
+        }
+
+        for (const element of ingredientList) {
+            // Check if ingredient with given id exists
+            const ingredientExists = await Ingredient.findOne({
+                where: { id_ingredient: element.id_ingredient },
+                transaction: t
+            });
+            if (!ingredientExists) {
+                throw new CustomError(`Ingredient with id ${element.id_ingredient} not found`, 404);
+            }
+            await Ingredient_recipe.create({
+                id_ingredient: element.id_ingredient,
+                id_recipe: createdRecipe.id_recipe,
+                quantity: element.quantity
+            }, { transaction: t });
+        }
+        return createdRecipe;
     });
 
     return res.status(201).json({
@@ -133,7 +133,7 @@ const updateRecipe = catchAsync(async (req, res, next) => {
     } = req.body;
     const authUser = req.user;
     const imagePath = req.file ? `./images/${req.file.filename}` : null;
-     // Check if parameters aren't empty strings and are present
+    // Check if parameters aren't empty strings and are present
     if (!name || name.trim() === '' ||
         !instructions || instructions.trim() === '' ||
         !ingredients) {
@@ -216,30 +216,21 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
         return next(new CustomError('Recipe could not be deleted', 500));
     }
 });
+
 const getRecipes = catchAsync(async (req, res, next) => {
     const {
         search: searchQuery,
         ingredient,
         sortBy,
-        authorId: authorUserId,
-        favId: favUserId,
         matchOnly,
         useSaved,
         useDiet,
         page: pageQuery,
         limit: limitQuery,
-    } = req.query
-
+    } = req.query;
 
     const authUser = req.user;
 
-    const ingredients = 
-    Array.isArray(ingredient) && ingredient.length ? ingredient.map(Number) : [];
-
-    const allowedSortParams = ['newest', 'highest_rated', 'ingredients'];
-    const sortParam = allowedSortParams.includes(sortBy) ? sortBy : 'newest';
-
-    // Pagination - protect against fetching too many rows
     const DEFAULT_LIMIT = 50;
     const MAX_LIMIT = 200;
     const page = Number(pageQuery) > 0 ? Number(pageQuery) : 1;
@@ -247,162 +238,172 @@ const getRecipes = catchAsync(async (req, res, next) => {
     if (limit > MAX_LIMIT) limit = MAX_LIMIT;
     const offset = (page - 1) * limit;
 
-    let whereClause = {}
-    if (searchQuery) {
-        whereClause.name = { [Op.iLike]: `%${searchQuery}%` };
-    }
-    if (authorUserId) {
-        whereClause.added_by = authorUserId;
-    }
-    const includes = [
-        {
-            model: User,
-            as: 'added_by_User',
-            attributes: ['username', 'id_user']
-        },
-        {
-            model: Rating,
-            as: 'Ratings',
-            attributes: [],
+    const allowedSortParams = ['newest', 'highest_rated', 'ingredients'];
+    const sortParam = allowedSortParams.includes(sortBy) ? sortBy : 'newest';
 
-        },
-    ]
-    const group = ['Recipe.id_recipe', 'added_by_User.id_user'];
-    // Condition for searching only for recipes added to favourites by a specific user
-    if (favUserId) {
-        includes.push({
-            model: Favourite,
-            as: 'Favourites',
-            where: {
-                id_user: favUserId
-            },
-            required: true
-        })
-        group.push('Favourites.id_recipe', 'Favourites.id_user');
-    }
-    // User's saved ingredients for logged in users
+    const queryIngredients =
+        Array.isArray(ingredient) ? ingredient.map(Number) : (ingredient != null ? [Number(ingredient)] : []);
+    let ingredients = queryIngredients.filter(Number.isFinite);
+
     let excludedIngredients = [];
-    let includedIngredients = [];
     if (authUser && (useSaved == 1 || useDiet == 1)) {
+
+        const userId = authUser.id_user ?? authUser.id;
+
         const userIngredients = await User_ingredient.findAll({
-            where: { id_user: authUser.id },
+            where: { id_user: userId }
         });
+
         if (useDiet == 1) {
             excludedIngredients = userIngredients
                 .filter(ui => ui.is_excluded)
                 .map(ui => ui.id_ingredient);
         }
+
         if (useSaved == 1) {
-             includedIngredients = userIngredients
-            .filter(ui => !ui.is_excluded)
-            .map(ui => ui.id_ingredient);
+            const includedIngredients = userIngredients
+                .filter(ui => !ui.is_excluded)
+                .map(ui => ui.id_ingredient);
+
+            ingredients = [...ingredients, ...includedIngredients];
         }
-    
-        ingredients.push(...includedIngredients);
     }
 
-    // Build attributes and order for server-side sorting
+    ingredients = [...new Set(ingredients.map(Number))];
+    const ingListSql = ingredients.length ? ingredients.join(',') : null;
+
+    const whereClause = {};
+    if (searchQuery) {
+        whereClause.name = { [Op.iLike]: `%${searchQuery}%` };
+    }
+
+    if (excludedIngredients.length) {
+        whereClause[Op.and] = whereClause[Op.and] || [];
+        whereClause[Op.and].push(literal(`NOT EXISTS (
+            SELECT 1
+            FROM public."Ingredient_recipe" irx
+            WHERE irx."id_recipe" = "Recipe"."id_recipe"
+            AND irx."id_ingredient" IN (${excludedIngredients.join(',')})
+    )`));
+    }
+
+
+
     const attributes = [
         'id_recipe',
         'name',
         'image_path',
-        [fn('AVG', col('Ratings.value')), 'rating'],
+        [
+            literal(`(
+        SELECT COALESCE(AVG(rt."value"), 0)
+        FROM public."Rating" rt
+        WHERE rt."id_recipe" = "Recipe"."id_recipe"
+      )`),
+            'rating',
+        ],
     ];
 
-    const order = [];
-    switch (sortParam) {
-        case 'newest':
-            // newest first
-            order.push(['id_recipe', 'DESC']);
-            break;
-        case 'highest_rated':
-            // order by aggregated rating
-            // Put recipes with ratings first, then order by rating desc
-            order.push([sequelize.where(fn('AVG', col('Ratings.value')), Op.is, null), 'ASC']);
-            order.push([fn('AVG', col('Ratings.value')), 'DESC']);
-            break;
-        case 'ingredients':
-            // When sorting by ingredients, sort by least missing first, then by most matching
-            if (ingredients && ingredients.length) {
-                // include Ingredient_recipe relation to compute missing and matched counts
-                includes.push({ model: Ingredient_recipe, as: 'Ingredient_recipes', attributes: [] });
-                attributes.push([fn('SUM', literal(`CASE WHEN "Ingredient_recipes"."id_ingredient" NOT IN (${ingredients.join(',')}) THEN 1 ELSE 0 END`)), 'missing_count']);
-                attributes.push([fn('SUM', literal(`CASE WHEN "Ingredient_recipes"."id_ingredient" IN (${ingredients.join(',')}) THEN 1 ELSE 0 END`)), 'matched_count']);
-                order.push([literal('missing_count'), 'ASC']);
-                order.push([literal('matched_count'), 'DESC']);
-            }
-            break;
-        default:
-            order.push(['id_recipe', 'DESC']);
+    if (ingredients.length) {
+        attributes.push(
+            [
+                literal(`(
+          SELECT COUNT(*)
+          FROM public."Ingredient_recipe" ir
+          WHERE ir."id_recipe" = "Recipe"."id_recipe"
+            AND ir."id_ingredient" IN (${ingListSql})
+        )`),
+                'matched_count',
+            ],
+            [
+                literal(`(
+          SELECT COUNT(*)
+          FROM public."Ingredient_recipe" ir
+          WHERE ir."id_recipe" = "Recipe"."id_recipe"
+            AND ir."id_ingredient" NOT IN (${ingListSql})
+        )`),
+                'missing_count',
+            ]
+        );
+
+    }
+    else if (!ingredients.length) {
+        attributes.push(
+            [literal(`0`), 'matched_count'],
+            [
+                literal(`(
+          SELECT COUNT(*)
+          FROM public."Ingredient_recipe" ir
+          WHERE ir."id_recipe" = "Recipe"."id_recipe"
+        )`),
+                'missing_count',
+            ]
+        );
     }
 
+    const order = [];
+    if (sortParam === 'newest') {
+        order.push(['id_recipe', 'DESC']);
+        order.push([literal(`"rating"`), 'DESC']);
+    } else if (sortParam === 'highest_rated') {
+        order.push([literal(`"rating"`), 'DESC']);
+    } else if (sortParam === 'ingredients' && ingredients.length) {
+        order.push([literal(`"missing_count"`), 'ASC']);
+        order.push([literal(`"matched_count"`), 'DESC']);
+        order.push([literal(`"rating"`), 'DESC']);
+    } else {
+        order.push(['id_recipe', 'DESC']);
+    }
     const recipes = await Recipe.findAll({
         where: whereClause,
-        include: includes,
-        attributes: attributes,
-        group: group,
+        include: [
+            {
+                model: User,
+                as: 'added_by_User',
+                attributes: ['username', 'id_user'],
+            },
+        ],
+        attributes,
         limit,
         offset,
         subQuery: false,
         order,
     });
 
-    const recipeIds = recipes.map(r => r.id_recipe);
-    if (!recipeIds || recipeIds.length === 0) {
+    if (recipes.length === 0) {
         return res.status(200).json({ status: 'success', data: [] });
     }
 
-    const recipe_ingredients = await Ingredient_recipe.findAll({
-        where: { id_recipe: recipeIds },
-        include: [
-            {
-                model: Ingredient,
-                as: 'id_ingredient_Ingredient',
-                attributes: ['id_ingredient', 'name']
-            }
-        ]
-    });
     const recipesWithDetails = recipes.map(recipe => {
-        const recipeIngredientList = recipe_ingredients.filter(i => i.id_recipe === recipe.id_recipe)
-            .map(i => ({
-                id_ingredient: i.id_ingredient_Ingredient.id_ingredient,
-                name: i.id_ingredient_Ingredient.name
-            }));
-        const recipeIngredientIds = recipeIngredientList.map(r => r.id_ingredient);
-        const matchingIngredients = ingredients?.filter((id) => recipeIngredientIds.includes(id)).length;
-        const totalIngredients = recipeIngredientIds.length;
-        const missingIngredients = totalIngredients - matchingIngredients;
+
+        const matchingIngredients = parseInt(recipe.get('matched_count'));
+        const missingIngredients = parseInt(recipe.get('missing_count'));
+        const totalIngredients = matchingIngredients + missingIngredients;
+
         return {
             id_recipe: recipe.id_recipe,
             name: recipe.name,
             image_url: recipe.image_path
-                ? `${req.protocol}://${req.get('host')}/${recipe.image_path}` : null,
+                ? `${req.protocol}://${req.get('host')}/${recipe.image_path}`
+                : null,
             author: recipe.added_by_User,
             rating: recipe.get('rating') ? parseFloat(recipe.get('rating')) : null,
-            ingredients: recipeIngredientList,
             matched_ingredients: matchingIngredients,
             total_ingredients: totalIngredients,
-            missing_ingredients: missingIngredients
-        }
+            missing_ingredients: missingIngredients,
+        };
     });
 
-    // Applyfilters
-    let recipesFiltered = matchOnly == 1 
-        ? recipesWithDetails.filter((a) => a.missing_ingredients === 0) 
-        : recipesWithDetails;
-    
-    recipesFiltered = excludedIngredients.length > 0
-        ? recipesFiltered.filter((recipe) => {
-            const recipeIngredientIds = recipe.ingredients.map(i => i.id_ingredient);
-            return !recipeIngredientIds.some(id => excludedIngredients.includes(id));
-        })
-        : recipesFiltered;
+    let recipesFiltered = recipesWithDetails;
+    if (matchOnly == 1 && ingredients.length) {
+        recipesFiltered = recipesFiltered.filter(r => r.missing_ingredients === 0);
+    }
 
-    res.status(200).json({
+    return res.status(200).json({
         status: 'success',
-        data: recipesFiltered
+        data: recipesFiltered,
     });
 });
+
 const isAuthor = catchAsync(async (req, res, next) => {
     const authUser = req.user;
     const { id_recipe } = req.query;
@@ -433,4 +434,4 @@ const isAuthor = catchAsync(async (req, res, next) => {
 
 
 
-module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe, getRandomRecipe, updateRecipe};
+module.exports = { createRecipe, getRecipe, getRecipes, isAuthor, deleteRecipe, getRandomRecipe, updateRecipe };
