@@ -29,7 +29,7 @@ export default function Gallery() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
-  const [sortBy, setSortBy] = useState("highest_rated");
+  const [sortBy, setSortBy] = useState("ingredients");
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 

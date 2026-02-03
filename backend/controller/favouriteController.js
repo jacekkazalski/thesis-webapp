@@ -1,6 +1,7 @@
 const sequelize = require('../config/database');
+const {literal} = require('sequelize');
 const initModels = require('../models/init-models');
-const { Favourite} = initModels(sequelize);
+const { Favourite, Recipe, User} = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
 
@@ -66,5 +67,52 @@ const isFavourite = catchAsync(async (req, res, next) => {
         });
     }
 });
+const getFavourites = catchAsync(async (req, res, next) => {
+    const { id_user } = req.query;
+    if (!id_user) {
+        return next(new CustomError('Missing required fields', 400));
+    }
+    const favouriteRecipeIds = await Favourite.findAll({
+        attributes: ['id_recipe'],
+        where: { id_user: id_user },
+    });
+    const recipes = await Recipe.findAll({
+        attributes: [
+            'id_recipe',
+            'name', 
+            'image_path',
+            [
+              literal(`(
+                SELECT COALESCE(AVG(rt."value"), 0)
+                FROM public."Rating" rt
+                WHERE rt."id_recipe" = "Recipe"."id_recipe"
+              )`),
+              'rating',
+            ],],
+        where: {
+            id_recipe: favouriteRecipeIds.map(fav => fav.id_recipe)
+        },
+        include: [
+            {
+                model: User,
+                as: 'added_by_User',
+                attributes: ['id_user', 'username']
+            }
+        ]
+    });
 
-module.exports = { toggleFavourite, isFavourite };
+    const recipesFormatted = recipes.map(recipe => ({
+        id_recipe: recipe.id_recipe,
+        name: recipe.name,
+        image_url: recipe.image_path ? 
+        `${req.protocol}://${req.get('host')}/${recipe.image_path}` : null,
+        author: recipe.added_by_User,
+        rating: parseFloat(recipe.get('rating')),
+    }));
+    return res.status(200).json({
+        status: 'success',
+        data: recipesFormatted
+    });
+});
+
+module.exports = { toggleFavourite, isFavourite, getFavourites };

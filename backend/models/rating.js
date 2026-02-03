@@ -26,7 +26,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     tableName: 'Rating',
     schema: 'public',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "Rating_pkey",
