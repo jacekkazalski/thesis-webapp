@@ -54,18 +54,33 @@ const getRecipe = catchAsync(async (req, res, next) => {
     });
 });
 const getRandomRecipe = catchAsync(async (req, res, next) => {
-    const count = await Recipe.count();
-    if (count === 0) {
-        return next(new CustomError('No recipes found', 404));
-    }
-    const randomIndex = Math.floor(Math.random() * count);
-    const randomRecipe = await Recipe.findOne({
-        limit: 1,
-        offset: randomIndex,
+    const minMax = await Recipe.findOne({
+        attributes: [
+            [fn('MIN', col('id_recipe')), 'min_id'],
+            [fn('MAX', col('id_recipe')), 'max_id'],
+        ]
     });
-    if (!randomRecipe) {
+
+    const minId = Number(minMax?.get('min_id'));
+    const maxId = Number(minMax?.get('max_id'));
+
+    if (!Number.isFinite(minId) || !Number.isFinite(maxId)) {
         return next(new CustomError('No recipes found', 404));
     }
+
+    const randomId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
+
+    let randomRecipe = await Recipe.findOne({
+        where: { id_recipe: { [Op.gte]: randomId } },
+        order: [['id_recipe', 'ASC']],
+    });
+
+    if (!randomRecipe) {
+        randomRecipe = await Recipe.findOne({
+            order: [['id_recipe', 'ASC']],
+        });
+    }
+
     return res.status(200).json({
         status: 'success',
         id_recipe: randomRecipe.id_recipe,
