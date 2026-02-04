@@ -5,6 +5,14 @@ const sendErrorDev = (err, res) => {
     const message = err.message;
     const stack = err.stack;
 
+    // Log detailed error to console for development
+    console.error('==== ERROR DETAILS ====');
+    console.error(`Status Code: ${statusCode}`);
+    console.error(`Status: ${status}`);
+    console.error(`Message: ${message}`);
+    console.error(`\nStack Trace:\n${stack}`);
+    console.error('======================\n');
+
     res.status(statusCode).json({
         status,
         message,
@@ -40,8 +48,9 @@ const errorHandler = (err, req, res, next) => {
     }
     if(process.env.NODE_ENV === 'development') {
         sendErrorDev(err, res);
+    } else {
+        sendErrorProd(err, res);
     }
-    sendErrorProd(err, res);
 }
 
 module.exports = errorHandler;

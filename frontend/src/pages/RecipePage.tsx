@@ -220,7 +220,7 @@ export default function RecipePage() {
               />
             </Stack>
             <Stack>
-              <Typography variant="overline">Średnia ocen - {recipe?.rating ?? "Brak"}</Typography>
+              <Typography variant="overline">Średnia ocen - {recipe?.rating ? recipe.rating.toFixed(2) : "Brak"}</Typography>
               <Rating readOnly value={recipe?.rating ?? 0} />
             </Stack>
           </Stack>

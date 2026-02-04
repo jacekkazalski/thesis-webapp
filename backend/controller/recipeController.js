@@ -81,7 +81,6 @@ const createRecipe = catchAsync(async (req, res, next) => {
     const imagePath = req.file ? `./images/${req.file.filename}` : null;
     console.log(authUser);
 
-    // Check if parameters aren't empty strings and are present
     if (!name || name.trim() === '' ||
         !instructions || instructions.trim() === '' ||
         !ingredients) {
@@ -286,24 +285,21 @@ const getRecipes = catchAsync(async (req, res, next) => {
             AND irx."id_ingredient" IN (${excludedIngredients.join(',')})
     )`));
     }
-
-
-
     const attributes = [
         'id_recipe',
         'name',
-        'image_path',
-        [
-            literal(`(
-        SELECT COALESCE(AVG(rt."value"), 0)
-        FROM public."Rating" rt
-        WHERE rt."id_recipe" = "Recipe"."id_recipe"
-      )`),
-            'rating',
-        ],
+        'image_path'
     ];
-
-    if (ingredients.length) {
+    const order = []
+    if (sortParam === 'highest_rated') {
+        attributes.push([literal(`(
+          SELECT COALESCE(AVG(rt."value"), 0)
+          FROM public."Rating" rt
+          WHERE rt."id_recipe" = "Recipe"."id_recipe"
+        )`), 'rating']);
+        order.push([literal(`"rating"`), 'DESC']);
+    }
+    else if (sortParam === 'ingredients' && ingredients.length) {
         attributes.push(
             [
                 literal(`(
@@ -324,33 +320,11 @@ const getRecipes = catchAsync(async (req, res, next) => {
                 'missing_count',
             ]
         );
-
-    }
-    else if (!ingredients.length) {
-        attributes.push(
-            [literal(`0`), 'matched_count'],
-            [
-                literal(`(
-          SELECT COUNT(*)
-          FROM public."Ingredient_recipe" ir
-          WHERE ir."id_recipe" = "Recipe"."id_recipe"
-        )`),
-                'missing_count',
-            ]
-        );
-    }
-
-    const order = [];
-    if (sortParam === 'newest') {
-        order.push(['id_recipe', 'DESC']);
-        order.push([literal(`"rating"`), 'DESC']);
-    } else if (sortParam === 'highest_rated') {
-        order.push([literal(`"rating"`), 'DESC']);
-    } else if (sortParam === 'ingredients' && ingredients.length) {
-        order.push([literal(`"missing_count"`), 'ASC']);
         order.push([literal(`"matched_count"`), 'DESC']);
-        order.push([literal(`"rating"`), 'DESC']);
-    } else {
+        order.push([literal(`"missing_count"`), 'ASC']);
+        
+    }
+    else {
         order.push(['id_recipe', 'DESC']);
     }
     const recipes = await Recipe.findAll({
@@ -365,14 +339,39 @@ const getRecipes = catchAsync(async (req, res, next) => {
         attributes,
         limit,
         offset,
-        subQuery: false,
         order,
     });
-
     if (recipes.length === 0) {
         return res.status(200).json({ status: 'success', data: [] });
     }
 
+    const recipeIds = recipes.map(r => r.id_recipe);
+    if ((sortParam !== 'ingredients' || !ingredients.length)) {
+        const recipeIngredients = await Ingredient_recipe.findAll({
+            where: { id_recipe: { [Op.in]: recipeIds } },
+        });
+
+        recipes.forEach(recipe => {
+            recipe.dataValues.matched_count = recipeIngredients.filter(ri => 
+                ri.id_recipe === recipe.id_recipe && ingredients.includes(ri.id_ingredient)
+            ).length;
+            recipe.dataValues.missing_count = recipeIngredients.filter(ri => 
+                ri.id_recipe === recipe.id_recipe 
+            ).length - recipe.dataValues.matched_count;
+        });
+
+    }
+    if(sortParam !== 'highest_rated') {
+        const ratings = await Rating.findAll({
+            where: { id_recipe: { [Op.in]: recipeIds } },
+            attributes: ['id_recipe', [fn('AVG', col('value')), 'rating']],
+            group: ['id_recipe']
+        });
+
+        recipes.forEach(recipe => {
+            recipe.dataValues.rating = ratings.find(r => r.id_recipe === recipe.id_recipe)?.get('rating') ?? 0;
+        });
+    }
     const recipesWithDetails = recipes.map(recipe => {
 
         const matchingIngredients = parseInt(recipe.get('matched_count'));
