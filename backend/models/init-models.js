@@ -50,6 +50,10 @@ function initModels(sequelize) {
   User.hasMany(Recipe, { as: "Recipes", foreignKey: "added_by"});
   User_ingredient.belongsTo(User, { as: "id_user_User", foreignKey: "id_user"});
   User.hasMany(User_ingredient, { as: "User_ingredients", foreignKey: "id_user"});
+  Ingredient_diet.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient"});
+  Ingredient.hasMany(Ingredient_diet, { as: "Ingredient_diets", foreignKey: "id_ingredient"});
+  Ingredient_diet.belongsTo(Diet, { as: "id_diet_Diet", foreignKey: "id_diet"});
+  Diet.hasMany(Ingredient_diet, { as: "Ingredient_diets", foreignKey: "id_diet"});
 
   return {
     Category,

@@ -3,6 +3,12 @@ module.exports = function(sequelize, DataTypes) {
   return sequelize.define('Diet', {
     id_diet: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      identity: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING(25),
       allowNull: false
     }
   }, {

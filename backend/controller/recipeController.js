@@ -1,7 +1,7 @@
 const sequelize = require('../config/database');
 const { Op, fn, col, literal } = require('sequelize');
 const initModels = require('../models/init-models');
-const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating, User_ingredient } = initModels(sequelize);
+const { Recipe, Ingredient, User, Ingredient_recipe, Favourite, Rating, User_ingredient, Ingredient_diet } = initModels(sequelize);
 const catchAsync = require('../utils/catchAsync');
 const CustomError = require('../utils/customError');
 
@@ -265,11 +265,21 @@ const getRecipes = catchAsync(async (req, res, next) => {
         const userIngredients = await User_ingredient.findAll({
             where: { id_user: userId }
         });
+        const userDiet = await User.findOne({
+            where: { id_user: userId },
+            attributes: ['id_diet']
+        });
 
         if (useDiet == 1) {
             excludedIngredients = userIngredients
                 .filter(ui => ui.is_excluded)
                 .map(ui => ui.id_ingredient);
+            if (userDiet && userDiet.id_diet) {
+                const dietIngredients = await Ingredient_diet.findAll({
+                    where: { id_diet: userDiet.id_diet }
+                });
+                excludedIngredients = [...excludedIngredients, ...dietIngredients.map(di => di.id_ingredient)];
+            }
         }
 
         if (useSaved == 1) {

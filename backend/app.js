@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRouter = require('./route/authRoute');
 const recipeRouter = require('./route/recipeRoute');
 const ingredientRouter = require('./route/ingredientRoute');
+const dietRouter = require('./route/dietRoute');
 const favouriteRouter = require('./route/favouriteRoute');
 const ratingRouter = require('./route/ratingRoute');
 const userRouter = require('./route/userRoute');
@@ -28,6 +29,7 @@ const port = process.env.PORT || 3000;
 app.use('/api/auth', authRouter)
 app.use('/api/recipes', recipeRouter)
 app.use('/api/ingredients', ingredientRouter)
+app.use('/api/diets', dietRouter)
 app.use('/api/favourites', favouriteRouter)
 app.use('/api/ratings', ratingRouter)
 app.use('/api/users', userRouter)

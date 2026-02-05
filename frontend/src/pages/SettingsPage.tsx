@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography, Button, Alert, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+﻿import { Paper, Stack, Typography, Button, Alert, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { IngredientMultiSelect } from "../components/IngredientMultiSelect";
 import { Ingredient } from "../utils/types";
 import { useEffect, useState } from "react";
@@ -9,21 +9,22 @@ import { useNavigate } from "react-router-dom";
 export default function SettingsPage() {
     const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
     const [pantryIngredients, setPantryIngredients] = useState<Ingredient[]>([]);
-    const [dietIngredients, setDietIngredients] = useState<Ingredient[]>([]);
+    const [excludedIngredients, setExcludedIngredients] = useState<Ingredient[]>([]);
+    const [availableDiets, setAvailableDiets] = useState<Array<{ id_diet: number; name: string }>>([]);
+    const [selectedDietId, setSelectedDietId] = useState<number | "">("");
+    const [initialSelectedDietId, setInitialSelectedDietId] = useState<number | "">("");
     const [initialPantryIds, setInitialPantryIds] = useState<Set<number>>(new Set());
     const [initialDietIds, setInitialDietIds] = useState<Set<number>>(new Set());
     const [errorMsg, setErrorMsg] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
-    // Change password state
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordError, setPasswordError] = useState("");
 
-    // Delete account state
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
@@ -31,22 +32,24 @@ export default function SettingsPage() {
     const navigate = useNavigate();
 
     const pantryIds = new Set(pantryIngredients.map(ing => ing.id_ingredient));
-    const dietIds = new Set(dietIngredients.map(ing => ing.id_ingredient));
+    const dietIds = new Set(excludedIngredients.map(ing => ing.id_ingredient));
     const overlappingIds = Array.from(pantryIds).filter(id => dietIds.has(id));
     const overlappingNames = pantryIngredients
         .filter(ing => overlappingIds.includes(ing.id_ingredient))
         .map(ing => ing.name);
     const hasOverlap = overlappingIds.length > 0;
-    const overlapErrorMsg = hasOverlap 
-        ? `Składniki: "${overlappingNames.join(", ")}" nie mogą być jednocześnie w spiżarni i wykluczonych`
+    const overlapErrorMsg = hasOverlap
+        ? `Składniki: "${overlappingNames.join(", ")}" nie mogą być jednocześnie w spiżarni i na liście wykluczonych.`
         : "";
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [ingredientsRes, userIngRes] = await Promise.all([
+                const [ingredientsRes, userIngRes, dietsRes, userDietRes] = await Promise.all([
                     axiosPrivate.get("/ingredients"),
-                    axiosPrivate.get("users/ingredients")
+                    axiosPrivate.get("users/ingredients"),
+                    axiosPrivate.get("/diets"),
+                    axiosPrivate.get("/diets/user"),
                 ]);
                 const allIngs = ingredientsRes.data.data;
                 setAllIngredients(allIngs);
@@ -55,9 +58,13 @@ export default function SettingsPage() {
                 const pantry = allIngs.filter((ing: { id_ingredient: number; }) => pantryIds.includes(ing.id_ingredient));
                 const diet = allIngs.filter((ing: { id_ingredient: number; }) => dietIds.includes(ing.id_ingredient));
                 setPantryIngredients(pantry);
-                setDietIngredients(diet);
+                setExcludedIngredients(diet);
                 setInitialPantryIds(new Set(pantryIds));
                 setInitialDietIds(new Set(dietIds));
+                setAvailableDiets(dietsRes.data.data || []);
+                const currentDietId = userDietRes.data?.data?.diet_id ?? "";
+                setSelectedDietId(currentDietId);
+                setInitialSelectedDietId(currentDietId);
             } catch (error) {
                 console.log(error);
             }
@@ -69,7 +76,6 @@ export default function SettingsPage() {
         setErrorMsg("");
         setSuccessMsg("");
 
-        // Check for overlapping ingredients
         if (hasOverlap) {
             setErrorMsg(overlapErrorMsg);
             return;
@@ -77,21 +83,20 @@ export default function SettingsPage() {
 
         setIsSaving(true);
         try {
-            // Determine what changed
+
             const pantryIdsArray = Array.from(pantryIds);
             const dietIdsArray = Array.from(dietIds);
 
-            // Ingredients to add to pantry (not in initial set)
+
             const pantryToAdd = pantryIdsArray.filter(id => !initialPantryIds.has(id));
-            // Ingredients to remove from pantry
+
             const pantryToRemove = Array.from(initialPantryIds).filter(id => !pantryIds.has(id));
 
-            // Ingredients to add to diet (not in initial set)
+
             const dietToAdd = dietIdsArray.filter(id => !initialDietIds.has(id));
-            // Ingredients to remove from diet
+
             const dietToRemove = Array.from(initialDietIds).filter(id => !dietIds.has(id));
 
-            // Remove pantry ingredients first (to avoid unique constraint violations when moving)
             if (pantryToRemove.length > 0) {
                 await axiosPrivate.delete("/users/ingredients", {
                     params: {
@@ -100,7 +105,7 @@ export default function SettingsPage() {
                 });
             }
 
-            // Remove diet ingredients
+
             if (dietToRemove.length > 0) {
                 await axiosPrivate.delete("/users/ingredients", {
                     params: {
@@ -109,7 +114,7 @@ export default function SettingsPage() {
                 });
             }
 
-            // Add new pantry ingredients
+
             if (pantryToAdd.length > 0) {
                 await axiosPrivate.post("/users/ingredients", {}, {
                     params: {
@@ -119,7 +124,7 @@ export default function SettingsPage() {
                 });
             }
 
-            // Add new diet ingredients
+
             if (dietToAdd.length > 0) {
                 await axiosPrivate.post("/users/ingredients", {}, {
                     params: {
@@ -129,7 +134,15 @@ export default function SettingsPage() {
                 });
             }
 
-            // Update initial state to current state
+            if (selectedDietId !== initialSelectedDietId) {
+                if (selectedDietId === "") {
+                    await axiosPrivate.delete("/users/diet");
+                } else {
+                    await axiosPrivate.post("/users/diet", { diet_id: selectedDietId });
+                }
+                setInitialSelectedDietId(selectedDietId);
+            }
+
             setInitialPantryIds(new Set(pantryIdsArray));
             setInitialDietIds(new Set(dietIdsArray));
 
@@ -220,12 +233,30 @@ export default function SettingsPage() {
                         value={pantryIngredients}
                         onChange={setPantryIngredients}
                     />
-                    <Typography variant="h5">Wykluczone składniki </Typography>
-                    <Typography variant="body1">Wybierz składniki, których nie możesz lub nie chcesz uwzględniać w swoich wyszukiwaniach.</Typography>
+                    <Typography variant="h5">Wykluczone składniki i dieta </Typography>
+                    <Typography variant="body1">
+                        Wybierz składniki, których nie możesz lub nie chcesz uwzględniać w swoich wyszukiwaniach. Możesz też wybrać jedną z poniższych opcji.
+                    </Typography>
+                    <FormControl sx={{ width: "80%" }}>
+                        <InputLabel id="diet-select-label">Wybierz dietę</InputLabel>
+                        <Select
+                            labelId="diet-select-label"
+                            label="Wybierz dietę"
+                            value={selectedDietId}
+                            onChange={(e) => setSelectedDietId(e.target.value as number | "")}
+                        >
+                            <MenuItem value={""}>Brak</MenuItem>
+                            {availableDiets.map((diet) => (
+                                <MenuItem key={diet.id_diet} value={diet.id_diet}>
+                                    {diet.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <IngredientMultiSelect
                         options={allIngredients}
-                        value={dietIngredients}
-                        onChange={setDietIngredients}
+                        value={excludedIngredients}
+                        onChange={setExcludedIngredients}
                     />
                     {hasOverlap && (
                         <Alert severity="warning">
@@ -243,7 +274,7 @@ export default function SettingsPage() {
                     </Button>
 
                     <Typography variant="h5" sx={{ mt: 4 }}>Bezpieczeństwo</Typography>
-                    
+
                     <Button
                         variant="outlined"
                         onClick={() => setChangePasswordOpen(true)}
@@ -324,9 +355,9 @@ export default function SettingsPage() {
                             setDeleteAccountOpen(false);
                             setDeleteConfirmation("");
                         }}>Anuluj</Button>
-                        <Button 
-                            onClick={handleDeleteAccount} 
-                            variant="contained" 
+                        <Button
+                            onClick={handleDeleteAccount}
+                            variant="contained"
                             color="error"
                             disabled={deleteConfirmation !== "USUŃ MOJE KONTO"}
                         >
@@ -338,3 +369,5 @@ export default function SettingsPage() {
         </>
     );
 }
+
+
