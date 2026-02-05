@@ -1,36 +1,34 @@
-const { login } = require('../controller/authController');
-
 require('dotenv').config();
+
+const base = {
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  host: process.env.DB_HOST,
+  dialect: 'postgres',
+  pool: {
+    max: Number(process.env.DB_POOL_MAX ?? 10),
+    min: 0,
+    acquire: 20000,
+    idle: 10000,
+  },
+};
+
 module.exports = {
   development: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-
+    ...base,
     logging: (sql, timing) => {
       console.log(sql);
-      if (timing !== undefined) {
-        console.log("Execution time:", timing, "ms");
-      }
+      if (timing !== undefined) console.log('Execution time:', timing, 'ms');
     },
-    benchmark: true
+    benchmark: true,
   },
   test: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-    logging: false
+    ...base,
+    logging: false,
   },
   production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-    loginging: false
-  }
-}
+    ...base,
+    logging: false,
+  },
+};
