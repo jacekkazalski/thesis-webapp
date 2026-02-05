@@ -74,6 +74,13 @@ export default function NavBar() {
       console.error("Error fetching random recipe:", error);
     }
   };
+  const homeReset = () => {
+    setSearchValue("");
+    navigate(
+      {pathname: "/", search: ""},
+      {state: {reset: Date.now()} }
+    );
+  } 
 
   return (
     <AppBar position="static" elevation={3} color="default">
@@ -92,12 +99,12 @@ export default function NavBar() {
               alignSelf: "center",
               cursor: "pointer",
             }}
-            onClick={() => navigate("/")}
+            onClick={homeReset}
           />
           <NavButton
             icon={HomeOutlined}
             text="Główna"
-            onClick={() => navigate("/")}
+            onClick={homeReset}
           />
           <NavButton
             icon={Add}
