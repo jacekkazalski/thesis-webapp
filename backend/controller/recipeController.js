@@ -54,36 +54,34 @@ const getRecipe = catchAsync(async (req, res, next) => {
     });
 });
 const getRandomRecipe = catchAsync(async (req, res, next) => {
-    const minMax = await Recipe.findOne({
-        attributes: [
-            [fn('MIN', col('id_recipe')), 'min_id'],
-            [fn('MAX', col('id_recipe')), 'max_id'],
-        ]
-    });
+    let randomId = null;
+    const attempts = 5;
 
-    const minId = Number(minMax?.get('min_id'));
-    const maxId = Number(minMax?.get('max_id'));
-
-    if (!Number.isFinite(minId) || !Number.isFinite(maxId)) {
-        return next(new CustomError('No recipes found', 404));
+    for (let i = 0; i < attempts; i++) {
+        const [rows] = await sequelize.query(`
+            SELECT "id_recipe"
+            FROM "public"."Recipe" TABLESAMPLE SYSTEM (1)
+            LIMIT 1
+        `);
+        if (rows && rows.length > 0) {
+            randomId = rows[0].id_recipe;
+            break;
+        }
     }
 
-    const randomId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
-
-    let randomRecipe = await Recipe.findOne({
-        where: { id_recipe: { [Op.gte]: randomId } },
-        order: [['id_recipe', 'ASC']],
-    });
-
-    if (!randomRecipe) {
-        randomRecipe = await Recipe.findOne({
+    if (!randomId) {
+        const fallback = await Recipe.findOne({
             order: [['id_recipe', 'ASC']],
         });
+        if (!fallback) {
+            return next(new CustomError('No recipes found', 404));
+        }
+        randomId = fallback.id_recipe;
     }
 
     return res.status(200).json({
         status: 'success',
-        id_recipe: randomRecipe.id_recipe,
+        id_recipe: randomId,
     });
 })
 const createRecipe = catchAsync(async (req, res, next) => {
