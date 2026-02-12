@@ -1,35 +1,35 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import placeholderImg from "../assets/placeholder.png";
-import axios from "../api/axios";
-import { Recipe } from "../utils/types";
-import useAxiosCustom from "../hooks/useAxiosCustom";
+import {
+  Delete,
+  Edit,
+  Favorite,
+  FavoriteBorder,
+  PersonOutlineOutlined,
+} from "@mui/icons-material";
 import {
   Box,
-  Typography,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
-  Paper,
-  Stack,
-  Tooltip,
-  Rating,
   List,
   ListItem,
   ListItemText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
+  Paper,
+  Rating,
+  Stack,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import {
-  Favorite,
-  FavoriteBorder,
-  Edit,
-  Delete,
-  PersonOutlineOutlined,
-} from "@mui/icons-material";
-import useAuth from "../hooks/useAuth";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "../api/axios";
+import placeholderImg from "../assets/placeholder.png";
 import { NavButton } from "../components/NavBar";
+import useAuth from "../hooks/useAuth";
+import useAxiosCustom from "../hooks/useAxiosCustom";
+import { Recipe } from "../utils/types";
 
 export default function RecipePage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -235,12 +235,18 @@ export default function RecipePage() {
           <Typography variant="h6" gutterBottom>
             Składniki
           </Typography>
-          <List>
+          <List dense disablePadding>
             {recipe?.ingredients.map((ingredient) => (
-              <ListItem key={ingredient.id_ingredient}>
+              <ListItem
+                key={ingredient.id_ingredient}
+                disableGutters
+                sx={{ py: 0.25 }}
+              >
                 <ListItemText
                   primary={ingredient.name}
                   secondary={ingredient.quantity}
+                
+                  sx={{ my: 0 }}
                 />
               </ListItem>
             ))}

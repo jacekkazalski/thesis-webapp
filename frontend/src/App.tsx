@@ -12,7 +12,18 @@ import ProfilePage from "./pages/ProfilePage";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import SettingsPage from "./pages/SettingsPage";
 
-const theme = createTheme();
+const theme = createTheme({
+  palette: {
+    mode: "light",
+    primary: {
+      main: "#4caf50",
+    },
+    
+  },
+  typography: {
+    fontFamily: "Roboto, sans-serif",
+  },
+});
 
 function App() {
   return (

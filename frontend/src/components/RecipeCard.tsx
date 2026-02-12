@@ -1,75 +1,64 @@
-import { Recipe } from "../utils/types";
-import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
+  CardActionArea,
   CardContent,
   CardMedia,
-  Stack,
-  Typography,
-  CardActionArea,
-  Avatar,
   Rating,
+  Stack,
+  Typography
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import placeholderImg from "../assets/placeholder.png";
+import { Recipe } from "../utils/types";
 interface Props {
   recipe: Recipe;
 }
 export default function RecipeCard({ recipe }: Props) {
   const navigate = useNavigate();
-  //TODO: list view css
+  const imageSrc = recipe.image_url || placeholderImg;
+  const ratingValue = recipe.rating || 0;
+  const matchedIngredients = recipe.matched_ingredients || 0;
+  const totalIngredients = recipe.total_ingredients || 0;
   return (
     <Box>
-      <Card variant="outlined">
+      <Card variant="outlined" sx={{ borderRadius: 2, overflow: "hidden" }}>
         <CardActionArea onClick={() => navigate(`/recipe/${recipe.id_recipe}`)}>
-          <CardMedia
-            component="img"
-            height="140"
-            image={recipe.image_url || placeholderImg}
-            alt={recipe.name}
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              padding: 1,
-              height: 50,
-              overflow: "clip",
-              textOverflow: "ellipsis",
-              fontSize: recipe.name.length > 20 ? 18 : undefined,
-            }}
-          >
-            {recipe.name}
-          </Typography>
-        </CardActionArea>
-        <CardContent>
-            <Stack
-            direction="row"
-            spacing={1}
-            alignItems="center"
-            onClick={() => navigate(`/user/${recipe.author?.id_user}`)}
-            sx={{ cursor: "pointer" }}
-            >
-            <Avatar sx={{ bgcolor: "secondary.main", width: 24, height: 24 }} />
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-              mt: 0.5,
-              maxWidth: 120,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              }}
-            >
-              {recipe.author?.username || "Nieznany autor"}
-            </Typography>
-            <Rating value={recipe.rating} readOnly size="small" />
+          <CardContent sx={{ py: 1, px: 1.25 }}>
+            
+            <Stack spacing={0.5}>
+              <CardMedia
+              component="img"
+              height={132}
+              image={imageSrc}
+              alt={recipe.name}
+            />
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 700,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+                title={recipe.name}
+              >
+                {recipe.name}
+              </Typography>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+
+
+                <Rating value={recipe.rating} readOnly size="small" precision={0.5}/>
+                {(recipe.total_ingredients) && (
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    {recipe.matched_ingredients || 0}/{recipe.total_ingredients} składników
+                  </Typography>
+                )}
+              </Stack>
             </Stack>
-            {(recipe.total_ingredients) && (
-            <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
-              Składniki: {recipe.matched_ingredients || 0}/{recipe.total_ingredients}
-            </Typography>
-            )}
-        </CardContent>
+          </CardContent>
+        </CardActionArea>
       </Card>
     </Box>
   );

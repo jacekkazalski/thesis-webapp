@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import useAxiosCustom from "../hooks/useAxiosCustom";
-import { Ingredient, Recipe } from "../utils/types";
 import {
   Box,
   Checkbox,
@@ -8,21 +5,18 @@ import {
   FormControlLabel,
   FormHelperText,
   MenuItem,
+  Pagination,
   Select,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
-  useMediaQuery,
-  Pagination,
 } from "@mui/material";
-import { FormatListBulleted, ViewModule } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import useAxiosCustom from "../hooks/useAxiosCustom";
+import { Ingredient, Recipe } from "../utils/types";
 import { IngredientMultiSelect } from "./IngredientMultiSelect";
 import RecipeGrid from "./RecipeGrid";
-import { useSearchParams } from "react-router-dom";
-import { useTheme } from "@mui/material/styles";
-import useAuth from "../hooks/useAuth";
-import { useLocation } from "react-router-dom";
 
 
 export default function Gallery() {
@@ -107,7 +101,7 @@ export default function Gallery() {
 
 
   return (
-    <Box>
+    <Box sx={{ color: "text.primary", backgroundColor: "background.default" }}>
       <Stack direction="column" p={2} spacing={2}>
         <Stack direction="row" spacing={2}>
           <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -122,7 +116,7 @@ export default function Gallery() {
             </Select>
             <FormHelperText>Sortuj przepisy</FormHelperText>
           </FormControl>
-          <Stack direction="column">
+    {/*       {<Stack direction="column">
             <ToggleButtonGroup
               value={viewType}
               exclusive
@@ -141,7 +135,7 @@ export default function Gallery() {
               </Tooltip>
             </ToggleButtonGroup>
             <FormHelperText>Sposób wyświetlania</FormHelperText>
-          </Stack>
+          </Stack>} */}
           <Stack direction="row" alignItems="start">
             <FormControlLabel
               control={

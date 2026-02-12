@@ -1,32 +1,31 @@
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Collapse,
-  TextField,
-  Box,
-  Stack,
-  useMediaQuery,
-  ClickAwayListener,
-} from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Logout,
+  Add,
+  CasinoOutlined,
+  HomeOutlined,
+  KitchenTwoTone,
   Login,
+  Logout,
   Person,
   PersonAdd,
-  HomeOutlined,
-  Add,
   Schedule,
-  CasinoOutlined,
-  SearchOutlined,
+  SearchOutlined
 } from "@mui/icons-material";
-import useAuth from "../hooks/useAuth";
-import axios, { axiosCustom } from "../api/axios";
+import {
+  AppBar,
+  Box,
+  Button,
+  Collapse,
+  Stack,
+  TextField,
+  Toolbar,
+  Typography,
+  useMediaQuery
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import React, { useEffect, useRef, useState } from "react";
-import logo from "../assets/cowlodowce_logo.png";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios, { axiosCustom } from "../api/axios";
+import useAuth from "../hooks/useAuth";
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -85,22 +84,19 @@ export default function NavBar() {
   return (
     <AppBar position="static" elevation={3} color="default">
       <Toolbar>
-        <Stack direction="row">
-          {/* Logo or Title */}
-          <Box
-            component="img"
-            src={logo}
-            alt="logo"
-            sx={{
-              objectFit: "contain",
-              height: 60,
-              width: "auto",
-              mr: 1,
-              alignSelf: "center",
-              cursor: "pointer",
-            }}
+        <Stack direction="row" alignItems="center">
+          <Button
             onClick={homeReset}
-          />
+            color="inherit"
+            sx={{
+              textTransform: "none",
+              display: "flex",
+              alignItems: "center",
+              mr: 1,
+            }}
+          >
+            <KitchenTwoTone sx={{ fontSize: 50,  }} color="primary" />
+          </Button>
           <NavButton
             icon={HomeOutlined}
             text="Główna"
@@ -206,7 +202,6 @@ export function NavButton({
   return (
     <Button
       onClick={onClick}
-      color="primary"
       sx={{
         flexDirection: "column",
         alignItems: "center",
@@ -214,10 +209,10 @@ export function NavButton({
         py: 1,
       }}
     >
-      <Icon sx={{ fontSize: 25 }} />
+      <Icon sx={{ fontSize: 25, color: "text.primary" }} />
       <Typography
         variant="caption"
-        sx={{ textTransform: "none", fontSize: 12 }}
+        sx={{ textTransform: "none", fontSize: 12, color: "text.primary" }}
       >
         {text}
       </Typography>

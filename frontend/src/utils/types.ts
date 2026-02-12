@@ -23,6 +23,8 @@ export interface Ingredient {
   id_ingredient: number;
   name: string;
   quantity?: string;
+  category_name?: string;
+  category_id?: number;
 }
 export interface User {
   id_user: number;
