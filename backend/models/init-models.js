@@ -32,28 +32,33 @@ function initModels(sequelize) {
   User.belongsToMany(Ingredient, { as: 'id_ingredient_Ingredient_User_ingredients', through: User_ingredient, foreignKey: "id_user", otherKey: "id_ingredient" });
   User.belongsToMany(Recipe, { as: 'id_recipe_Recipes', through: Favourite, foreignKey: "id_user", otherKey: "id_recipe" });
   User.belongsToMany(Recipe, { as: 'id_recipe_Recipe_Ratings', through: Rating, foreignKey: "id_user", otherKey: "id_recipe" });
-  Ingredient_recipe.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient"});
-  Ingredient.hasMany(Ingredient_recipe, { as: "Ingredient_recipes", foreignKey: "id_ingredient"});
-  User_ingredient.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient"});
-  Ingredient.hasMany(User_ingredient, { as: "User_ingredients", foreignKey: "id_ingredient"});
-  Favourite.belongsTo(Recipe, { as: "id_recipe_Recipe", foreignKey: "id_recipe"});
-  Recipe.hasMany(Favourite, { as: "Favourites", foreignKey: "id_recipe"});
-  Ingredient_recipe.belongsTo(Recipe, { as: "id_recipe_Recipe", foreignKey: "id_recipe"});
-  Recipe.hasMany(Ingredient_recipe, { as: "Ingredient_recipes", foreignKey: "id_recipe"});
-  Rating.belongsTo(Recipe, { as: "id_recipe_Recipe", foreignKey: "id_recipe"});
-  Recipe.hasMany(Rating, { as: "Ratings", foreignKey: "id_recipe"});
-  Favourite.belongsTo(User, { as: "id_user_User", foreignKey: "id_user"});
-  User.hasMany(Favourite, { as: "Favourites", foreignKey: "id_user"});
-  Rating.belongsTo(User, { as: "id_user_User", foreignKey: "id_user"});
-  User.hasMany(Rating, { as: "Ratings", foreignKey: "id_user"});
-  Recipe.belongsTo(User, { as: "added_by_User", foreignKey: "added_by"});
-  User.hasMany(Recipe, { as: "Recipes", foreignKey: "added_by"});
-  User_ingredient.belongsTo(User, { as: "id_user_User", foreignKey: "id_user"});
-  User.hasMany(User_ingredient, { as: "User_ingredients", foreignKey: "id_user"});
-  Ingredient_diet.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient"});
-  Ingredient.hasMany(Ingredient_diet, { as: "Ingredient_diets", foreignKey: "id_ingredient"});
-  Ingredient_diet.belongsTo(Diet, { as: "id_diet_Diet", foreignKey: "id_diet"});
-  Diet.hasMany(Ingredient_diet, { as: "Ingredient_diets", foreignKey: "id_diet"});
+  Ingredient_recipe.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient" });
+  Ingredient.hasMany(Ingredient_recipe, { as: "Ingredient_recipes", foreignKey: "id_ingredient" });
+  User_ingredient.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient" });
+  Ingredient.hasMany(User_ingredient, { as: "User_ingredients", foreignKey: "id_ingredient" });
+  Favourite.belongsTo(Recipe, { as: "id_recipe_Recipe", foreignKey: "id_recipe" });
+  Recipe.hasMany(Favourite, { as: "Favourites", foreignKey: "id_recipe" });
+  Ingredient_recipe.belongsTo(Recipe, { as: "id_recipe_Recipe", foreignKey: "id_recipe" });
+  Recipe.hasMany(Ingredient_recipe, { as: "Ingredient_recipes", foreignKey: "id_recipe" });
+  Rating.belongsTo(Recipe, { as: "id_recipe_Recipe", foreignKey: "id_recipe" });
+  Recipe.hasMany(Rating, { as: "Ratings", foreignKey: "id_recipe" });
+  Favourite.belongsTo(User, { as: "id_user_User", foreignKey: "id_user" });
+  User.hasMany(Favourite, { as: "Favourites", foreignKey: "id_user" });
+  Rating.belongsTo(User, { as: "id_user_User", foreignKey: "id_user" });
+  User.hasMany(Rating, { as: "Ratings", foreignKey: "id_user" });
+  Recipe.belongsTo(User, { as: "added_by_User", foreignKey: "added_by" });
+  User.hasMany(Recipe, { as: "Recipes", foreignKey: "added_by" });
+  User_ingredient.belongsTo(User, { as: "id_user_User", foreignKey: "id_user" });
+  User.hasMany(User_ingredient, { as: "User_ingredients", foreignKey: "id_user" });
+  Ingredient_diet.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient" });
+  Ingredient.hasMany(Ingredient_diet, { as: "Ingredient_diets", foreignKey: "id_ingredient" });
+  Ingredient_diet.belongsTo(Diet, { as: "id_diet_Diet", foreignKey: "id_diet" });
+  Diet.hasMany(Ingredient_diet, { as: "Ingredient_diets", foreignKey: "id_diet" });
+  Category.belongsToMany(Ingredient, { as: 'id_ingredient_Ingredients', through: Ingredient_category, foreignKey: "id_category", otherKey: "id_ingredient" });
+  Ingredient.belongsToMany(Category, { as: 'id_category_Categories', through: Ingredient_category, foreignKey: "id_ingredient", otherKey: "id_category" });
+  Ingredient_category.belongsTo(Ingredient, { as: "id_ingredient_Ingredient", foreignKey: "id_ingredient" });
+  Ingredient_category.belongsTo(Category, { as: "id_category_Category", foreignKey: "id_category" });
+
 
   return {
     Category,
