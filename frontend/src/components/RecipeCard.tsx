@@ -6,11 +6,11 @@ import {
   CardMedia,
   Rating,
   Stack,
-  Typography
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import placeholderImg from "../assets/placeholder.png";
-import { Recipe } from "../utils/types";
+  Typography,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import placeholderImg from '../assets/placeholder.png';
+import { Recipe } from '../utils/types';
 interface Props {
   recipe: Recipe;
 }
@@ -22,37 +22,29 @@ export default function RecipeCard({ recipe }: Props) {
   const totalIngredients = recipe.total_ingredients || 0;
   return (
     <Box>
-      <Card variant="outlined" sx={{ borderRadius: 2, overflow: "hidden" }}>
+      <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
         <CardActionArea onClick={() => navigate(`/recipe/${recipe.id_recipe}`)}>
           <CardContent sx={{ py: 1, px: 1.25 }}>
-            
             <Stack spacing={0.5}>
-              <CardMedia
-              component="img"
-              height={132}
-              image={imageSrc}
-              alt={recipe.name}
-            />
+              <CardMedia component="img" height={132} image={imageSrc} alt={recipe.name} />
               <Typography
                 variant="subtitle1"
                 sx={{
                   fontWeight: 700,
-                  display: "-webkit-box",
+                  display: '-webkit-box',
                   WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
                 }}
                 title={recipe.name}
               >
                 {recipe.name}
               </Typography>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
-
-
-                <Rating value={recipe.rating} readOnly size="small" precision={0.5}/>
-                {(recipe.total_ingredients) && (
+                <Rating value={ratingValue} readOnly size="small" precision={0.5} />
+                {recipe.total_ingredients && (
                   <Typography variant="body2" sx={{ mt: 0.5 }}>
-                    {recipe.matched_ingredients || 0}/{recipe.total_ingredients} składników
+                    {matchedIngredients || 0}/{totalIngredients} składników
                   </Typography>
                 )}
               </Stack>

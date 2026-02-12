@@ -1,25 +1,17 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import axios from "../api/axios";
-import { AxiosError } from "axios";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Alert,
-  Link,
-} from "@mui/material";
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
+import axios from '../api/axios';
+import { AxiosError } from 'axios';
+import { Box, Button, TextField, Typography, Paper, Alert, Link } from '@mui/material';
 
 export default function LoginPage() {
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
         mt: 8,
       }}
     >
@@ -32,40 +24,36 @@ function LoginForm() {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || "/";
+  const from = location.state?.from || '/';
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
+    setError('');
     try {
-      const response = await axios.post(
-        "/auth/login",
-        JSON.stringify({ email, password }),
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        },
-      );
+      const response = await axios.post('/auth/login', JSON.stringify({ email, password }), {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      });
       const accessToken = response?.data?.accessToken;
       const username = response?.data?.username;
       const id_user = response?.data?.id_user;
       setAuth({ accessToken, username, email, id_user });
-      setEmail("");
-      setPassword("");
+      setEmail('');
+      setPassword('');
       navigate(from, { replace: true });
     } catch (err) {
       if (err instanceof AxiosError) {
-        if (err.response?.data.message === "Invalid email or password") {
-          setError("Błędny login lub hasło");
+        if (err.response?.data.message === 'Invalid email or password') {
+          setError('Błędny login lub hasło');
         } else {
-          setError("Błąd logowania");
+          setError('Błąd logowania');
         }
       } else {
-        setError("Błąd logowania");
+        setError('Błąd logowania');
       }
     }
   };
@@ -77,9 +65,9 @@ function LoginForm() {
       sx={{
         width: 320,
         p: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         gap: 2,
       }}
     >
@@ -87,7 +75,7 @@ function LoginForm() {
         Logowanie
       </Typography>
       {error && (
-        <Alert severity="error" sx={{ width: "100%" }}>
+        <Alert severity="error" sx={{ width: '100%' }}>
           {error}
         </Alert>
       )}
@@ -112,15 +100,10 @@ function LoginForm() {
         margin="normal"
         fullWidth
       />
-      <Button
-        variant="contained"
-        type="submit"
-        fullWidth
-        onClick={handleSubmit}
-      >
+      <Button variant="contained" type="submit" fullWidth onClick={handleSubmit}>
         Zaloguj
       </Button>
-      <Link href={"/register"} variant="body2" underline="hover">
+      <Link href={'/register'} variant="body2" underline="hover">
         Nie masz konta? Zarejestruj się
       </Link>
     </Box>

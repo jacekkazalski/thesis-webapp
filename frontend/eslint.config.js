@@ -1,12 +1,12 @@
-import react from 'eslint-plugin-react'
-import js from '@eslint/js'
-import reactHooks from 'eslint-plugin-react-hooks'
-import ts from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
-import globals from 'globals'
+import react from 'eslint-plugin-react';
+import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
+import ts from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import globals from 'globals';
 
-import prettierPlugin from 'eslint-plugin-prettier'
-import eslintConfigPrettier from 'eslint-config-prettier'
+import prettierPlugin from 'eslint-plugin-prettier';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   {
@@ -48,10 +48,9 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
 
-    
       'prettier/prettier': 'warn',
     },
   },
 
   eslintConfigPrettier,
-]
+];

@@ -9,28 +9,27 @@ import {
   Select,
   Stack,
   Tooltip,
-} from "@mui/material";
-import { useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import useAxiosCustom from "../hooks/useAxiosCustom";
-import { Ingredient, Recipe } from "../utils/types";
-import { IngredientMultiSelect } from "./IngredientMultiSelect";
-import RecipeGrid from "./RecipeGrid";
-
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
+import useAxiosCustom from '../hooks/useAxiosCustom';
+import { Ingredient, Recipe } from '../utils/types';
+import { IngredientMultiSelect } from './IngredientMultiSelect';
+import RecipeGrid from './RecipeGrid';
 
 export default function Gallery() {
   const { auth } = useAuth();
   const axiosInstance = useAxiosCustom();
-  const [viewType, setViewType] = useState<"gallery" | "list">("gallery");
+
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
-  const [sortBy, setSortBy] = useState("ingredients");
+  const [sortBy, setSortBy] = useState('ingredients');
   const [searchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 24;
-  const searchQuery = searchParams.get("search") || "";
+  const searchQuery = searchParams.get('search') || '';
   const location = useLocation();
 
   const [pantryChecked, setPantryChecked] = useState<boolean>(false);
@@ -43,31 +42,22 @@ export default function Gallery() {
     setDietChecked(logged);
   }, [auth]);
   useEffect(() => {
-  if (!(location.state as any)?.reset) return;
+    if (!(location.state as any)?.reset) return;
 
-  const logged = !!auth?.accessToken;
+    const logged = !!auth?.accessToken;
 
-  setChosenIngredients([]);
-  setSortBy("ingredients");
-  setMatchChecked(false);
-  setPantryChecked(logged);
-  setDietChecked(logged);
-  setPage(1);
-  
-}, [(location.state as any)?.reset, auth]);
+    setChosenIngredients([]);
+    setSortBy('ingredients');
+    setMatchChecked(false);
+    setPantryChecked(logged);
+    setDietChecked(logged);
+    setPage(1);
+  }, [(location.state as any)?.reset, auth]);
 
-
-  const handleViewTypeChange = (
-    newViewType: ((prevState: "gallery" | "list") => "gallery" | "list") | null,
-  ) => {
-    if (newViewType != null) {
-      setViewType(newViewType);
-    }
-  };
   useEffect(() => {
     const fetchRecipes = async () => {
-      const ingredientIds = chosenIngredients.map((i) => i.id_ingredient)
-      const response = await axiosInstance.get("/recipes", {
+      const ingredientIds = chosenIngredients.map((i) => i.id_ingredient);
+      const response = await axiosInstance.get('/recipes', {
         params: {
           sortBy,
           search: searchQuery,
@@ -76,32 +66,40 @@ export default function Gallery() {
           useDiet: dietChecked ? 1 : 0,
           matchOnly: matchChecked ? 1 : 0,
           page,
-          limit: PAGE_SIZE
+          limit: PAGE_SIZE,
         },
       });
       console.log(response.data.data);
       setRecipes(response.data.data);
     };
     const fetchIngredients = async () => {
-      const response = await axiosInstance.get("/ingredients");
+      const response = await axiosInstance.get('/ingredients');
       setAllIngredients(response.data.data);
     };
     fetchRecipes();
     fetchIngredients();
-  }, [sortBy, chosenIngredients, searchQuery, pantryChecked, dietChecked, matchChecked, page]);
+  }, [
+    sortBy,
+    chosenIngredients,
+    searchQuery,
+    pantryChecked,
+    dietChecked,
+    matchChecked,
+    page,
+    axiosInstance,
+  ]);
   useEffect(() => {
     setPage(1);
   }, [sortBy, chosenIngredients, searchQuery, pantryChecked, dietChecked, matchChecked]);
   useEffect(() => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}, [page]);
-
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [page]);
 
   return (
-    <Box sx={{ color: "text.primary", backgroundColor: "background.default" }}>
+    <Box sx={{ color: 'text.primary', backgroundColor: 'background.default' }}>
       <Stack direction="column" p={2} spacing={2}>
         <Stack direction="row" spacing={2}>
           <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -116,7 +114,7 @@ export default function Gallery() {
             </Select>
             <FormHelperText>Sortuj przepisy</FormHelperText>
           </FormControl>
-    {/*       {<Stack direction="column">
+          {/*       {<Stack direction="column">
             <ToggleButtonGroup
               value={viewType}
               exclusive

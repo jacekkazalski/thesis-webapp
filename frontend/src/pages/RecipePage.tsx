@@ -1,10 +1,4 @@
-import {
-  Delete,
-  Edit,
-  Favorite,
-  FavoriteBorder,
-  PersonOutlineOutlined,
-} from "@mui/icons-material";
+import { Delete, Edit, Favorite, FavoriteBorder, PersonOutlineOutlined } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -21,15 +15,15 @@ import {
   Stack,
   Tooltip,
   Typography,
-} from "@mui/material";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "../api/axios";
-import placeholderImg from "../assets/placeholder.png";
-import { NavButton } from "../components/NavBar";
-import useAuth from "../hooks/useAuth";
-import useAxiosCustom from "../hooks/useAxiosCustom";
-import { Recipe } from "../utils/types";
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from '../api/axios';
+import placeholderImg from '../assets/placeholder.png';
+import { NavButton } from '../components/NavBar';
+import useAuth from '../hooks/useAuth';
+import useAxiosCustom from '../hooks/useAxiosCustom';
+import { Recipe } from '../utils/types';
 
 export default function RecipePage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -60,7 +54,7 @@ export default function RecipePage() {
   };
 
   const handleDelete = async () => {
-    const confirmed = window.confirm("Czy na pewno chcesz usunąć ten przepis?");
+    const confirmed = window.confirm('Czy na pewno chcesz usunąć ten przepis?');
     if (!confirmed) return;
 
     try {
@@ -68,7 +62,7 @@ export default function RecipePage() {
         params: { id_recipe: recipeId },
       });
 
-      navigate("/");
+      navigate('/');
     } catch (err) {
       console.log(err);
     }
@@ -93,67 +87,61 @@ export default function RecipePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const recipeRes = await axios.get("/recipes/recipe", {
+        const recipeRes = await axios.get('/recipes/recipe', {
           params: { id_recipe: recipeId },
         });
         setRecipe(recipeRes.data);
 
         const [favRes, authorRes, ratingRes] = await Promise.allSettled([
-          axiosCustom.get("/favourites/check", {
+          axiosCustom.get('/favourites/check', {
             params: { id_recipe: recipeId },
           }),
-          axiosCustom.get("/recipes/author/check", {
+          axiosCustom.get('/recipes/author/check', {
             params: { id_recipe: recipeId },
           }),
           axiosCustom.get(`/ratings/user?id_recipe=${recipeId}`),
         ]);
 
-        if (favRes.status === "fulfilled") {
+        if (favRes.status === 'fulfilled') {
           setIsFavourite(favRes.value.data.isFavourite);
         }
 
-        if (authorRes.status === "fulfilled") {
+        if (authorRes.status === 'fulfilled') {
           setIsAuthor(authorRes.value.data.isAuthor);
         }
 
-        if (ratingRes.status === "fulfilled") {
+        if (ratingRes.status === 'fulfilled') {
           setUserRating(ratingRes.value.data.rating);
         }
       } catch (err) {
-        console.error("Error fetching recipe:", err);
+        console.error('Error fetching recipe:', err);
       }
     };
 
     fetchData();
-  }, [recipeId]);
+  }, [recipeId, axiosCustom]);
   return (
     <>
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <DialogTitle>Musisz się zalogować</DialogTitle>
         <DialogContent>
-          <Typography>
-            Ta akcja jest dostępna tylko dla zalogowanych użytkowników.
-          </Typography>
+          <Typography>Ta akcja jest dostępna tylko dla zalogowanych użytkowników.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsModalOpen(false)}>Anuluj</Button>
-          <Button
-            onClick={() =>
-              navigate("/login", { state: { from: `/recipe/${recipeId}` } })
-            }
-          >
+          <Button onClick={() => navigate('/login', { state: { from: `/recipe/${recipeId}` } })}>
             Zaloguj się
           </Button>
         </DialogActions>
       </Dialog>
-      <Paper elevation={3} sx={{ overflow: "hidden", mb: 2 }}>
+      <Paper elevation={3} sx={{ overflow: 'hidden', mb: 2 }}>
         <Box
           component="img"
           src={recipe?.image_url || placeholderImg}
           alt="recipe photo"
           sx={{
-            width: "100%",
-            objectFit: "cover",
+            width: '100%',
+            objectFit: 'cover',
             height: { xs: 200, md: 300 },
           }}
         />
@@ -166,27 +154,19 @@ export default function RecipePage() {
             spacing={1}
             alignItems="center"
             sx={{
-              flexWrap: "wrap",
+              flexWrap: 'wrap',
               gap: 2,
             }}
           >
             <Stack direction="row">
               <NavButton
                 icon={PersonOutlineOutlined}
-                text={recipe?.author?.username || ""}
+                text={recipe?.author?.username || ''}
                 onClick={() => navigate(`/user/${recipe?.author?.id_user}`)}
               />
-              <Tooltip
-                title={
-                  isFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych"
-                }
-              >
+              <Tooltip title={isFavourite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}>
                 <IconButton onClick={handleFavourite}>
-                  {isFavourite ? (
-                    <Favorite color="secondary" />
-                  ) : (
-                    <FavoriteBorder />
-                  )}
+                  {isFavourite ? <Favorite color="secondary" /> : <FavoriteBorder />}
                 </IconButton>
               </Tooltip>
               {isAuthor && (
@@ -197,9 +177,7 @@ export default function RecipePage() {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Edytuj przepis">
-                    <IconButton
-                      onClick={() => navigate(`/recipes/edit/${recipeId}`)}
-                    >
+                    <IconButton onClick={() => navigate(`/recipes/edit/${recipeId}`)}>
                       <Edit />
                     </IconButton>
                   </Tooltip>
@@ -208,9 +186,7 @@ export default function RecipePage() {
             </Stack>
 
             <Stack>
-              <Typography variant="overline">
-                Twoja ocena - {userRating ?? "Brak"}
-              </Typography>
+              <Typography variant="overline">Twoja ocena - {userRating ?? 'Brak'}</Typography>
               <Rating
                 name="recipe-rating"
                 value={userRating ?? 0}
@@ -220,32 +196,25 @@ export default function RecipePage() {
               />
             </Stack>
             <Stack>
-              <Typography variant="overline">Średnia ocen - {recipe?.rating ? recipe.rating.toFixed(2) : "Brak"}</Typography>
+              <Typography variant="overline">
+                Średnia ocen - {recipe?.rating ? recipe.rating.toFixed(2) : 'Brak'}
+              </Typography>
               <Rating readOnly value={recipe?.rating ?? 0} />
             </Stack>
           </Stack>
         </Box>
       </Paper>
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        spacing={2}
-        sx={{ width: "100%" }}
-      >
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ width: '100%' }}>
         <Paper elevation={2} sx={{ flex: 1, p: 2 }}>
           <Typography variant="h6" gutterBottom>
             Składniki
           </Typography>
           <List dense disablePadding>
             {recipe?.ingredients.map((ingredient) => (
-              <ListItem
-                key={ingredient.id_ingredient}
-                disableGutters
-                sx={{ py: 0.25 }}
-              >
+              <ListItem key={ingredient.id_ingredient} disableGutters sx={{ py: 0.25 }}>
                 <ListItemText
                   primary={ingredient.name}
                   secondary={ingredient.quantity}
-                
                   sx={{ my: 0 }}
                 />
               </ListItem>
@@ -256,9 +225,7 @@ export default function RecipePage() {
           <Typography variant="h6" gutterBottom>
             Instrukcje
           </Typography>
-          <Typography sx={{ whiteSpace: "pre-line" }}>
-            {recipe?.instructions}
-          </Typography>
+          <Typography sx={{ whiteSpace: 'pre-line' }}>{recipe?.instructions}</Typography>
         </Paper>
       </Stack>
     </>

@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ESNext",                  // Allows modern JavaScript features (e.g., async/await).
-    "module": "ESNext",                 // Use ES modules.
+    "target": "ESNext", // Allows modern JavaScript features (e.g., async/await).
+    "module": "ESNext", // Use ES modules.
     "lib": ["dom", "dom.iterable", "esnext"], // Include browser globals and modern JS APIs.
-    "jsx": "react-jsx",                 // Enables React JSX syntax.
-    "strict": true,                     // Use strict type checking.
-    "moduleResolution": "node",         // Resolves modules in Node.js style.
-    "esModuleInterop": true,            // Allows compatibility with CommonJS modules.
-    "resolveJsonModule": true,          // Enables importing JSON files.
-    "skipLibCheck": true,               // Skips type checking for declaration files.
-    "noEmit": true                      // Prevents TypeScript from emitting compiled JavaScript.
+    "jsx": "react-jsx", // Enables React JSX syntax.
+    "strict": true, // Use strict type checking.
+    "moduleResolution": "node", // Resolves modules in Node.js style.
+    "esModuleInterop": true, // Allows compatibility with CommonJS modules.
+    "resolveJsonModule": true, // Enables importing JSON files.
+    "skipLibCheck": true, // Skips type checking for declaration files.
+    "noEmit": true // Prevents TypeScript from emitting compiled JavaScript.
   },
-  "include": ["src/**/*"],              // Include all TypeScript/JSX files in the src folder.
-  "exclude": ["node_modules", "dist"]   // Exclude dependencies and compiled files.
+  "include": ["src/**/*"], // Include all TypeScript/JSX files in the src folder.
+  "exclude": ["node_modules", "dist"] // Exclude dependencies and compiled files.
 }

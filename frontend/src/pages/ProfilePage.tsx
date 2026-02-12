@@ -1,11 +1,11 @@
-import { Box, Paper, Tabs, Typography, Tab, Button, IconButton, Stack, Tooltip } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useState } from "react";
-import { Recipe, User } from "../utils/types";
-import axios from "../api/axios";
-import { Favorite, NoteAdd, Settings } from "@mui/icons-material";
-import RecipeGrid from "../components/RecipeGrid";
-import useAuth from "../hooks/useAuth";
+import { Favorite, NoteAdd, Settings } from '@mui/icons-material';
+import { Box, Button, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from '../api/axios';
+import RecipeGrid from '../components/RecipeGrid';
+import useAuth from '../hooks/useAuth';
+import { Recipe, User } from '../utils/types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -29,7 +29,7 @@ export default function ProfilePage() {
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
   const navigate = useNavigate();
-  const {auth} = useAuth();
+  const { auth } = useAuth();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -61,26 +61,22 @@ export default function ProfilePage() {
     <>
       <Paper elevation={3}>
         <Stack direction="row" alignItems="center" justifyContent="start" p={2}>
-        <Typography variant="h3" p={2}>
-          {user?.username}
-        </Typography>
-        {auth?.id_user && auth.id_user.toString() === userId && (
-            <Button variant="contained" startIcon={<Settings />} onClick={() => navigate("/settings")}>
+          <Typography variant="h3" p={2}>
+            {user?.username}
+          </Typography>
+          {auth?.id_user && auth.id_user.toString() === userId && (
+            <Button
+              variant="contained"
+              startIcon={<Settings />}
+              onClick={() => navigate('/settings')}
+            >
               Ustawienia
             </Button>
-        )}
+          )}
         </Stack>
         <Tabs value={tabValue} onChange={handleTabChange} centered>
-          <Tab
-            icon={<NoteAdd />}
-            iconPosition="start"
-            label="Dodane przepisy"
-          />
-          <Tab
-            icon={<Favorite />}
-            iconPosition="start"
-            label="Ulubione przepisy"
-          />
+          <Tab icon={<NoteAdd />} iconPosition="start" label="Dodane przepisy" />
+          <Tab icon={<Favorite />} iconPosition="start" label="Ulubione przepisy" />
         </Tabs>
 
         <TabPanel index={0} value={tabValue}>

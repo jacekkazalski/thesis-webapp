@@ -1,24 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
-import { AxiosError } from "axios";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Alert,
-  Link,
-} from "@mui/material";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from '../api/axios';
+import { AxiosError } from 'axios';
+import { Box, Button, TextField, Typography, Paper, Alert, Link } from '@mui/material';
 
 export default function RegistrationPage() {
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
         mt: 8,
       }}
     >
@@ -28,30 +20,30 @@ export default function RegistrationPage() {
 }
 
 function RegistrationForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
+    setError('');
 
     if (password.length < 8) {
-      setError("Hasło musi mieć przynajmniej 8 znaków");
+      setError('Hasło musi mieć przynajmniej 8 znaków');
       return;
     }
     if (password !== confirmPassword) {
-      setError("Hasła nie zgadzają się");
+      setError('Hasła nie zgadzają się');
       return;
     }
 
     try {
       await axios.post(
-        "/auth/signup",
+        '/auth/signup',
         JSON.stringify({
           email: email,
           password: password,
@@ -59,23 +51,23 @@ function RegistrationForm() {
           username: username,
         }),
         {
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         },
       );
       setSuccess(true);
     } catch (err) {
       if (err instanceof AxiosError) {
-        if (err.response?.data.message === "Email already exists") {
-          setError("Email już istnieje");
-        } else if (err.response?.data.message === "Username already exists") {
-          setError("Zajęta nazwa użytkownika");
-        } else if (err.response?.data.message === "Invalid email") {
-          setError("Niepoprawny adres email");
+        if (err.response?.data.message === 'Email already exists') {
+          setError('Email już istnieje');
+        } else if (err.response?.data.message === 'Username already exists') {
+          setError('Zajęta nazwa użytkownika');
+        } else if (err.response?.data.message === 'Invalid email') {
+          setError('Niepoprawny adres email');
         } else {
           setError(err.message);
         }
       } else {
-        setError("Rejestracja nieudana");
+        setError('Rejestracja nieudana');
       }
     }
   };
@@ -87,11 +79,7 @@ function RegistrationForm() {
           <Typography variant="h5" component="h2" gutterBottom>
             Rejestracja udana
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => navigate("/login")}
-            fullWidth
-          >
+          <Button variant="contained" onClick={() => navigate('/login')} fullWidth>
             Zaloguj się
           </Button>
         </>
@@ -102,9 +90,9 @@ function RegistrationForm() {
           sx={{
             width: 320,
             p: 3,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: 2,
           }}
         >
@@ -157,15 +145,10 @@ function RegistrationForm() {
             fullWidth
             margin="normal"
           />
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
+          <Button variant="contained" onClick={handleSubmit} fullWidth sx={{ mt: 2 }}>
             Zarejestruj
           </Button>
-          <Link href={"/login"} variant="body2" underline="hover">
+          <Link href={'/login'} variant="body2" underline="hover">
             Masz już konto? Zaloguj się
           </Link>
         </Box>

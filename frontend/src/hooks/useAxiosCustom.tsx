@@ -1,7 +1,7 @@
-import { axiosCustom } from "../api/axios";
-import useRefreshToken from "./useRefreshToken";
-import useAuth from "./useAuth";
-import { useEffect } from "react";
+import { axiosCustom } from '../api/axios';
+import useRefreshToken from './useRefreshToken';
+import useAuth from './useAuth';
+import { useEffect } from 'react';
 
 // Attach interceptors to automatically refresh the access token
 const useAxiosCustom = () => {
@@ -12,9 +12,9 @@ const useAxiosCustom = () => {
     // Add an authorization header if it's missing
     const requestIntercept = axiosCustom.interceptors.request.use(
       (config) => {
-        if (!config.headers["Authorization"] && auth?.accessToken) {
-          console.log("Inteceptor Attaching headers");
-          config.headers["Authorization"] = `Bearer ${auth.accessToken}`;
+        if (!config.headers['Authorization'] && auth?.accessToken) {
+          console.log('Inteceptor Attaching headers');
+          config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
         }
         return config;
       },
@@ -27,10 +27,10 @@ const useAxiosCustom = () => {
         const prevRequest = error?.config;
         // Expired access token && prevent endless loop
         if (error?.response.status === 403 && !prevRequest?.sent) {
-          console.log("Interceptor attempting token refresh");
+          console.log('Interceptor attempting token refresh');
           prevRequest.sent = true;
           const newAccessToken = await refresh();
-          prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          prevRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return axiosCustom(prevRequest);
         }
 

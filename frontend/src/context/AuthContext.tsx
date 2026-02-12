@@ -1,5 +1,5 @@
-import React, { createContext, useState, ReactNode, useMemo, useEffect } from "react";
-import { AuthState } from "../utils/types";
+import React, { createContext, useState, ReactNode, useMemo, useEffect } from 'react';
+import { AuthState } from '../utils/types';
 
 interface AuthContextType {
   auth: AuthState | null;
@@ -12,13 +12,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuthState] = useState<AuthState | null>(null);
 
   useEffect(() => {
-    const storedAuth = localStorage.getItem("auth");
+    const storedAuth = localStorage.getItem('auth');
     if (storedAuth) {
       try {
         setAuthState(JSON.parse(storedAuth));
       } catch (error) {
-        console.error("Error parsing stored auth:", error);
-        localStorage.removeItem("auth");
+        console.error('Error parsing stored auth:', error);
+        localStorage.removeItem('auth');
       }
     }
   }, []);
@@ -27,9 +27,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAuthState((prev) => {
       const newAuth = typeof value === 'function' ? value(prev) : value;
       if (newAuth) {
-        localStorage.setItem("auth", JSON.stringify(newAuth));
+        localStorage.setItem('auth', JSON.stringify(newAuth));
       } else {
-        localStorage.removeItem("auth");
+        localStorage.removeItem('auth');
       }
       return newAuth;
     });

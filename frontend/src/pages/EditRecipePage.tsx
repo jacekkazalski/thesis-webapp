@@ -1,30 +1,30 @@
-import useAxiosCustom from "../hooks/useAxiosCustom";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { AxiosError } from "axios";
-import { Ingredient } from "../utils/types";
+import { Delete, UploadFile } from '@mui/icons-material';
 import {
   Box,
+  Button,
+  Chip,
+  Grid,
+  IconButton,
   Paper,
   Stack,
   TextField,
-  Typography,
-  Button,
-  IconButton,
   Tooltip,
-  Chip,
-  Grid,
-} from "@mui/material";
-import { Delete, UploadFile } from "@mui/icons-material";
-import { IngredientMultiSelect } from "../components/IngredientMultiSelect";
+  Typography,
+} from '@mui/material';
+import { AxiosError } from 'axios';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { IngredientMultiSelect } from '../components/IngredientMultiSelect';
+import useAxiosCustom from '../hooks/useAxiosCustom';
+import { Ingredient } from '../utils/types';
 
 export default function EditRecipePage() {
-  const [name, setName] = useState("");
-  const [instructions, setInstructions] = useState("");
+  const [name, setName] = useState('');
+  const [instructions, setInstructions] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [chosenIngredients, setChosenIngredients] = useState<Ingredient[]>([]);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState('');
 
   const MAX_FILE_SIZE = 4;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE * 1024 * 1024;
@@ -44,9 +44,7 @@ export default function EditRecipePage() {
   };
   // Remove ingredient from chosen ingredients
   const handleRemoveIngredient = (ingredientId: number) => {
-    const ingToRemove = chosenIngredients.find(
-      (ing) => ing.id_ingredient == ingredientId,
-    );
+    const ingToRemove = chosenIngredients.find((ing) => ing.id_ingredient == ingredientId);
     if (ingToRemove) {
       setChosenIngredients((prevIngredients) =>
         prevIngredients.filter((ing) => ing.id_ingredient !== ingredientId),
@@ -60,40 +58,40 @@ export default function EditRecipePage() {
         setErrorMsg(`Maksymalny rozmiar pliku to ${MAX_FILE_SIZE} MB`);
         return;
       }
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        setErrorMsg("Niedozwolony rodzaj pliku (.JPG, .PNG, .WEBP)");
+        setErrorMsg('Niedozwolony rodzaj pliku (.JPG, .PNG, .WEBP)');
         return;
       }
       setSelectedImage(event.target.files[0]);
-      setErrorMsg("");
+      setErrorMsg('');
     }
   };
   const handleRemoveFile = () => {
-    setErrorMsg("");
+    setErrorMsg('');
     setSelectedImage(null);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setErrorMsg("");
+    setErrorMsg('');
     if (chosenIngredients.length < 1) {
-      setErrorMsg("Musisz wybrać przynajmniej jeden składnik");
+      setErrorMsg('Musisz wybrać przynajmniej jeden składnik');
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append("id_recipe", recipeId || "");
-      formData.append("name", name);
-      formData.append("instructions", instructions);
-      formData.append("ingredients", JSON.stringify(chosenIngredients));
+      formData.append('id_recipe', recipeId || '');
+      formData.append('name', name);
+      formData.append('instructions', instructions);
+      formData.append('ingredients', JSON.stringify(chosenIngredients));
       if (selectedImage) {
-        formData.append("image", selectedImage);
+        formData.append('image', selectedImage);
       }
 
-      await axiosPrivate.put("/recipes/update", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await axiosPrivate.put('/recipes/update', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       navigate(`/recipe/${recipeId}`);
@@ -101,7 +99,7 @@ export default function EditRecipePage() {
       console.log(error);
       if (error instanceof AxiosError) {
         if (error.response?.status === 403) {
-          navigate("/login", { state: { from: location }, replace: true });
+          navigate('/login', { state: { from: location }, replace: true });
         }
       }
     }
@@ -109,17 +107,17 @@ export default function EditRecipePage() {
 
   useEffect(() => {
     try {
-      axiosPrivate.get("/ingredients").then((response) => {
+      axiosPrivate.get('/ingredients').then((response) => {
         setAllIngredients(response.data.data);
       });
       // Fetch recipe and prefill form
       const fetchRecipe = async () => {
-        const res = await axiosPrivate.get("/recipes/recipe", {
+        const res = await axiosPrivate.get('/recipes/recipe', {
           params: { id_recipe: recipeId },
         });
         // response structure: { status, name, id_recipe, instructions, image_url, ingredients, author, rating }
-        setName(res.data.name || "");
-        setInstructions(res.data.instructions || "");
+        setName(res.data.name || '');
+        setInstructions(res.data.instructions || '');
         setChosenIngredients(res.data.ingredients || []);
       };
       fetchRecipe();
@@ -129,18 +127,12 @@ export default function EditRecipePage() {
   }, [axiosPrivate, recipeId]);
 
   return (
-    <Box sx={{ width: "80%", p: 2, alignContent: "center", mx: "auto" }}>
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        spacing={2}
-        sx={{ width: "100%" }}
-      >
+    <Box sx={{ width: '80%', p: 2, alignContent: 'center', mx: 'auto' }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ width: '100%' }}>
         <Paper elevation={2} sx={{ flex: 2, p: 2 }}>
           <Stack spacing={2}>
-            <Typography variant={"h4"}>Edytuj przepis</Typography>
-            {errorMsg && (
-              <Typography color={"warning.dark"}>{errorMsg}</Typography>
-            )}
+            <Typography variant={'h4'}>Edytuj przepis</Typography>
+            {errorMsg && <Typography color={'warning.dark'}>{errorMsg}</Typography>}
             <TextField
               required
               label="Nazwa przepisu"
@@ -159,51 +151,36 @@ export default function EditRecipePage() {
           </Stack>
           <Box
             sx={{
-              display: "flex",
+              display: 'flex',
               gap: 2,
               p: 2,
-              flexWrap: "wrap",
+              flexWrap: 'wrap',
             }}
           >
-            <Button
-              component="label"
-              variant="outlined"
-              startIcon={<UploadFile />}
-              sx={{}}
-            >
+            <Button component="label" variant="outlined" startIcon={<UploadFile />} sx={{}}>
               Zmień zdjęcie
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleFileChange}
-              />
+              <input type="file" hidden accept="image/*" onChange={handleFileChange} />
             </Button>
             {selectedImage && (
               <Box
                 sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
+                  display: 'inline-flex',
+                  alignItems: 'center',
                   ml: 2,
                 }}
               >
                 <Typography
                   sx={{
-                    maxWidth: "200px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    maxWidth: '200px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {selectedImage.name}
                 </Typography>
                 <Tooltip title="Usuń zdjęcie">
-                  <IconButton
-                    onClick={handleRemoveFile}
-                    size="small"
-                    sx={{ ml: 1 }}
-                    color="error"
-                  >
+                  <IconButton onClick={handleRemoveFile} size="small" sx={{ ml: 1 }} color="error">
                     <Delete />
                   </IconButton>
                 </Tooltip>
@@ -211,32 +188,32 @@ export default function EditRecipePage() {
             )}
           </Box>
           <Box p={2}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleSubmit}
-              size="large"
-            >
+            <Button variant="contained" color="success" onClick={handleSubmit} size="large">
               Zapisz
             </Button>
           </Box>
         </Paper>
         <Paper elevation={2} sx={{ flex: 1, p: 2 }}>
-          <Typography variant={"h6"}>Składniki</Typography>
+          <Typography variant={'h6'}>Składniki</Typography>
           <IngredientMultiSelect
             options={allIngredients}
             value={chosenIngredients}
             onChange={setChosenIngredients}
-            hideSelectedItems={true}
           />
           {chosenIngredients.map((ingredient) => (
-            <Grid container spacing={1} alignItems="center" sx={{ mb: 1 }}>
+            <Grid
+              container
+              spacing={1}
+              alignItems="center"
+              sx={{ mb: 1 }}
+              key={ingredient.id_ingredient}
+            >
               <Grid size={6}>
                 <Chip
                   label={ingredient.name}
                   key={ingredient.id_ingredient}
                   onDelete={() => handleRemoveIngredient(ingredient.id_ingredient)}
-                  color={"secondary"}
+                  color={'secondary'}
                   size="medium"
                 />
               </Grid>
@@ -245,9 +222,7 @@ export default function EditRecipePage() {
                   variant="standard"
                   label="Podaj ilość"
                   value={ingredient.quantity}
-                  onChange={(e) =>
-                    handleQuantityChange(ingredient.id_ingredient, e.target.value)
-                  }
+                  onChange={(e) => handleQuantityChange(ingredient.id_ingredient, e.target.value)}
                 />
               </Grid>
             </Grid>

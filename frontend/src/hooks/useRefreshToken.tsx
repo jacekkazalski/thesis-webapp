@@ -1,13 +1,13 @@
-import useAuth from "./useAuth";
-import axios from "../api/axios";
-import { AuthState } from "../utils/types";
+import useAuth from './useAuth';
+import axios from '../api/axios';
+import { AuthState } from '../utils/types';
 
 const useRefreshToken = () => {
   const { setAuth } = useAuth();
 
   const refresh = async () => {
     try {
-      const response = await axios.get("/auth/refresh", {
+      const response = await axios.get('/auth/refresh', {
         withCredentials: true,
       });
       const accessToken = response.data.accessToken;
@@ -15,7 +15,7 @@ const useRefreshToken = () => {
       setAuth((prev: AuthState | null) =>
         prev
           ? { ...prev, accessToken: accessToken }
-          : { accessToken, id_user: 0, username: "", email: "" },
+          : { accessToken, id_user: 0, username: '', email: '' },
       );
       return accessToken;
     } catch (err) {
