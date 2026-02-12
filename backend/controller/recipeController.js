@@ -292,13 +292,11 @@ const getRecipes = catchAsync(async (req, res, next) => {
     }
 
     ingredients = [...new Set(ingredients.map(Number))];
-    const ingListSql = ingredients.length ? ingredients.join(',') : null;
 
     const whereClause = {};
     if (searchQuery) {
         whereClause.name = { [Op.iLike]: `%${searchQuery}%` };
     }
-
     if (excludedIngredients.length) {
         whereClause[Op.and] = whereClause[Op.and] || [];
         whereClause[Op.and].push(literal(`NOT EXISTS (
@@ -308,83 +306,77 @@ const getRecipes = catchAsync(async (req, res, next) => {
             AND irx."id_ingredient" IN (${excludedIngredients.join(',')})
     )`));
     }
-    const attributes = [
-        'id_recipe',
-        'name',
-        'image_path'
-    ];
-    const order = []
-    if (sortParam === 'highest_rated') {
-        attributes.push([literal(`(
-          SELECT COALESCE(AVG(rt."value"), 0)
-          FROM public."Rating" rt
-          WHERE rt."id_recipe" = "Recipe"."id_recipe"
-        )`), 'rating']);
-        order.push([literal(`"rating"`), 'DESC']);
+    const attributes =
+        [
+            'id_recipe',
+            'name',
+            'image_path'
+        ]
+    const include = [];
+    const orderClause = [];
+    if (sortParam === 'newest') {
+        orderClause.push(['id_recipe', 'DESC']);
+    } else if (sortParam === 'highest_rated') {
+        orderClause.push(['averageRating', 'DESC']);
+        include.push({
+            model: Rating,
+            as: 'Ratings',
+            attributes: [],
+            required: false
+        });
+        attributes.push([fn("COALESCE", fn('AVG', col('Ratings.value')), 0), "averageRating"]);
+    } else if (sortParam === 'ingredients') {
+        orderClause.push([literal('matched_count'), 'DESC']);
+        orderClause.push([literal('total_count'), 'ASC']);
+        attributes.push([fn("COUNT", col("Ingredient_recipes.id_ingredient")), "total_count"]);
+        attributes.push([fn("SUM", literal(`CASE WHEN "Ingredient_recipes"."id_ingredient" IN (${ingredients.length ? ingredients.join(',') : 'NULL'}) THEN 1 ELSE 0 END`)), "matched_count"]);
+        include.push({
+            model: Ingredient_recipe,
+            as: 'Ingredient_recipes',
+            attributes: [],
+            required: false
+        });
     }
-    else if (sortParam === 'ingredients' && ingredients.length) {
-        attributes.push(
-            [
-                literal(`(
-          SELECT COUNT(*)
-          FROM public."Ingredient_recipe" ir
-          WHERE ir."id_recipe" = "Recipe"."id_recipe"
-            AND ir."id_ingredient" IN (${ingListSql})
-        )`),
-                'matched_count',
-            ],
-            [
-                literal(`(
-          SELECT COUNT(*)
-          FROM public."Ingredient_recipe" ir
-          WHERE ir."id_recipe" = "Recipe"."id_recipe"
-            AND ir."id_ingredient" NOT IN (${ingListSql})
-        )`),
-                'missing_count',
-            ]
-        );
-        order.push([literal(`"matched_count"`), 'DESC']);
-        order.push([literal(`"missing_count"`), 'ASC']);
-        
-    }
-    else {
-        order.push(['id_recipe', 'DESC']);
-    }
+
+
     const recipes = await Recipe.findAll({
         where: whereClause,
-        include: [
-            {
-                model: User,
-                as: 'added_by_User',
-                attributes: ['username', 'id_user'],
-            },
+        subQuery: false,
+        attributes: attributes,
+        include: include,
+        group: [
+            "Recipe.id_recipe",
+            "Recipe.name",
+            "Recipe.image_path",
         ],
-        attributes,
+        order: orderClause,
         limit,
         offset,
-        order,
     });
     if (recipes.length === 0) {
         return res.status(200).json({ status: 'success', data: [] });
     }
 
     const recipeIds = recipes.map(r => r.id_recipe);
-    if ((sortParam !== 'ingredients' || !ingredients.length)) {
+    if ((sortParam !== 'ingredients')) {
         const recipeIngredients = await Ingredient_recipe.findAll({
             where: { id_recipe: { [Op.in]: recipeIds } },
+            subQuery: false,
+            attributes: [
+                [fn("COUNT", col("id_ingredient")), "total_count"],
+                [fn("SUM", literal(`CASE WHEN "id_ingredient" IN (${ingredients.length ? ingredients.join(',') : 'NULL'}) THEN 1 ELSE 0 END`)), "matched_count"],
+                'id_recipe'
+            ],
+            group: ['id_recipe']
         });
 
         recipes.forEach(recipe => {
-            recipe.dataValues.matched_count = recipeIngredients.filter(ri => 
-                ri.id_recipe === recipe.id_recipe && ingredients.includes(ri.id_ingredient)
-            ).length;
-            recipe.dataValues.missing_count = recipeIngredients.filter(ri => 
-                ri.id_recipe === recipe.id_recipe 
-            ).length - recipe.dataValues.matched_count;
+            recipe.dataValues.matched_count = recipeIngredients.find(ri => ri.id_recipe === recipe.id_recipe)?.get('matched_count') ?? 0;
+            recipe.dataValues.total_count = recipeIngredients.find(ri => ri.id_recipe === recipe.id_recipe)?.get('total_count') ?? 0;
         });
 
     }
-    if(sortParam !== 'highest_rated') {
+    if (sortParam !== 'highest_rated') {
         const ratings = await Rating.findAll({
             where: { id_recipe: { [Op.in]: recipeIds } },
             attributes: ['id_recipe', [fn('AVG', col('value')), 'rating']],
@@ -397,9 +389,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
     }
     const recipesWithDetails = recipes.map(recipe => {
 
-        const matchingIngredients = parseInt(recipe.get('matched_count'));
-        const missingIngredients = parseInt(recipe.get('missing_count'));
-        const totalIngredients = matchingIngredients + missingIngredients;
+       
 
         return {
             id_recipe: recipe.id_recipe,
@@ -409,16 +399,15 @@ const getRecipes = catchAsync(async (req, res, next) => {
                 : null,
             author: recipe.added_by_User,
             rating: recipe.get('rating') ? parseFloat(recipe.get('rating')) : null,
-            matched_ingredients: matchingIngredients,
-            total_ingredients: totalIngredients,
-            missing_ingredients: missingIngredients,
+            matched_ingredients: recipe.get('matched_count') ? parseInt(recipe.get('matched_count')) : 0,
+            total_ingredients: recipe.get('total_count') ? parseInt(recipe.get('total_count')) : 0,
         };
     });
 
-    let recipesFiltered = recipesWithDetails;
-    if (matchOnly == 1 && ingredients.length) {
-        recipesFiltered = recipesFiltered.filter(r => r.missing_ingredients === 0);
-    }
+     let recipesFiltered = recipesWithDetails;
+     if (matchOnly == 1 && ingredients.length) {
+         recipesFiltered = recipesFiltered.filter(r => r.matched_ingredients == r.total_ingredients);
+     }
 
     return res.status(200).json({
         status: 'success',
