@@ -1,5 +1,5 @@
 const sequelize = require("../config/database");
-const { Op, fn, col, literal } = require("sequelize");
+const { Op, fn, col, literal, QueryTypes } = require("sequelize");
 const initModels = require("../models/init-models");
 const {
   Recipe,
@@ -269,7 +269,7 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
 
 const getRecipes = catchAsync(async (req, res, next) => {
   const {
-    search: searchQuery,
+    search,
     ingredient,
     sortBy,
     matchOnly,
@@ -281,7 +281,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
 
   const authUser = req.user;
 
-  const DEFAULT_LIMIT = 50;
+  const DEFAULT_LIMIT = 48;
   const MAX_LIMIT = 200;
   const page = Number(pageQuery) > 0 ? Number(pageQuery) : 1;
   let limit = Number(limitQuery) > 0 ? Number(limitQuery) : DEFAULT_LIMIT;
@@ -334,151 +334,109 @@ const getRecipes = catchAsync(async (req, res, next) => {
     }
   }
 
+  
+
   ingredients = [...new Set(ingredients.map(Number))];
+  excludedIngredients = [...new Set(excludedIngredients.map(Number))];
+  const searchQuery = search ? search.trim() : "";
+  const searchPattern = searchQuery ? `%${searchQuery}%` : null;
 
-  const whereClause = {};
-  if (searchQuery) {
-    whereClause.name = { [Op.iLike]: `%${searchQuery}%` };
-  }
-  if (excludedIngredients.length) {
-    whereClause[Op.and] = whereClause[Op.and] || [];
-    whereClause[Op.and].push(
-      literal(`NOT EXISTS (
-            SELECT 1
-            FROM public."Ingredient_recipe" irx
-            WHERE irx."id_recipe" = "Recipe"."id_recipe"
-            AND irx."id_ingredient" IN (${excludedIngredients.join(",")})
-    )`),
-    );
-  }
-  const attributes = ["id_recipe", "name", "image_path"];
-  const include = [];
-  const orderClause = [];
-  if (sortParam === "newest") {
-    orderClause.push(["id_recipe", "DESC"]);
-  } else if (sortParam === "highest_rated") {
-    orderClause.push(["averageRating", "DESC"]);
-    include.push({
-      model: Rating,
-      as: "Ratings",
-      attributes: [],
-      required: false,
-    });
-    attributes.push([
-      fn("COALESCE", fn("AVG", col("Ratings.value")), 0),
-      "averageRating",
-    ]);
-  } else if (sortParam === "ingredients") {
-    orderClause.push([literal("matched_count"), "DESC"]);
-    orderClause.push([literal("total_count"), "ASC"]);
-    attributes.push([
-      fn("COUNT", col("Ingredient_recipes.id_ingredient")),
-      "total_count",
-    ]);
-    attributes.push([
-      fn(
-        "SUM",
-        literal(
-          `CASE WHEN "Ingredient_recipes"."id_ingredient" IN (${ingredients.length ? ingredients.join(",") : "NULL"}) THEN 1 ELSE 0 END`,
-        ),
-      ),
-      "matched_count",
-    ]);
-    include.push({
-      model: Ingredient_recipe,
-      as: "Ingredient_recipes",
-      attributes: [],
-      required: false,
-    });
-  }
 
-  const recipes = await Recipe.findAll({
-    where: whereClause,
-    subQuery: false,
-    attributes: attributes,
-    include: include,
-    group: ["Recipe.id_recipe", "Recipe.name", "Recipe.image_path"],
-    order: orderClause,
+  const useCandidateFiltering = ingredients.length > 0;
+  const candidateCte = ` 
+    candidates AS (
+      SELECT DISTINCT ir.id_recipe
+      FROM public."Ingredient_recipe" ir
+      WHERE ir.id_ingredient = ANY($1::int[])
+    )
+  `;
+  const exludeCte = `
+    excluded AS (
+      SELECT DISTINCT irx.id_recipe
+      FROM public."Ingredient_recipe" irx
+      WHERE irx.id_ingredient = ANY($2::int[])
+    )
+  `;
+
+  const withCte = useCandidateFiltering
+  ? `WITH ${candidateCte}, ${exludeCte}`
+  : `WITH ${exludeCte}`;
+  const joinClause = useCandidateFiltering
+    ? `JOIN candidates c ON r.id_recipe = c.id_recipe`
+    : "";
+
+  const whereClause = `
+    WHERE e.id_recipe IS NULL
+    AND ($3::text IS NULL OR r.name ILIKE $3)
+  `;
+  const orderBy =
+    sortParam === "highest_rated"
+      ? `ORDER BY rating DESC, r.id_recipe DESC`
+      : sortParam === "ingredients" && useCandidateFiltering
+        ? `ORDER BY matched_count DESC, total_count ASC, r.id_recipe DESC`
+        : `ORDER BY r.id_recipe DESC`;
+  
+  const binds = [
+    ingredients.length ? ingredients : [],
+    excludedIngredients.length ? excludedIngredients : [],
+    searchPattern,
     limit,
     offset,
-  });
-  if (recipes.length === 0) {
-    return res.status(200).json({ status: "success", data: [] });
-  }
+  ]
 
-  const recipeIds = recipes.map((r) => r.id_recipe);
-  if (sortParam !== "ingredients") {
-    const recipeIngredients = await Ingredient_recipe.findAll({
-      where: { id_recipe: { [Op.in]: recipeIds } },
-      subQuery: false,
-      attributes: [
-        [fn("COUNT", col("id_ingredient")), "total_count"],
-        [
-          fn(
-            "SUM",
-            literal(
-              `CASE WHEN "id_ingredient" IN (${ingredients.length ? ingredients.join(",") : "NULL"}) THEN 1 ELSE 0 END`,
-            ),
-          ),
-          "matched_count",
-        ],
-        "id_recipe",
-      ],
-      group: ["id_recipe"],
-    });
+  const sql = `
+    ${withCte}
+    , ir_aggr AS (
+      SELECT
+        ir.id_recipe,
+        COUNT(ir.id_ingredient) AS total_count,
+        COUNT(*) FILTER (WHERE ir.id_ingredient = ANY($1::int[])) AS matched_count
+      FROM public."Ingredient_recipe" ir
+      ${useCandidateFiltering ? `JOIN candidates c ON ir.id_recipe = c.id_recipe` : ``}
+      GROUP BY ir.id_recipe
+      ),
+      rt_aggr AS (
+        SELECT
+          rt.id_recipe,
+          COALESCE(AVG(rt.value), 0) AS rating
+        FROM public."Rating" rt
+        ${useCandidateFiltering ? `JOIN candidates c ON rt.id_recipe = c.id_recipe` : ``}
+        GROUP BY rt.id_recipe
+      ) 
+      SELECT
+        r.id_recipe,
+        r.name,
+        r.image_path,
+        ir_aggr.total_count AS total_count,
+        ir_aggr.matched_count AS matched_count,
+        rt_aggr.rating AS rating
+      FROM public."Recipe" r
+      ${joinClause}
+      LEFT JOIN excluded e ON e.id_recipe = r.id_recipe
+      LEFT JOIN ir_aggr ON ir_aggr.id_recipe = r.id_recipe
+      LEFT JOIN rt_aggr ON rt_aggr.id_recipe = r.id_recipe
+      ${whereClause}
+      ${orderBy}
+      LIMIT $4 OFFSET $5`
+  
 
-    recipes.forEach((recipe) => {
-      recipe.dataValues.matched_count =
-        recipeIngredients
-          .find((ri) => ri.id_recipe === recipe.id_recipe)
-          ?.get("matched_count") ?? 0;
-      recipe.dataValues.total_count =
-        recipeIngredients
-          .find((ri) => ri.id_recipe === recipe.id_recipe)
-          ?.get("total_count") ?? 0;
-    });
-  }
-  if (sortParam !== "highest_rated") {
-    const ratings = await Rating.findAll({
-      where: { id_recipe: { [Op.in]: recipeIds } },
-      attributes: ["id_recipe", [fn("AVG", col("value")), "rating"]],
-      group: ["id_recipe"],
-    });
-
-    recipes.forEach((recipe) => {
-      recipe.dataValues.rating =
-        ratings.find((r) => r.id_recipe === recipe.id_recipe)?.get("rating") ??
-        0;
-    });
-  }
-  const recipesWithDetails = recipes.map((recipe) => {
+  const recipes = await sequelize.query(sql, {type: QueryTypes.SELECT, bind: binds})
+  const recipesFormatted = recipes.map((recipe) => {
     return {
       id_recipe: recipe.id_recipe,
       name: recipe.name,
       image_url: recipe.image_path
         ? `${req.protocol}://${req.get("host")}/${recipe.image_path}`
         : null,
-      author: recipe.added_by_User,
-      rating: recipe.get("rating") ? parseFloat(recipe.get("rating")) : null,
-      matched_ingredients: recipe.get("matched_count")
-        ? parseInt(recipe.get("matched_count"))
-        : 0,
-      total_ingredients: recipe.get("total_count")
-        ? parseInt(recipe.get("total_count"))
-        : 0,
+      rating: recipe.rating ?? 0,
+      matched_ingredients: recipe.matched_count ?? 0,
+      total_ingredients: recipe.total_count ?? 0,
     };
   });
 
-  let recipesFiltered = recipesWithDetails;
-  if (matchOnly == 1 && ingredients.length) {
-    recipesFiltered = recipesFiltered.filter(
-      (r) => r.matched_ingredients == r.total_ingredients,
-    );
-  }
-
   return res.status(200).json({
     status: "success",
-    data: recipesFiltered,
+    data: recipesFormatted,
   });
 });
 
