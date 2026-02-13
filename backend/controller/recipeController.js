@@ -428,9 +428,9 @@ const getRecipes = catchAsync(async (req, res, next) => {
       image_url: recipe.image_path
         ? `${req.protocol}://${req.get("host")}/${recipe.image_path}`
         : null,
-      rating: recipe.rating ?? 0,
-      matched_ingredients: recipe.matched_count ?? 0,
-      total_ingredients: recipe.total_count ?? 0,
+      rating: Number(Number(recipe.rating).toFixed(2)) ?? 0,
+      matched_ingredients: Number(recipe.matched_count) ?? 0,
+      total_ingredients: Number(recipe.total_count) ?? 0,
     };
   });
 

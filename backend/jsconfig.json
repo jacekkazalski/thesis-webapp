@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "checkJs": false,
+        "maxNodeModuleJsDepth": 2,
+        "module": "commonjs",
+        "target": "ES2021",
+        "types": [
+            "node",
+            "express",
+            "jest"
+        ]
+    },
+    "include": [
+        "**/*.js"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
