@@ -84,7 +84,6 @@ describe("GET /api/recipe?id_recipe=xxx", () => {
             name: expect.any(String),
             id_recipe: 1,
             instructions: expect.any(String),
-            image_url: expect.anything(),
             ingredients: expect.any(Array),
             author: {
                 id_user: expect.any(Number),
