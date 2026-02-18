@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "kill-port 3000 && nodemon server.js"
+    "dev": "kill-port 3000 && nodemon server.js",
+    "test": "cross-env NODE_ENV=test jest --runInBand"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +28,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^25.2.3",
     "@types/sequelize": "^4.28.20",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
