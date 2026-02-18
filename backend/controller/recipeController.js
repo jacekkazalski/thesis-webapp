@@ -13,6 +13,7 @@ const {
 } = initModels(sequelize);
 const catchAsync = require("../utils/catchAsync");
 const CustomError = require("../utils/customError");
+const ingredient = require("../models/ingredient");
 
 const getRecipe = catchAsync(async (req, res, next) => {
   const { id_recipe } = req.query;
@@ -34,9 +35,9 @@ const getRecipe = catchAsync(async (req, res, next) => {
     attributes: [[fn("AVG", col("value")), "averageRating"]],
   });
 
-  const ratingParameter = rating
-    ? parseFloat(rating.get("averageRating"))
-    : null;
+  const ratingParameter = rating.get("averageRating")
+    ? Number(Number(rating.get("averageRating")).toFixed(2))
+    : 0;
   const ingredients = await Ingredient_recipe.findAll({
     where: { id_recipe: id_recipe },
     include: [
@@ -103,14 +104,14 @@ const createRecipe = catchAsync(async (req, res, next) => {
   const { name, instructions, ingredients } = req.body;
   const authUser = req.user;
   const imagePath = req.file ? `./images/${req.file.filename}` : null;
-  console.log(authUser);
 
   if (
     !name ||
     name.trim() === "" ||
     !instructions ||
     instructions.trim() === "" ||
-    !ingredients
+    !ingredients ||
+    ingredients.length === 0
   ) {
     return next(new CustomError("Missing required fields", 400));
   }
@@ -171,7 +172,8 @@ const updateRecipe = catchAsync(async (req, res, next) => {
     name.trim() === "" ||
     !instructions ||
     instructions.trim() === "" ||
-    !ingredients
+    !ingredients ||
+    ingredients.length === 0
   ) {
     return next(new CustomError("Missing required fields", 400));
   }
@@ -334,13 +336,10 @@ const getRecipes = catchAsync(async (req, res, next) => {
     }
   }
 
-  
-
   ingredients = [...new Set(ingredients.map(Number))];
   excludedIngredients = [...new Set(excludedIngredients.map(Number))];
   const searchQuery = search ? search.trim() : "";
   const searchPattern = searchQuery ? `%${searchQuery}%` : null;
-
 
   const useCandidateFiltering = ingredients.length > 0;
   const candidateCte = ` 
@@ -359,8 +358,8 @@ const getRecipes = catchAsync(async (req, res, next) => {
   `;
 
   const withCte = useCandidateFiltering
-  ? `WITH ${candidateCte}, ${exludeCte}`
-  : `WITH ${exludeCte}`;
+    ? `WITH ${candidateCte}, ${exludeCte}`
+    : `WITH ${exludeCte}`;
   const joinClause = useCandidateFiltering
     ? `JOIN candidates c ON r.id_recipe = c.id_recipe`
     : "";
@@ -375,14 +374,14 @@ const getRecipes = catchAsync(async (req, res, next) => {
       : sortParam === "ingredients" && useCandidateFiltering
         ? `ORDER BY matched_count DESC, total_count ASC, r.id_recipe DESC`
         : `ORDER BY r.id_recipe DESC`;
-  
+
   const binds = [
     ingredients.length ? ingredients : [],
     excludedIngredients.length ? excludedIngredients : [],
     searchPattern,
     limit,
     offset,
-  ]
+  ];
 
   const sql = `
     ${withCte}
@@ -417,10 +416,12 @@ const getRecipes = catchAsync(async (req, res, next) => {
       LEFT JOIN rt_aggr ON rt_aggr.id_recipe = r.id_recipe
       ${whereClause}
       ${orderBy}
-      LIMIT $4 OFFSET $5`
-  
+      LIMIT $4 OFFSET $5`;
 
-  const recipes = await sequelize.query(sql, {type: QueryTypes.SELECT, bind: binds})
+  const recipes = await sequelize.query(sql, {
+    type: QueryTypes.SELECT,
+    bind: binds,
+  });
   const recipesFormatted = recipes.map((recipe) => {
     return {
       id_recipe: recipe.id_recipe,
