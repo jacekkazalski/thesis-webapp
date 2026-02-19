@@ -1,9 +1,12 @@
 const request = require("supertest");
 const app = require("../app");
-const ingredient = require("../models/ingredient");
-const rating = require("../models/rating");
+const { resetDatabase } = require("./helpers/setupDb");
+const { loginAndGetToken } = require("./helpers/auth");
 
 describe("GET /api/recipes", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("no parameters, return 200 with correct structure", async () => {
     const response = await request(app).get("/api/recipes");
     expect(response.status).toBe(200);
@@ -80,6 +83,9 @@ describe("GET /api/recipes", () => {
   });
 });
 describe("GET /api/recipe?id_recipe=xxx", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("valid id_recipe, return 200 with correct structure", async () => {
     const response = await request(app).get("/api/recipes/recipe?id_recipe=1");
     expect(response.status).toBe(200);

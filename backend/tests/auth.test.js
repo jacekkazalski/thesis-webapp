@@ -1,5 +1,6 @@
 const request = require("supertest");
 const app = require("../app");
+const { resetDatabase } = require("./helpers/setupDb");
 const { loginAndGetToken } = require("./helpers/auth");
 require("dotenv").config();
 
@@ -9,6 +10,9 @@ const user_1_password = process.env.TEST_USER_PASSWORD;
 const mod_1_email = process.env.TEST_MOD_1;
 
 describe("POST /api/auth/signup", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("signup with missing fields, code 400", async () => {
     const response = await request(app).post("/api/auth/signup").send({
       username: "user",
@@ -40,8 +44,27 @@ describe("POST /api/auth/signup", () => {
       "Password must be at least 8 characters long",
     );
   });
+  test("signup with valid inputs, code 201", async () => {
+    const response = await request(app).post("/api/auth/signup").send({
+      username: "user_test",
+      email: "user_test@gmail.com",
+      password: "Test123!",
+      confirmPassword: "Test123!",
+    });
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("message", "User created successfully");
+    expect(response.body.data.user).toHaveProperty("id");
+    expect(response.body.data.user).toHaveProperty("username", "user_test");
+    expect(response.body.data.user).toHaveProperty(
+      "email",
+      "user_test@gmail.com",
+    );
+  });
 });
 describe("POST /api/auth/login", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("login valid credentials and refresh access token using http only cookie, code 200", async () => {
     const email = user_1_email;
     const password = user_1_password;
@@ -81,6 +104,9 @@ describe("POST /api/auth/login", () => {
   });
 });
 describe("POST /api/auth/change-password", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("incorrect password, code 401", async () => {
     const token = await loginAndGetToken();
     const response = await request(app)

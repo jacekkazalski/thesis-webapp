@@ -1,7 +1,6 @@
 const request = require("supertest");
 const app = require("../app");
-const ingredient = require("../models/ingredient");
-const rating = require("../models/rating");
+const { resetDatabase } = require("./helpers/setupDb");
 const { loginAndGetToken } = require("./helpers/auth");
 require("dotenv").config();
 
@@ -11,6 +10,9 @@ const user_1_password = process.env.TEST_USER_PASSWORD;
 const mod_1_email = process.env.TEST_MOD_1;
 
 describe("POST /api/recipes/create", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("no token, return 401", async () => {
     const response = await request(app).post("/api/recipes/create");
     expect(response.status).toBe(401);
@@ -66,6 +68,9 @@ describe("POST /api/recipes/create", () => {
   });
 });
 describe("PUT /api/recipes/update", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
   test("no token, return 401", async () => {
     const response = await request(app).put("/api/recipes/update");
     expect(response.status).toBe(401);
@@ -120,6 +125,9 @@ describe("PUT /api/recipes/update", () => {
       });
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("status", "success");
-    expect(response.body).toHaveProperty("message", "Recipe updated successfully");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Recipe updated successfully",
+    );
   });
 });
