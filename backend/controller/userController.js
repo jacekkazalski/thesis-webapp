@@ -34,7 +34,6 @@ const getUser = catchAsync(async (req, res, next) => {
 
 const deleteUser = catchAsync(async (req, res, next) => {
   const authUser = req.user;
-  console.log(`Deleting user with ID: ${authUser.id}`);
 
   await sequelize.transaction(async (t) => {
     const user = await User.findOne({
@@ -47,11 +46,6 @@ const deleteUser = catchAsync(async (req, res, next) => {
       transaction: t,
     });
     await Rating.destroy({ where: { id_user: authUser.id }, transaction: t });
-
-    await Ingredient_diet.destroy({
-      where: { id_user: authUser.id },
-      transaction: t,
-    });
 
     const recipes = await Recipe.findAll({
       where: { added_by: authUser.id },

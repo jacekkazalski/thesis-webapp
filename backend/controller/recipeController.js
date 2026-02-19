@@ -187,7 +187,7 @@ const updateRecipe = catchAsync(async (req, res, next) => {
     if (!foundRecipe) throw new CustomError("Recipe not found", 404);
     // Check if user is author
     if (foundRecipe.added_by !== authUser.id)
-      throw new CustomError("Unauthorized operation", 403);
+      throw new CustomError("Forbidden", 403);
     await Recipe.update(
       {
         name: name ?? foundRecipe.name,
@@ -246,7 +246,7 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
   }
   // Check if user is author or moderator
   if (foundRecipe.added_by !== authUser.id && authUser.role !== "moderator") {
-    return next(new CustomError("Unauthorized operation", 403));
+    return next(new CustomError("Forbidden", 403));
   }
 
   // Create a transaction to delete the recipe and its associated data

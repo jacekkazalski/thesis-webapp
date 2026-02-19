@@ -103,7 +103,7 @@ const refresh = catchAsync(async (req, res, next) => {
   }
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
     if (err || user.username !== result.username) {
-      return next(new CustomError("Forbidden", 403));
+      return next(new CustomError("Unauthorized", 401));
     }
     const accessToken = jwt.sign(
       { username: result.username, id: result.id_user, role: result.role },
@@ -151,7 +151,7 @@ const authenticateToken = (req, res, next) => {
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     // Invalid/expired access token
     if (err) {
-      return next(new CustomError("Forbidden", 403));
+      return next(new CustomError("Unauthorized", 401));
     }
     req.user = user;
     next();
