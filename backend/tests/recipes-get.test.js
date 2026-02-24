@@ -2,6 +2,7 @@ const request = require("supertest");
 const app = require("../app");
 const { resetDatabase } = require("./helpers/setupDb");
 const { loginAndGetToken } = require("./helpers/auth");
+require("dotenv").config();
 
 describe("GET /api/recipes", () => {
   beforeEach(async () => {
@@ -14,15 +15,13 @@ describe("GET /api/recipes", () => {
     expect(response.body).toHaveProperty("data");
     expect(Array.isArray(response.body.data)).toBe(true);
 
-    if (response.body.data.length > 0) {
-      const recipe = response.body.data[0];
-      expect(recipe).toHaveProperty("id_recipe");
-      expect(recipe).toHaveProperty("name");
-      expect(recipe).toHaveProperty("image_url");
-      expect(recipe).toHaveProperty("matched_ingredients");
-      expect(recipe).toHaveProperty("total_ingredients");
-      expect(recipe).toHaveProperty("rating");
-    }
+    const recipe = response.body.data[0];
+    expect(recipe).toHaveProperty("id_recipe");
+    expect(recipe).toHaveProperty("name");
+    expect(recipe).toHaveProperty("image_url");
+    expect(recipe).toHaveProperty("matched_ingredients");
+    expect(recipe).toHaveProperty("total_ingredients");
+    expect(recipe).toHaveProperty("rating");
   });
   test("limit parameter, data length less than or equal to limit", async () => {
     const response = await request(app).get("/api/recipes?limit=5");
@@ -49,23 +48,20 @@ describe("GET /api/recipes", () => {
     expect(response.body).toHaveProperty("data");
     expect(Array.isArray(response.body.data)).toBe(true);
 
-    if (response.body.data.length > 0) {
-      const recipe = response.body.data[0];
-      expect(recipe).toHaveProperty("id_recipe");
-      expect(recipe).toHaveProperty("name");
-      expect(recipe).toHaveProperty("image_url");
-      expect(recipe).toHaveProperty("matched_ingredients");
-    }
+    const recipe = response.body.data[0];
+    expect(recipe).toHaveProperty("id_recipe");
+    expect(recipe).toHaveProperty("name");
+    expect(recipe).toHaveProperty("image_url");
+    expect(recipe).toHaveProperty("matched_ingredients");
   });
   test("search by name", async () => {
-    const response = await request(app).get("/api/recipes?search=12");
+    const response = await request(app).get("/api/recipes?search=Recipe_1");
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body).toHaveProperty("data");
     expect(Array.isArray(response.body.data)).toBe(true);
-    if (response.body.data.length > 0) {
-      expect(response.body.data[0].name.toLowerCase()).toContain("12");
-    }
+
+    expect(response.body.data[0].name.toLowerCase()).toContain("recipe_1");
   });
   test("search by ingredients", async () => {
     const response = await request(app).get(
@@ -75,9 +71,11 @@ describe("GET /api/recipes", () => {
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body).toHaveProperty("data");
     expect(Array.isArray(response.body.data)).toBe(true);
-    if (response.body.data.length > 0) {
-      expect(response.body.data[0].matched_ingredients).toBeGreaterThanOrEqual(
-        1,
+
+    const recipeArray = response.body.data;
+    for (x = 0; x < recipeArray.length - 1; x++) {
+      expect(recipeArray[x].matched_ingredients).toBeGreaterThanOrEqual(
+        recipeArray[x + 1].matched_ingredients,
       );
     }
   });
@@ -116,5 +114,55 @@ describe("GET /api/recipe?id_recipe=xxx", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("status", "fail");
     expect(response.body).toHaveProperty("message", "Recipe not found");
+  });
+});
+
+describe("GET /api/recipes logged-in", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
+  test("test excluded ingredients, login as user_2 who has excluded ingredient 7", async () => {
+    const token = await loginAndGetToken(
+      process.env.TEST_USER_2,
+      process.env.TEST_USER_PASSWORD,
+    );
+    const response = await request(app)
+      .get("/api/recipes?useDiet=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("status", "success");
+    expect(response.body).toHaveProperty("data");
+    for (const recipe of response.body.data) {
+      expect(recipe.id_recipe).not.toBe(4);
+    }
+  });
+  test("test diet, login as user_2 who has vegetarian diet", async () => {
+    const token = await loginAndGetToken(
+      process.env.TEST_USER_2,
+      process.env.TEST_USER_PASSWORD,
+    );
+    const response = await request(app)
+      .get("/api/recipes?useDiet=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("status", "success");
+    expect(response.body).toHaveProperty("data");
+    for (const recipe of response.body.data) {
+      expect(recipe.id_recipe).not.toBe(1);
+    }
+  });
+  test("test included ingredients, login as user_1 who has ingredient 1 and 2, expect the matched ingredients to be more than 0", async () => {
+    const token = await loginAndGetToken(
+      process.env.TEST_USER_1,
+      process.env.TEST_USER_PASSWORD,
+    );
+    const response = await request(app)
+      .get("/api/recipes?useSaved=1&sortBy=ingredients")
+      .set("Authorization", `Bearer ${token}`);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("status", "success");
+    expect(response.body).toHaveProperty("data");
+    const firstRecipe = response.body.data[0];
+    expect(firstRecipe.matched_ingredients).toBeGreaterThan(0);
   });
 });

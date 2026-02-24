@@ -62,7 +62,8 @@ INSERT INTO public."Recipe"(name, instructions, added_by)
 	VALUES
 		('User_1 Recipe_1 (Meat)', 'Instructions', 1),
 		('User_1 Recipe_2 (No meat)', 'Instructions', 1),
-		('User_2 Recipe_1', 'Instructions', 2);
+		('User_2 Recipe_1', 'Instructions', 2),
+		('User_1_Recipe_3 (Excluded ingredient 7)', 'Instructions', 1);
 
 
 INSERT INTO public."Ingredient_recipe"(id_recipe, id_ingredient)
@@ -74,7 +75,9 @@ INSERT INTO public."Ingredient_recipe"(id_recipe, id_ingredient)
 		(2, 4),
 		(2, 5),
 		(3, 6),
-		(3, 5);
+		(3, 5),
+		(4, 7),
+		(4, 5);
 
 INSERT INTO public."Rating"(id_user, id_recipe, value)
 	VALUES
