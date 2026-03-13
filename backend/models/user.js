@@ -36,6 +36,10 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      banned_until: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     {
       tableName: "User",
