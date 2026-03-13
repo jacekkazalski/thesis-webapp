@@ -7,7 +7,9 @@ const {
   addPredefinedDietToUser,
   removePredefinedDietFromUser,
   getUserRecipes,
+  banUser,
 } = require("../controller/userController");
+const { authorizeRole } = require("../controller/authController");
 const { authenticateToken } = require("../controller/authController");
 const router = require("express").Router();
 
@@ -19,5 +21,8 @@ router.route("/ingredients").get(authenticateToken, getUserIngredients);
 router.route("/diet").post(authenticateToken, addPredefinedDietToUser);
 router.route("/diet").delete(authenticateToken, removePredefinedDietFromUser);
 router.route("/recipes").get(getUserRecipes);
+router
+  .route("/ban")
+  .patch(authenticateToken, authorizeRole("moderator"), banUser);
 
 module.exports = router;

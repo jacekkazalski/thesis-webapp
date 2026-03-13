@@ -234,6 +234,39 @@ const getUserRecipes = catchAsync(async (req, res, next) => {
     data: recipesFormatted,
   });
 });
+const banUser = catchAsync(async (req, res, next) => {
+  const moderator = req.user;
+  const { id_user } = req.query;
+  const { durationDays } = req.body;
+  if (!id_user || !durationDays) {
+    return next(new CustomError("Missing required fields", 400));
+  }
+
+  if (!Number.isInteger(durationDays) || durationDays <= 0) {
+    return next(new CustomError("Duration must be a positive integer", 400));
+  }
+  const targertUser = await User.findOne({
+    where: { id_user: id_user },
+  });
+  if (!targertUser) {
+    return next(new CustomError("User not found", 404));
+  }
+  if (targertUser.id_user === moderator.id) {
+    return next(new CustomError("You cannot ban yourself", 400));
+  }
+  if (targertUser.role === "moderator") {
+    return next(new CustomError("You cannot ban another moderator", 400));
+  }
+  const banned_until = new Date();
+  banned_until.setDate(banned_until.getDate() + durationDays);
+
+  await targertUser.update({ banned_until: banned_until });
+
+  return res.status(200).json({
+    status: "success",
+    message: `User banned until ${banned_until}`,
+  });
+});
 module.exports = {
   getUser,
   deleteUser,
@@ -243,4 +276,5 @@ module.exports = {
   addPredefinedDietToUser,
   removePredefinedDietFromUser,
   getUserRecipes,
+  banUser,
 };

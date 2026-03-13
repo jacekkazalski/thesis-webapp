@@ -60,6 +60,14 @@ const login = catchAsync(async (req, res, next) => {
   if (!result || !(await bcrypt.compare(password, result.password))) {
     return next(new CustomError("Invalid email or password", 401));
   }
+  if (result.banned_until && new Date(result.banned_until) > new Date()) {
+    return next(
+      new CustomError(
+        `User is banned until ${new Date(result.banned_until).toLocaleString()}`,
+        403,
+      ),
+    );
+  }
 
   const accessToken = jwt.sign(
     { username: result.username, id: result.id_user, role: result.role },
@@ -101,6 +109,14 @@ const refresh = catchAsync(async (req, res, next) => {
   if (!result) {
     return next(new CustomError("Unauthorized", 401));
   }
+  if (result.banned_until && new Date(result.banned_until) > new Date()) {
+    return next(
+      new CustomError(
+        `User is banned until ${new Date(result.banned_until).toLocaleString()}`,
+        403,
+      ),
+    );
+  }
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
     if (err || user.username !== result.username) {
       return next(new CustomError("Unauthorized", 401));
@@ -141,38 +157,92 @@ const logout = catchAsync(async (req, res, next) => {
   return res.json({ message: "Logout successful" });
 });
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = catchAsync(async (req, res, next) => {
   const authHeader =
     req.headers["Authorization"] || req.headers["authorization"];
+
   if (!authHeader) {
     return next(new CustomError("Unauthorized", 401));
   }
   const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    // Invalid/expired access token
-    if (err) {
-      return next(new CustomError("Unauthorized", 401));
-    }
-    req.user = user;
-    next();
+  if (!token) {
+    return next(new CustomError("Unauthorized", 401));
+  }
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  } catch {
+    return next(new CustomError("Unauthorized", 401));
+  }
+  const user = await User.findByPk(decoded.id, {
+    attributes: ["id_user", "username", "email", "role", "banned_until"],
   });
-};
-const optionalAuthenticateToken = (req, res, next) => {
+  if (!user) {
+    return next(new CustomError("Unauthorized", 401));
+  }
+  if (user.banned_until && new Date(user.banned_until) > new Date()) {
+    return next(
+      new CustomError(
+        `User is banned until ${new Date(user.banned_until).toLocaleString()}`,
+        403,
+      ),
+    );
+  }
+  req.user = {
+    id: user.id_user,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+  };
+  next();
+});
+const optionalAuthenticateToken = catchAsync(async (req, res, next) => {
   const authHeader =
     req.headers["Authorization"] || req.headers["authorization"];
   if (!authHeader) {
+    return next();
+  }
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return next();
+  }
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  } catch {
     next();
     return;
   }
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    // Invalid/expired access token
-    if (!err && user) {
-      req.user = user;
+  const user = await User.findByPk(decoded.id, {
+    attributes: ["id_user", "username", "email", "role", "banned_until"],
+  });
+  if (!user) {
+    next();
+    return;
+  }
+  if (user.banned_until && new Date(user.banned_until) > new Date()) {
+    next();
+    return;
+  }
+  req.user = decoded;
+  req.user = {
+    id: user.id_user,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+  };
+});
+const authorizeRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return next(new CustomError("Unauthorized", 401));
+    }
+    if (!allowedRoles.includes(req.user.role)) {
+      return next(new CustomError("Forbidden", 403));
     }
     next();
-  });
-};
+  };
+}
 
 const changePassword = catchAsync(async (req, res, next) => {
   const authUser = req.user;
@@ -216,4 +286,5 @@ module.exports = {
   logout,
   optionalAuthenticateToken,
   changePassword,
+  authorizeRole
 };
