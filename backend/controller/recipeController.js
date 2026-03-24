@@ -14,6 +14,7 @@ const {
 const catchAsync = require("../utils/catchAsync");
 const CustomError = require("../utils/customError");
 const ingredient = require("../models/ingredient");
+const { get } = require("node:http");
 
 const getRecipe = catchAsync(async (req, res, next) => {
   const { id_recipe } = req.query;
@@ -193,6 +194,8 @@ const updateRecipe = catchAsync(async (req, res, next) => {
         name: name ?? foundRecipe.name,
         instructions: instructions ?? foundRecipe.instructions,
         image_path: imagePath ?? foundRecipe.image_path,
+        updated_at: literal("CURRENT_TIMESTAMP"),
+        is_checked: false,
       },
       {
         where: { id_recipe: id_recipe },
@@ -440,7 +443,35 @@ const getRecipes = catchAsync(async (req, res, next) => {
     data: recipesFormatted,
   });
 });
+const getUncheckedRecipes = catchAsync(async (req, res, next) => {
+  const uncheckedRecipes = await Recipe.findAll({
+    where: { is_checked: false },
+    attributes: ["id_recipe", "name", "image_path"],
+  });
 
+  return res.status(200).json({
+    status: "success",
+    data: uncheckedRecipes,
+  });
+});
+const checkRecipe = catchAsync(async (req, res, next) => {
+  const { id_recipe } = req.query;
+  if (!id_recipe) {
+    return next(new CustomError("Missing required fields", 400));
+  }
+  const foundRecipe = await Recipe.findOne({
+    where: { id_recipe: id_recipe },
+  });
+  if (!foundRecipe) {
+    return next(new CustomError("Recipe not found", 404));
+  }
+  await foundRecipe.update({ is_checked: true });
+
+  return res.status(200).json({
+    status: "success",
+    message: "Recipe checked successfully",
+  });
+});
 const isAuthor = catchAsync(async (req, res, next) => {
   const authUser = req.user;
   const { id_recipe } = req.query;
@@ -476,4 +507,6 @@ module.exports = {
   deleteRecipe,
   getRandomRecipe,
   updateRecipe,
+  getUncheckedRecipes,
+  checkRecipe,
 };
