@@ -13,6 +13,7 @@ const {
 } = initModels(sequelize);
 const catchAsync = require("../utils/catchAsync");
 const CustomError = require("../utils/customError");
+const { isModeratorRole } = require("./authController");
 
 const getUser = catchAsync(async (req, res, next) => {
   const { id_user } = req.query;
@@ -254,7 +255,7 @@ const banUser = catchAsync(async (req, res, next) => {
   if (targertUser.id_user === moderator.id) {
     return next(new CustomError("You cannot ban yourself", 400));
   }
-  if (targertUser.role === "moderator") {
+  if (isModeratorRole(targertUser.role)) {
     return next(new CustomError("You cannot ban another moderator", 400));
   }
   const banned_until = new Date();

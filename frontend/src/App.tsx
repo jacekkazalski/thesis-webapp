@@ -11,6 +11,7 @@ import EditRecipePage from './pages/EditRecipePage';
 import ProfilePage from './pages/ProfilePage';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import SettingsPage from './pages/SettingsPage';
+import ModeratorRecipeList from './pages/ModeratorRecipeList';
 
 const theme = createTheme({
   palette: {
@@ -40,6 +41,9 @@ function App() {
               <Route element={<RequireAuth />}>
                 <Route path={'/create'} element={<AddRecipePage />} />
                 <Route path={'/recipes/edit/:recipeId'} element={<EditRecipePage />} />
+              </Route>
+              <Route element={<RequireAuth allowedRoles={['moderator', 'mod']} />}>
+                <Route path="/moderator/recipes" element={<ModeratorRecipeList />} />
               </Route>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegistrationPage />} />

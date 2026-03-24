@@ -15,6 +15,7 @@ const catchAsync = require("../utils/catchAsync");
 const CustomError = require("../utils/customError");
 const ingredient = require("../models/ingredient");
 const { get } = require("node:http");
+const { isModeratorRole } = require("./authController");
 
 const getRecipe = catchAsync(async (req, res, next) => {
   const { id_recipe } = req.query;
@@ -248,7 +249,7 @@ const deleteRecipe = catchAsync(async (req, res, next) => {
     return next(new CustomError("Recipe not found", 404));
   }
   // Check if user is author or moderator
-  if (foundRecipe.added_by !== authUser.id && authUser.role !== "moderator") {
+  if (foundRecipe.added_by !== authUser.id && !isModeratorRole(authUser.role)) {
     return next(new CustomError("Forbidden", 403));
   }
 
@@ -446,12 +447,29 @@ const getRecipes = catchAsync(async (req, res, next) => {
 const getUncheckedRecipes = catchAsync(async (req, res, next) => {
   const uncheckedRecipes = await Recipe.findAll({
     where: { is_checked: false },
-    attributes: ["id_recipe", "name", "image_path"],
+    attributes: ["id_recipe", "name", "image_path", "created_at"],
+    limit: 50,
+    include: [
+      {
+        model: User,
+        as: "added_by_User",
+        attributes: ["id_user", "username"],
+      },
+    ],
   });
+  const formattedRecipes = uncheckedRecipes.map((recipe) => ({
+    id_recipe: recipe.id_recipe,
+    name: recipe.name,
+    image_url: recipe.image_path
+      ? `${req.protocol}://${req.get("host")}/${recipe.image_path}`
+      : null,
+    author: recipe.added_by_User,
+    created_at: recipe.created_at,
+  }));
 
   return res.status(200).json({
     status: "success",
-    data: uncheckedRecipes,
+    data: formattedRecipes,
   });
 });
 const checkRecipe = catchAsync(async (req, res, next) => {

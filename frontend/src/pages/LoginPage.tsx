@@ -41,7 +41,8 @@ function LoginForm() {
       const accessToken = response?.data?.accessToken;
       const username = response?.data?.username;
       const id_user = response?.data?.id_user;
-      setAuth({ accessToken, username, email, id_user });
+      const role = response?.data?.role;
+      setAuth({ accessToken, username, email, id_user, role });
       setEmail('');
       setPassword('');
       navigate(from, { replace: true });

@@ -7,6 +7,8 @@ const catchAsync = require("../utils/catchAsync");
 const CustomError = require("../utils/customError");
 require("dotenv").config();
 
+const isModeratorRole = (role) => role === "moderator" || role === "mod";
+
 const signup = catchAsync(async (req, res, next) => {
   const { username, email, password, confirmPassword } = req.body;
 
@@ -231,6 +233,7 @@ const optionalAuthenticateToken = catchAsync(async (req, res, next) => {
     email: user.email,
     role: user.role,
   };
+  return next();
 });
 const authorizeRole = (...allowedRoles) => {
   return (req, res, next) => {
@@ -286,5 +289,6 @@ module.exports = {
   logout,
   optionalAuthenticateToken,
   changePassword,
-  authorizeRole
+  authorizeRole,
+  isModeratorRole,
 };

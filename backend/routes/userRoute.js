@@ -23,6 +23,6 @@ router.route("/diet").delete(authenticateToken, removePredefinedDietFromUser);
 router.route("/recipes").get(getUserRecipes);
 router
   .route("/ban")
-  .patch(authenticateToken, authorizeRole("moderator"), banUser);
+  .patch(authenticateToken, authorizeRole("moderator", "mod"), banUser);
 
 module.exports = router;

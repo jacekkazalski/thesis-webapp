@@ -5,6 +5,7 @@ import {
   KitchenTwoTone,
   Login,
   Logout,
+  ManageAccounts,
   Person,
   PersonAdd,
   Schedule,
@@ -96,6 +97,13 @@ export default function NavBar() {
           <NavButton icon={Add} text="Dodaj" onClick={() => navigate('/create')} />
           <NavButton icon={Schedule} text="Nowe" onClick={() => navigate('/')} />
           <NavButton icon={CasinoOutlined} text="Losuj" onClick={getRandomRecipe} />
+          {auth?.role && ['moderator', 'mod'].includes(auth.role) && (
+            <NavButton
+              icon={ManageAccounts}
+              text="Moderacja"
+              onClick={() => navigate('/moderator/recipes')}
+            />
+          )}
 
           <Box display="flex" alignItems="center">
             {isWide ? (

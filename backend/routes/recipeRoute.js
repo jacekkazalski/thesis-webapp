@@ -30,9 +30,9 @@ router.route("/delete").delete(authenticateToken, deleteRecipe);
 router.route("/random").get(getRandomRecipe);
 router
   .route("/unchecked")
-  .get(authenticateToken, authorizeRole("moderator"), getUncheckedRecipes);
+  .get(authenticateToken, authorizeRole("moderator", "mod"), getUncheckedRecipes);
 router
   .route("/check")
-  .patch(authenticateToken, authorizeRole("moderator"), checkRecipe);
+  .patch(authenticateToken, authorizeRole("moderator", "mod"), checkRecipe);
 
 module.exports = router;

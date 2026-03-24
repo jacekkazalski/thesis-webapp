@@ -15,7 +15,7 @@ const useRefreshToken = () => {
       setAuth((prev: AuthState | null) =>
         prev
           ? { ...prev, accessToken: accessToken }
-          : { accessToken, id_user: 0, username: '', email: '' },
+          : { accessToken, id_user: 0, username: '', email: '', role: '' },
       );
       return accessToken;
     } catch (err) {
