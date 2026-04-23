@@ -19,7 +19,7 @@ import { IngredientMultiSelect } from './IngredientMultiSelect';
 import RecipeGrid from './RecipeGrid';
 
 export default function Gallery() {
-  const { auth } = useAuth();
+  const { auth, authReady } = useAuth();
   const axiosInstance = useAxiosCustom();
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -31,53 +31,67 @@ export default function Gallery() {
   const PAGE_SIZE = 24;
   const searchQuery = searchParams.get('search') || '';
   const location = useLocation();
+  const isLoggedIn = !!auth?.accessToken;
 
-  const [pantryChecked, setPantryChecked] = useState<boolean>(false);
-  const [dietChecked, setDietChecked] = useState<boolean>(false);
+  const [pantryChecked, setPantryChecked] = useState<boolean>(isLoggedIn);
+  const [dietChecked, setDietChecked] = useState<boolean>(isLoggedIn);
   const [matchChecked, setMatchChecked] = useState<boolean>(false);
 
   useEffect(() => {
-    const logged = !!auth?.accessToken;
-    setPantryChecked(logged);
-    setDietChecked(logged);
-  }, [auth]);
+    setPantryChecked(isLoggedIn);
+    setDietChecked(isLoggedIn);
+  }, [isLoggedIn]);
   useEffect(() => {
     if (!(location.state as any)?.reset) return;
-
-    const logged = !!auth?.accessToken;
 
     setChosenIngredients([]);
     setSortBy('ingredients');
     setMatchChecked(false);
-    setPantryChecked(logged);
-    setDietChecked(logged);
+    setPantryChecked(isLoggedIn);
+    setDietChecked(isLoggedIn);
     setPage(1);
-  }, [(location.state as any)?.reset, auth]);
+  }, [(location.state as any)?.reset, isLoggedIn]);
 
   useEffect(() => {
+    // Wait for the auth state to be loaded from storage
+    if (!authReady) return;
+
+    let isCurrent = true;
+    const controller = new AbortController();
+
     const fetchRecipes = async () => {
       const ingredientIds = chosenIngredients.map((i) => i.id_ingredient);
-      const response = await axiosInstance.get('/recipes', {
-        params: {
-          sortBy,
-          search: searchQuery,
-          ingredient: ingredientIds,
-          useSaved: pantryChecked ? 1 : 0,
-          useDiet: dietChecked ? 1 : 0,
-          matchOnly: matchChecked ? 1 : 0,
-          page,
-          limit: PAGE_SIZE,
-        },
-      });
-      console.log(response.data.data);
-      setRecipes(response.data.data);
+      try {
+        const response = await axiosInstance.get('/recipes', {
+          params: {
+            sortBy,
+            search: searchQuery,
+            ingredient: ingredientIds,
+            useSaved: pantryChecked ? 1 : 0,
+            useDiet: dietChecked ? 1 : 0,
+            matchOnly: matchChecked ? 1 : 0,
+            page,
+            limit: PAGE_SIZE,
+          },
+          signal: controller.signal,
+        });
+
+        if (isCurrent) {
+          setRecipes(response.data.data);
+        }
+      } catch (error: any) {
+        if (error?.code !== 'ERR_CANCELED') {
+          console.error('Error fetching recipes:', error);
+        }
+      }
     };
-    const fetchIngredients = async () => {
-      const response = await axiosInstance.get('/ingredients');
-      setAllIngredients(response.data.data);
-    };
+
     fetchRecipes();
-    fetchIngredients();
+    // Cleanup function to cancel the request if the component unmounts or dependencies change
+    return () => {
+      isCurrent = false;
+      controller.abort();
+    };
   }, [
     sortBy,
     chosenIngredients,
@@ -86,11 +100,19 @@ export default function Gallery() {
     dietChecked,
     matchChecked,
     page,
+    authReady,
     axiosInstance,
   ]);
   useEffect(() => {
     setPage(1);
   }, [sortBy, chosenIngredients, searchQuery, pantryChecked, dietChecked, matchChecked]);
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      const response = await axiosInstance.get('/ingredients');
+      setAllIngredients(response.data.data);
+    };
+    fetchIngredients();
+  }, []);
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -144,26 +166,30 @@ export default function Gallery() {
               }
               label="Tylko wybrane składniki"
             />
-            {auth?.accessToken ? (
+            {isLoggedIn ? (
               <>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={pantryChecked}
-                      onChange={(e) => setPantryChecked(e.target.checked)}
-                    />
-                  }
-                  label="Spiżarnia"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={dietChecked}
-                      onChange={(e) => setDietChecked(e.target.checked)}
-                    />
-                  }
-                  label="Dieta"
-                />
+                <Tooltip title="Zaznacz, aby automatycznie uwzględnić składniki ze swojej wirtualnej lodówki. Listę zapisanych składników możesz edytować w ustawieniach konta.">
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={pantryChecked}
+                        onChange={(e) => setPantryChecked(e.target.checked)}
+                      />
+                    }
+                    label="Użyj wirtualnej lodówki"
+                  />
+                </Tooltip>
+                <Tooltip title="Zaznacz, aby wykluczyć przepisy niespełniające wymagań diety zapisanej w ustawieniach konta. Listę składników wykluczonych możesz edytować w ustawieniach konta.">
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={dietChecked}
+                        onChange={(e) => setDietChecked(e.target.checked)}
+                      />
+                    }
+                    label="Uwzględnij swoją dietę"
+                  />
+                </Tooltip>
               </>
             ) : (
               <>
@@ -171,7 +197,7 @@ export default function Gallery() {
                   <span>
                     <FormControlLabel
                       control={<Checkbox checked={false} disabled />}
-                      label="Spiżarnia"
+                      label="Użyj wirtualnej lodówki"
                     />
                   </span>
                 </Tooltip>

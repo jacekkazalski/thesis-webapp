@@ -56,7 +56,7 @@ export default function SettingsPage() {
     .map((ing) => ing.name);
   const hasOverlap = overlappingIds.length > 0;
   const overlapErrorMsg = hasOverlap
-    ? `Składniki: "${overlappingNames.join(', ')}" nie mogą być jednocześnie w spiżarni i na liście wykluczonych.`
+    ? `Składniki: "${overlappingNames.join(', ')}" nie mogą być jednocześnie w wirtualnej lodówce i na liście wykluczonych.`
     : '';
 
   useEffect(() => {
@@ -256,10 +256,10 @@ export default function SettingsPage() {
           {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
           {successMsg && <Alert severity="success">{successMsg}</Alert>}
 
-          <Typography variant="h5"> Składniki w spiżarni </Typography>
+          <Typography variant="h5"> Wirtualna lodówka </Typography>
           <Typography variant="body1">
             Wybierz składniki, które zawsze masz w domu. Będą one automatycznie zawarte w każdym
-            wyszukiwaniu.
+            wyszukiwaniu po zanzaczeniu opcji "Użyj wirtualnej lodówki".
           </Typography>
           <IngredientMultiSelect
             options={allIngredients}
@@ -269,7 +269,9 @@ export default function SettingsPage() {
           <Typography variant="h5">Wykluczone składniki i dieta </Typography>
           <Typography variant="body1">
             Wybierz składniki, których nie możesz lub nie chcesz uwzględniać w swoich
-            wyszukiwaniach. Możesz też wybrać jedną z poniższych opcji.
+            wyszukiwaniach. Możesz też wybrać jedną z poniższych gotowych opcji. Zaznaczenie "Uwzględnij
+            swoją dietę" przy wyszukiwaniu spowoduje automatyczne wykluczenie przepisów, które
+            zawierają składniki z tej listy.
           </Typography>
           <FormControl sx={{ width: '80%' }}>
             <InputLabel id="diet-select-label">Wybierz dietę</InputLabel>

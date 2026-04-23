@@ -3,6 +3,7 @@ import { AuthState } from '../utils/types';
 
 interface AuthContextType {
   auth: AuthState | null;
+  authReady: boolean;
   setAuth: React.Dispatch<React.SetStateAction<AuthState | null>>;
 }
 
@@ -10,6 +11,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuthState] = useState<AuthState | null>(null);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const storedAuth = localStorage.getItem('auth');
@@ -21,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('auth');
       }
     }
+    setAuthReady(true);
   }, []);
 
   const setAuth: React.Dispatch<React.SetStateAction<AuthState | null>> = (value) => {
@@ -35,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const value = useMemo(() => ({ auth, setAuth }), [auth]);
+  const value = useMemo(() => ({ auth, authReady, setAuth }), [auth, authReady]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
