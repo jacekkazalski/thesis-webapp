@@ -131,3 +131,37 @@ describe("PUT /api/recipes/update", () => {
     );
   });
 });
+
+describe("Moderator recipe review endpoints", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
+
+  test("seeded mod user can list unchecked recipes", async () => {
+    const token = await loginAndGetToken(mod_1_email, user_1_password);
+    const response = await request(app)
+      .get("/api/recipes/unchecked")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("status", "success");
+    expect(Array.isArray(response.body.data)).toBe(true);
+    expect(response.body.data[0]).toMatchObject({
+      id_recipe: expect.any(Number),
+      name: expect.any(String),
+      author: {
+        id_user: expect.any(Number),
+        username: expect.any(String),
+      },
+    });
+  });
+
+  test("regular user cannot list unchecked recipes", async () => {
+    const token = await loginAndGetToken(user_1_email, user_1_password);
+    const response = await request(app)
+      .get("/api/recipes/unchecked")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(403);
+  });
+});
