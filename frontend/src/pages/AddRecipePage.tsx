@@ -194,6 +194,7 @@ export default function AddRecipePage() {
             options={allIngredients}
             value={chosenIngredients}
             onChange={setChosenIngredients}
+            hideSelectedTags={true}
           />
           {chosenIngredients.map((ingredient) => (
             <Grid
