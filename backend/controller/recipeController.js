@@ -345,6 +345,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
   const searchQuery = search ? search.trim() : "";
   const searchPattern = searchQuery ? `%${searchQuery}%` : null;
 
+  const matchOnlyFlag = matchOnly == 1;
   const useCandidateFiltering = ingredients.length > 0;
   const candidateCte = ` 
     candidates AS (
@@ -371,6 +372,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
   const whereClause = `
     WHERE e.id_recipe IS NULL
     AND ($3::text IS NULL OR r.name ILIKE $3)
+    ${matchOnlyFlag ? "AND ir_aggr.total_count = ir_aggr.matched_count" : ""}
   `;
   const orderBy =
     sortParam === "highest_rated"
