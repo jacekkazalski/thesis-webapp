@@ -376,7 +376,7 @@ const getRecipes = catchAsync(async (req, res, next) => {
   `;
   const orderBy =
     sortParam === "highest_rated"
-      ? `ORDER BY rating DESC, r.id_recipe DESC`
+      ? `ORDER BY rating DESC NULLS LAST, r.id_recipe DESC`
       : sortParam === "ingredients" && useCandidateFiltering
         ? `ORDER BY matched_count DESC, total_count ASC, r.id_recipe DESC`
         : `ORDER BY r.id_recipe DESC`;
