@@ -362,7 +362,7 @@ distinct_ingredients AS (
     SELECT DISTINCT ingredient_name
     FROM data
 ),
--- 1) Insert do Ingredient (idempotentnie)
+-- 1) Insert do Ingredient
 ins AS (
     INSERT INTO public."Ingredient"(name)
     SELECT di.ingredient_name
