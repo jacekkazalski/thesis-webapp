@@ -77,9 +77,10 @@ const getRandomRecipe = catchAsync(async (req, res, next) => {
 
   for (let i = 0; i < attempts; i++) {
     const [rows] = await sequelize.query(`
-            SELECT "id_recipe"
-            FROM "public"."Recipe" TABLESAMPLE SYSTEM (1)
-            LIMIT 1
+            SELECT id_recipe
+            FROM public."Recipe"
+            ORDER BY RANDOM()
+            LIMIT 1;
         `);
     if (rows && rows.length > 0) {
       randomId = rows[0].id_recipe;
