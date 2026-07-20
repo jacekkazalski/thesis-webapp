@@ -25,6 +25,7 @@ export function IngredientMultiSelect({
       multiple
       limitTags={4}
       filterSelectedOptions
+      disableClearable
       renderTags={hideSelectedTags ? () => null : undefined}
       renderInput={(params) => <TextField {...params} label={label} placeholder={placeholder} />}
       options={options}
