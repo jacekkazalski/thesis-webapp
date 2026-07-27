@@ -3,13 +3,13 @@ server {
 
 	server_name _;
 
-	root /home/vmuser/www/recipe-app/thesis-webapp/frontend/dist;
+	root /var/www/webapp/frontend/dist;
 	index index.html;
 
 	client_max_body_size 8M;
 
 	location /images/ {
-		alias /home/vmuser/www/recipe-app/thesis-webapp/backend/images/;
+		alias /var/www/webapp/backend/images/;
 	}
 	location / {
 		try_files $uri $uri/ /index.html;
