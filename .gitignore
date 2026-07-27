@@ -147,3 +147,4 @@ backend/images/1770221005275_spaghetti-bolognese-recipe.jpg
 
 # recipe images
 backend/images/*
+!backend/images/test_images
