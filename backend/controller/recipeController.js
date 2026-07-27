@@ -433,8 +433,8 @@ const getRecipes = catchAsync(async (req, res, next) => {
     return {
       id_recipe: recipe.id_recipe,
       name: recipe.name,
-      image_url: foundRecipe.image_path
-        ? `/${foundRecipe.image_path.replace(/^\.?\//, "")}`
+      image_url: recipe.image_path
+        ? `/${recipe.image_path.replace(/^\.?\//, "")}`
         : null,
       rating: Number(Number(recipe.rating).toFixed(2)) ?? 0,
       matched_ingredients: Number(recipe.matched_count) ?? 0,
