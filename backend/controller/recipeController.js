@@ -464,8 +464,8 @@ const getUncheckedRecipes = catchAsync(async (req, res, next) => {
     id_recipe: recipe.id_recipe,
     name: recipe.name,
     image_url: recipe.image_path
-      ? `${req.protocol}://${req.get("host")}/${recipe.image_path}`
-      : null,
+        ? `/${recipe.image_path.replace(/^\.?\//, "")}`
+        : null,
     author: recipe.added_by_User,
     created_at: recipe.created_at,
   }));
